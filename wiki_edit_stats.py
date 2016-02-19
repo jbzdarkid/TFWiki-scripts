@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from urllib2 import urlopen
 from datetime import date, datetime
 from json import loads
@@ -14,20 +15,18 @@ usernameSubs = {
 				'Darkid': 'darkid',
 				}
 
-usersList = []
-
 def populate_list(aufrom=None):
-	global usersList
+	usersList = []
 	url = wikiAddress
-	if aufrom:
-		url += r'&aufrom=' + aufrom
-	result = loads(urlopen(url.encode('utf-8')).read())
-	usersList += result['query']['allusers']
-	print 'User count:', len(usersList)
-	if 'query-continue' in result:
-		populate_list(aufrom=result['query-continue']['allusers']['aufrom'])
+	while True:
+		result = loads(urlopen(url.encode('utf-8')).read())
+		usersList += result['query']['allusers']
+		if 'continue' not in result:
+			break
+		url = wikiAddress + '&aufrom=' + result['continue']['aufrom']
+	return usersList
 
-def userEditCount(nlower, nupper=None):
+def userEditCount(sortedList, nlower, nupper=None):
 	count = 0
 	for user in sortedList:
 		if nlower <= user['editcount']:
@@ -35,17 +34,17 @@ def userEditCount(nlower, nupper=None):
 				count += 1
 	return count
 
-def addTableRow(nlower, nupper=None):
+def addTableRow(sortedList, nlower, nupper=None):
 	print "Adding users with edit count", nlower, "-", nupper
-	count = userEditCount(nlower, nupper)
+	count = userEditCount(sortedList, nlower, nupper)
 	if nupper is None:
 		return """|-
 | {nlower}+
 | {{{{Chart bar|{count}|max={max}}}}}
 | {percentage}%""".format(nlower = nlower,
 						 count = count,
-						 max = len(usersList),
-						 percentage = round(100 * float(count) / len(usersList), 2)
+						 max = len(sortedList),
+						 percentage = round(100 * float(count) / len(sortedList), 2)
 						 )
 	else:
 		return """|-
@@ -54,24 +53,26 @@ def addTableRow(nlower, nupper=None):
 | {percentage}%""".format(nlower = nlower,
 						 nupper = nupper,
 						 count = count,
-						 max = len(usersList),
-						 percentage = round(100 * float(count) / len(usersList), 2)
+						 max = len(sortedList),
+						 percentage = round(100 * float(count) / len(sortedList), 2)
 						 )
 
 def monthName(n):
-	return {1: "January",
-		2: "February",
-		3: "March",
-		4: "April",
-		5: "May",
-		6: "June",
-		7: "July",
-		8: "August",
-		9: "September",
-		10: "October",
-		11: "November",
-		12: "December",
-		}[n]
+	return [
+		None,
+		"January",
+		"February",
+		"March",
+		"April",
+		"May",
+		"June",
+		"July",
+		"August",
+		"September",
+		"October",
+		"November",
+		"December",
+	][n]
 
 def addTimeData(timeSortedList):
 	print "Adding user signups"
@@ -108,7 +109,7 @@ def addTopUsers(sortedList, count):
 		username = user['name']
 		usereditcount = user['editcount']
 		userregistration = user['registration']
-		wikifi_link = 'http://stats.wiki.tf/user/tf/'+quote(username)
+		wikifi_link = 'http://stats.wiki.tf/user/tf/'+quote(username.encode('utf-8'))
 		userlink = 'User:'+username
 		if username in usernameSubs:
 			username = usernameSubs[username]
@@ -120,7 +121,7 @@ def addTopUsers(sortedList, count):
 		userstarttime = strptime(userregistration, r'%Y-%m-%dT%H:%M:%SZ')
 		timedelta = (datetime.now() - datetime(*userstarttime[:6])).days
 		editsperday = round(float(usereditcount) / timedelta, 2)
-		output += """|-
+		output += u"""|-
 	| {place} || [[{userlink}|{username}]] || {editcount} || {editday}
 	| data-sort-value="{sortabledate}" | {date} || [{wikifi_link} {username}]\n""".format(
 				place = place, # List is indexed 0-99, editors are indexed 1-100
@@ -135,15 +136,13 @@ def addTopUsers(sortedList, count):
 		i += 1
 	return output
 
-if __name__ == '__main__':
-	
-	populate_list() # Fills the global usersList
-	
+def main():
+	usersList = populate_list() # Fills the global usersList
+
 	sortedList = sorted(usersList, key=itemgetter('editcount'), reverse=True)
 	timeSortedList = sorted(usersList, key=itemgetter('registration'))
-	
-	file = open(r'edit_count_table.txt', 'wb')
-	file.write("""User edits statistics. Data accurate as of """ + str(strftime(r'%H:%M, %d %B %Y', gmtime())) + """ (GMT). Further stats available at [http://stats.wiki.tf/wiki/tf stats.wiki.tf].
+
+	output = """User edits statistics. Data accurate as of """ + str(strftime(r'%H:%M, %d %B %Y', gmtime())) + """ (GMT). Further stats available at [http://stats.wiki.tf/wiki/tf stats.wiki.tf].
 ;Note: All data excludes registered users with no edits.
 
 == Edit count distribution ==
@@ -151,11 +150,11 @@ if __name__ == '__main__':
 ! class="header" width="30%" | Number of edits
 ! class="header" width="50%" | Users
 ! class="header" width="20%" | Percentage of users
-""" + addTableRow(1, 10) + """
-""" + addTableRow(11, 100) + """
-""" + addTableRow(101, 1000) + """
-""" + addTableRow(1001, 5000) + """
-""" + addTableRow(5001) + """
+""" + addTableRow(sortedList, 1, 10) + """
+""" + addTableRow(sortedList, 11, 100) + """
+""" + addTableRow(sortedList, 101, 1000) + """
+""" + addTableRow(sortedList, 1001, 5000) + """
+""" + addTableRow(sortedList, 5001) + """
 |}
 
 == User signups ==
@@ -173,9 +172,14 @@ if __name__ == '__main__':
 ! class="header" | Edit count
 ! class="header" | Edits per day
 ! class="header" | Registration date
-! class="header" | Wiki-fi link
+! class="header unsortable" | Wiki-fi link
 """ + addTopUsers(sortedList, 100) + """
-|}""")
+|}"""
 
-	print("Article written to edit_count_table.txt")
-	file.close()
+	return output
+
+if __name__ == '__main__':
+	f = open('wiki_edit_stats.txt', 'wb')
+	f.write(main().encode('utf-8'))
+	print("Article written to wiki_edit_stats.txt")
+	f.close()
