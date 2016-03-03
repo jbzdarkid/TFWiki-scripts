@@ -20,8 +20,10 @@ itemExceptions = [ # These are keywords which, if present, will make the item ig
     'Asiafortress Cup',
     'AU Highlander Community League',
     'BETA LAN',
+    'DeutschLan',
     'ESH',
     'ESL',
+    'EdgeGamers',
     'ETF2L',
     'FBTF',
     'Florida LAN',
@@ -62,7 +64,11 @@ def add_region(itemname, TF_classlist, region):
         if itemname not in regionsDict[region][TF_class]:
             regionsDict[region][TF_class].append(itemname)
 
-def add_items(allitems):
+def add_items():
+    schema = VDF()
+    prefabs = schema.get_prefabs()
+    allitems = dict(schema.get_items(), **prefabs)
+
     global regionsDict
     for item in allitems:
         item = allitems[item]
@@ -153,7 +159,7 @@ def generate_output():
                         if blankLines != 0 and len(regionitems[TF_class]) > 0:
                             output += '\n|'
                         blankLines = 0
-            
+
             for n in range(0, len(regionitems[TF_class])):
                 item = regionitems[TF_class][n].encode('utf-8')
                 if n != 0 and len(regionitems[TF_class]) != 1:
@@ -168,7 +174,7 @@ def generate_output():
                 if item == 'Halloween Masks':
                     output += '[[File:Heavy Mask.png|40px]] [[Halloween Masks{{if lang}}|{{item name|Halloween Masks}}]]'
                 else:
-                    output += '{{item nav link|' + item + '|small=yes}}'
+                    output += '{{item nav link|' + item.decode('utf-8') + '|small=yes}}'
         output += '\n|-\n'
     output += '|}'
     return output
@@ -179,9 +185,7 @@ def main():
 
     if verbose:
         print 'Adding items...'
-    schema = VDF()
-    print schema
-    add_items(dict(schema.get_items(), **(schema.get_prefabs())))
+    add_items()
 
     # Some input fixes
     for region in regionsDict:
@@ -202,7 +206,7 @@ def main():
     if verbose:
         print 'Generating output...'
     return generate_output()
-    
+
 if __name__ == "__main__":
     verbose = True
     f = open('equipregions.txt', 'wb')
