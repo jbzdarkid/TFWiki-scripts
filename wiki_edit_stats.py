@@ -5,6 +5,8 @@ from json import loads
 from operator import itemgetter
 from time import strftime, strptime, gmtime
 from urllib import quote
+
+verbose = False
 global NUMYEARS
 NUMYEARS = date.today().year-2010 + 1 # 2014 - 2010 + 1 = 5 (years)
 
@@ -35,7 +37,8 @@ def userEditCount(sortedList, nlower, nupper=None):
 	return count
 
 def addTableRow(sortedList, nlower, nupper=None):
-	print "Adding users with edit count", nlower, "-", nupper
+	if verbose:
+		print "Adding users with edit count", nlower, "-", nupper
 	count = userEditCount(sortedList, nlower, nupper)
 	if nupper is None:
 		return """|-
@@ -75,7 +78,8 @@ def monthName(n):
 	][n]
 
 def addTimeData(timeSortedList):
-	print "Adding user signups"
+	if verbose:
+		print "Adding user signups"
 	timeRange = [[0]*12 for i in range(NUMYEARS)] # timeRange[year][month]
 	for user in timeSortedList:
 		time = user['registration']
@@ -101,7 +105,8 @@ def addTimeData(timeSortedList):
 	return output
 
 def addTopUsers(sortedList, count):
-	print "Adding top", count, "users"
+	if verbose:
+		print "Adding top", count, "users"
 	output = ""
 	i = 0
 	while (i < count):
@@ -179,6 +184,7 @@ def main():
 	return output
 
 if __name__ == '__main__':
+	verbose = True
 	f = open('wiki_edit_stats.txt', 'wb')
 	f.write(main().encode('utf-8'))
 	print("Article written to wiki_edit_stats.txt")
