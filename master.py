@@ -1,9 +1,8 @@
 from wikitools.page import Page
 from wikitools import wiki
-from getpass import getpass
 w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
 username = raw_input('Username: ')
-w.login(username, getpass(), verify=True)
+w.login(username)
 
 summary = 'Automatic Update by %s using [https://github.com/jbzdarkid/TFWiki-scripts Wikitools]' % username
 
