@@ -8,10 +8,11 @@ summary = 'Automatic Update by %s using [https://github.com/jbzdarkid/TFWiki-scr
 
 import wiki_edit_stats, wiki_unused_files, equipregions, external_links_analyse
 
-
-'''
 Page(w, 'Team Fortress Wiki:Reports/Users by edit count').edit(text=wiki_edit_stats.main(), summary=summary)
-p
-'''
+
 Page(w, 'Team Fortress Wiki:Reports/Unused files').edit(text=wiki_unused_files.main(), summary=summary)
 
+text = Page(w, 'Template:Equip region table').getWikiText()
+start = text.index('! {{item name|') # Start of equip regions
+end = text.index('<noinclude>') # End of table
+Page(w, 'Template:Equip region table').edit(text=text[:start]+equipregions.main().encode('utf-8')+text[end:], summary=summary)
