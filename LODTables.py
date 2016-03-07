@@ -24,12 +24,9 @@ def gen_allitems():
 			if prefab[0] == 'valve': # Valve are silly and occasionally put their name into the prefabs
 				prefab = prefab[1]
 			prefab = prefab.rpartition(' ')[2]
+			if prefab == 'weapon_melee_allclass' or prefab == 'weapon_shotgun': # Malformed & duplicate prefabs
+				continue
 			if prefab[:7] == 'weapon_' or prefab in ['holy_mackerel', 'axtinguisher', 'buff_banner', 'sandvich', 'ubersaw', 'frontier_justice', 'huntsman', 'ambassador']:
-				if prefab == 'weapon_shotgun':
-					prefab = 'weapon_shotgun_multiclass'
-				if prefab == 'weapon_melee_allclass':
-					print 'Skipping', key
-					continue
 				item['item_slot'] = prefabs[prefab]['item_slot']
 				item['used_by_classes'] = prefabs[prefab]['used_by_classes']
 
