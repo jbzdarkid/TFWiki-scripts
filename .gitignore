@@ -1,4 +1,5 @@
 *.txt
 *.pyc
+decompiled
 config.py
 skeleton_config.py
