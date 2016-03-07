@@ -134,6 +134,7 @@ def gen_modelmap(allitems):
 			if style:
 				propername += '|style='+style
 		if 'level' in allitems[value[0]]: # Hack for engineer buildings
+			print 137
 			propername += '|level='+allitems[value[0]]['level']
 		if 'vision_filter_flags' in allitems[value[0]]: # Romevision bot armor
 			continue
@@ -143,9 +144,7 @@ def gen_modelmap(allitems):
 
 	return modelmap
 
-def gen_data(allitems, modelmap):
-	data = {TF_class:[{} for _ in item_slots] for TF_class in TF_classes}
-
+def gen_files(modelmap):
 	for root, subFolders, files in os.walk(rootdir):
 		for file in files:
 			if file[-4:] != '.smd':
@@ -156,7 +155,7 @@ def gen_data(allitems, modelmap):
 				continue
 			if file == 'idle.smd':
 				continue
-			f = open(os.path.join(root, file), 'rb').read() # Open before we modify the file variable
+			filename = os.path.join(root, file) # Save the name before we modify the file variable
 			file = file[:-4] # Cuts .smd
 			if file[-13:] == 'reference':
 				modelname = file[:-14]
@@ -184,57 +183,62 @@ def gen_data(allitems, modelmap):
 						modelname = file
 			if modelname not in modelmap:
 				continue
-			[name, propername] = modelmap[modelname]
+			yield (filename, modelname)
 
-			lines = f.split('\r\n') # TODO: Iterate over file?
-			count = 0
-			for i in range(len(lines)):
-				if lines[i] == 'triangles':
-					count = (len(lines) - i - 3)/4
-					break
-			if count == 0: # Non-models don't have 'triangles' in them, so we ignore them
-				continue
-			# print name, file
-			if 'used_by_classes' not in allitems[name]:
-				continue
-			usedby = allitems[name]['used_by_classes']
-			if len(usedby) == 1:
-				TF_class = usedby.keys()[0]
-			elif len(usedby) == 9:
-				TF_class = 'all classes'
-			else:
-				TF_class = 'multi-class'
-			if 'item_slot' in allitems[name]: # Default, used for weapons and new cosmetic listings.
-				slot = allitems[name]['item_slot']
-			elif 'prefab' in allitems[name]:
-				slot = 'cosmetic'
-			if slot in ['misc', 'head']: # Old cosmetic listings
-				slot = 'cosmetic'
-			if slot not in item_slots:
-				continue
-			item_slot = item_slots.index(slot)
-			# Primary, secondary, melee, pda, pda2, building
-			if item_slot < 6 and max['Weapons'] < count:
-				max['Weapons'] = count
-			# Cosmetic
-			elif item_slot == 6 and max[TF_class] < count:
-				max[TF_class] = count
-			# Building2
-			elif item_slot == 7 and max['Building2'] < count:
-				max['Building2'] = count
-			# Class
-			elif item_slot == 8 and max['Classes'] < count:
-				max['Classes'] = count
+def gen_data(allitems, modelmap):
+	data = {TF_class:[{} for _ in item_slots] for TF_class in TF_classes}
+	for (filename, modelname) in gen_files(modelmap):
+		f = open(filename, 'rb').read() # We open the file (and read it) because we need a count of the number of lines.
+		lines = f.split('\r\n')
+		count = 0
+		for i in range(len(lines)):
+			if lines[i] == 'triangles':
+				count = (len(lines) - i - 3)/4
+				break
+		if count == 0: # Non-models don't have 'triangles' in them, so we ignore them
+			continue
+		[name, propername] = modelmap[modelname]
+		if 'used_by_classes' not in allitems[name]:
+			continue
+		usedby = allitems[name]['used_by_classes']
+		if len(usedby) == 1:
+			TF_class = usedby.keys()[0]
+		elif len(usedby) == 9:
+			TF_class = 'all classes'
+		else:
+			TF_class = 'multi-class'
+		if 'item_slot' in allitems[name]: # Default, used for weapons and new cosmetic listings.
+			slot = allitems[name]['item_slot']
+		elif 'prefab' in allitems[name]:
+			slot = 'cosmetic'
+		if slot in ['misc', 'head']: # Old cosmetic listings
+			slot = 'cosmetic'
+		if slot not in item_slots:
+			continue
+		item_slot = item_slots.index(slot)
+		# Primary, secondary, melee, pda, pda2, building
+		if item_slot < 6 and max['Weapons'] < count:
+			max['Weapons'] = count
+		# Cosmetic
+		elif item_slot == 6 and max[TF_class] < count:
+			max[TF_class] = count
+		# Building2
+		elif item_slot == 7 and max['Building2'] < count:
+			print 227
+			max['Building2'] = count
+		# Class
+		elif item_slot == 8 and max['Classes'] < count:
+			max['Classes'] = count
 
-			# Item doesn't exist
-			if propername not in data[TF_class][item_slot]:
-				data[TF_class][item_slot][propername] = [count, count]
-			# Item exists, found new minimum LOD
-			elif data[TF_class][item_slot][propername][0] < count:
-				data[TF_class][item_slot][propername][0] = count
-			# Item exists, found new maximum LOD
-			elif data[TF_class][item_slot][propername][1] > count:
-				data[TF_class][item_slot][propername][1] = count
+		# Item doesn't exist
+		if propername not in data[TF_class][item_slot]:
+			data[TF_class][item_slot][propername] = [count, count]
+		# Item exists, found new minimum LOD
+		elif data[TF_class][item_slot][propername][0] < count:
+			data[TF_class][item_slot][propername][0] = count
+		# Item exists, found new maximum LOD
+		elif data[TF_class][item_slot][propername][1] > count:
+			data[TF_class][item_slot][propername][1] = count
 	return data
 
 def get_weapons(data):
@@ -266,11 +270,12 @@ def get_cosmetics(data, TF_class):
 def get_buildings(data):
 	output = ''
 	for TF_class in TF_classes:
+		print data[TF_class][7]
 		if len(data[TF_class][7]) == 0:
 			continue
 		output += '|rowspan="%d" data-sort-value="%d"| {{Class link|%s}}\n' % (len(data[TF_class][7]), TF_classes.index(TF_class), TF_class)
 		for k in sorted(data[TF_class][7].keys()):
-			output += '{{LODTable/core|max=%d|%s|%d' % (max['Buildings'], k.encode('utf-8'), data[TF_class][7][k][0])
+			output += '{{LODTable/core|max=%d|%s|%d' % (max['Buildings2'], k.encode('utf-8'), data[TF_class][7][k][0])
 			if data[TF_class][7][k][0] != data[TF_class][7][k][1]:
 				output += '|%d' % data[TF_class][7][k][1]
 			output += '}}\n'
@@ -286,7 +291,7 @@ def get_classes(data):
 			if data[TF_class][8][k][0] != data[TF_class][8][k][1]:
 				output += '|%d' % data[TF_class][8][k][1]
 			output += '}}\n'
-	output += '|}'
+		output += '|}'
 	return output
 
 def main():
@@ -312,6 +317,7 @@ def main():
 |-\n'''
 	output += get_weapons(data)
 	output += '''|}
+
 == {{Item name|Cosmetics}} ==
 {| style="width: 30%; text-align: center"
 | style="width: 20%" | {{Common string|LOD Key}}
@@ -330,7 +336,7 @@ def main():
 |-\n'''
 		output += get_cosmetics(data, TF_class)
 		output += '|}\n'
-	output += '''|}
+	output += '''
 == {{Item name|Buildings}} ==
 {| style="width: 30%; text-align: center"
 | style="width: 20%" | {{Common string|LOD Key}}
@@ -347,6 +353,7 @@ def main():
 |-\n'''
 	output += get_buildings(data)
 	output += '''|}
+
 == {{Common string|Classes}} ==
 {| class="wikitable sortable grid"
 ! class="header" width="10%" | {{Common string|Class}}
@@ -356,6 +363,7 @@ def main():
 ! class="header" width="2%" | {{Common string|LOD Efficiency}}
 |-\n'''
 	output += get_classes(data)
+	output += '|}'
 	return output
 
 if __name__ == '__main__':
