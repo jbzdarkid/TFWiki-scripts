@@ -36,39 +36,39 @@ def gen_allitems():
 	# Some hard-coded additions. This _vaguely_ mimics the schema's true format.
 	buildings = {
 		'Sentry Gun Level 1': {
-			'model_world': 'models/buildings/sentry1.mdl',
+			'model_world': 'models/buildables/sentry1.mdl',
 			'item_name': '#TF_Object_Sentry',
 			'level': '1',
 		},
 		'Sentry Gun Level 2': {
-			'model_world': 'models/buildings/sentry2_optimized.mdl',
+			'model_world': 'models/buildables/sentry2_optimized.mdl',
 			'item_name': '#TF_Object_Sentry',
 			'level': '2',
 		},
 		'Sentry Gun Level 3': {
-			'model_world': 'models/buildings/sentry3_optimized.mdl',
+			'model_world': 'models/buildables/sentry3_optimized.mdl',
 			'item_name': '#TF_Object_Sentry',
 			'level': '3',
 		},
 		'Dispenser Level 1': {
-			'model_world': 'models/buildings/dispenser_toolbox.mdl',
+			'model_world': 'models/buildables/dispenser_toolbox.mdl',
 			'item_name': '#TF_Object_Dispenser',
 			'level': '1',
 		},
 		'Dispenser Level 2': {
-			'model_world': 'models/buildings/dispenser_lvl2.mdl',
+			'model_world': 'models/buildables/dispenser_lvl2.mdl',
 			'item_name': '#TF_Object_Dispenser',
 			'level': '2',
 		},
 		'Dispenser Level 3': {
-			'model_world': 'models/buildings/dispenser_lvl3.mdl',
+			'model_world': 'models/buildables/dispenser_lvl3.mdl',
 			'item_name': '#TF_Object_Dispenser',
 			'level': '3',
 		},
 		'Teleporter': {
-			'model_world': 'models/buildings/teleporter.mdl',
+			'model_world': 'models/buildables/teleporter.mdl',
 			'item_name': '#TF_Object_Tele',
-		}
+		},
 	}
 	for building in buildings:
 		buildings[building]['used_by_classes'] = {'engineer': '1'}
@@ -127,6 +127,10 @@ def gen_modelmap(allitems):
 		propername = schema.get_localized_item_name(allitems[value[0]]['item_name'])
 		if propername == 'The Essential Accessories':
 			propername = 'Essential Accessories'
+		if propername == 'The Superfan':
+			propername = 'Superfan'
+		if propername == 'The Athletic Supporter':
+			propername = 'Athletic Supporter'
 		elif propername == 'Teleporter':
 			propername = 'Teleporters'
 		if len(value) == 2: # Styles add-in
