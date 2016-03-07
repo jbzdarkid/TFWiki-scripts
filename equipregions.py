@@ -20,7 +20,7 @@ itemExceptions = [ # These are keywords which, if present, will make the item ig
     'Asiafortress Cup',
     'AU Highlander Community League',
     'BETA LAN',
-    'DeutschLan',
+    'DeutschLAN',
     'ESH',
     'ESL',
     'EdgeGamers',
@@ -210,5 +210,5 @@ def main():
 if __name__ == "__main__":
     verbose = True
     f = open('equipregions.txt', 'wb')
-    f.write(main())
+    f.write(main().encode('utf-8'))
     f.close()
