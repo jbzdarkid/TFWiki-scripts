@@ -329,6 +329,7 @@ def main():
 ! class="header" width="2%" | {{Common string|LOD Efficiency}}
 |-\n'''
 		output += get_cosmetics(data, TF_class)
+		output += '|}\n'
 	output += '''|}
 == {{Item name|Buildings}} ==
 {| style="width: 30%; text-align: center"
@@ -346,7 +347,7 @@ def main():
 |-\n'''
 	output += get_buildings(data)
 	output += '''|}
-== {{Item name|Classes}} ==
+== {{Common string|Classes}} ==
 {| class="wikitable sortable grid"
 ! class="header" width="10%" | {{Common string|Class}}
 ! class="header" width="18%" | {{Item name|Item}}
@@ -355,7 +356,6 @@ def main():
 ! class="header" width="2%" | {{Common string|LOD Efficiency}}
 |-\n'''
 	output += get_classes(data)
-	output += '|}'
 	return output
 
 if __name__ == '__main__':
