@@ -7,7 +7,7 @@ TF_classes = ['scout', 'soldier', 'pyro', 'demoman', 'heavy', 'engineer', 'medic
 item_slots = ['primary', 'secondary', 'melee', 'pda', 'pda2', 'building', 'cosmetic', 'building2', 'class']
 max = {TF_class:0 for TF_class in TF_classes} # 2.7+, sorry :(
 max['Weapons'] = 0
-max['Building2'] = 0
+max['Buildings2'] = 0
 max['Classes'] = 0
 
 def gen_allitems():
@@ -71,7 +71,7 @@ def gen_allitems():
 		}
 	}
 	for building in buildings:
-		buildings[building]['used_by_classes'] = {'engineer': '1'},
+		buildings[building]['used_by_classes'] = {'engineer': '1'}
 		buildings[building]['item_slot'] = 'building2'
 	allitems.update(buildings)
 	for TF_class in TF_classes:
@@ -261,6 +261,8 @@ def get_weapons(data):
 def get_cosmetics(data, TF_class):
 	output = ''
 	for k in sorted(data[TF_class][6].keys()):
+		if k is None:
+			continue
 		output += '{{LODTable/core|max=%d|%s|%d' % (max[TF_class], k.encode('utf-8'), data[TF_class][6][k][0])
 		if data[TF_class][6][k][0] != data[TF_class][6][k][1]:
 			output += '|%d' % data[TF_class][6][k][1]
@@ -291,7 +293,6 @@ def get_classes(data):
 			if data[TF_class][8][k][0] != data[TF_class][8][k][1]:
 				output += '|%d' % data[TF_class][8][k][1]
 			output += '}}\n'
-		output += '|}'
 	return output
 
 def main():
