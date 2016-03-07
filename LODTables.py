@@ -330,8 +330,8 @@ def main():
 		output += '''
 {| class="wikitable sortable grid collapsible collapsed"
 ! class="header" width="20%" | {{Item name|Item}}
-! class="header" width="38%" | {{Common string|LOD High Quality}}
-! class="header" width="38%" | {{Common string|LOD Low Quality}}
+! class="header" width="39%" | {{Common string|LOD High Quality}}
+! class="header" width="39%" | {{Common string|LOD Low Quality}}
 ! class="header" width="2%" | {{Common string|LOD Efficiency}}
 |-\n'''
 		output += get_cosmetics(data, TF_class)
@@ -357,9 +357,8 @@ def main():
 == {{Common string|Classes}} ==
 {| class="wikitable sortable grid"
 ! class="header" width="10%" | {{Common string|Class}}
-! class="header" width="18%" | {{Item name|Item}}
-! class="header" width="35%" | {{Common string|LOD High Quality}}
-! class="header" width="35%" | {{Common string|LOD Low Quality}}
+! class="header" width="44%" | {{Common string|LOD High Quality}}
+! class="header" width="44%" | {{Common string|LOD Low Quality}}
 ! class="header" width="2%" | {{Common string|LOD Efficiency}}
 |-\n'''
 	output += get_classes(data)
