@@ -167,7 +167,8 @@ def gen_data(allitems, modelmap):
 					file = file[:-10]
 				if file[-5:] == 'shell':
 					continue
-				if file[]
+				if file[-9:] == 'shell_xms':
+					continue
 				if file == 'c_flaregun_pyro_c_flaregun_shell' or file == 'c_xms_flaregun_c_flaregun_shell_xms':
 					print file[-5:]
 					continue
@@ -291,13 +292,13 @@ def get_classes(data):
 def main():
 	allitems = gen_allitems()
 	if verbose:
-		print 'Generated items'
+		print 'Found %d items' % len(allitems)
 	modelmap = gen_modelmap(allitems)
 	if verbose:
 		print 'Generated model map'
 	data = gen_data(allitems, modelmap)
 	if verbose:
-		print 'Generated triangles data'
+		print 'Done counting triangles'
 
 	output = ''
 	output += '''== {{Item name|Weapons}} ==
@@ -312,9 +313,12 @@ def main():
 	output += get_weapons(data)
 	output += '''|}
 == {{Item name|Cosmetics}} ==
-;{{Common string|LOD Key}}
-:<span style="background:#93aecf; padding:0em 2em;">&nbsp;</span> {{Common string|LOD Unoptimized}}
-:<span style="background:#F3A957; padding:0em 2em;">&nbsp;</span> {{Common string|LOD Optimized}}\n'''
+{| style="width: 30%; text-align: center"
+| style="width: 20%" | {{Common string|LOD Key}}
+| style="background:#93AECF; width: 40%" | {{Common string|LOD Unoptimized}}
+| style="background:#F3A957; width: 40%" | {{Common string|LOD Optimized}}
+|}
+'''
 	for TF_class in TF_classes:
 		output += '=== {{Class name|%s}} ===' % TF_class
 		output += '''
@@ -327,9 +331,11 @@ def main():
 		output += get_cosmetics(data, TF_class)
 	output += '''|}
 == {{Item name|Buildings}} ==
-;{{Common string|LOD Key}}
-:<span style="background:#93aecf; padding:0em 2em;">&nbsp;</span> {{Common string|LOD Unoptimized}}
-:<span style="background:#F3A957; padding:0em 2em;">&nbsp;</span> {{Common string|LOD Optimized}}
+{| style="width: 30%; text-align: center"
+| style="width: 20%" | {{Common string|LOD Key}}
+| style="background:#93AECF; width: 40%" | {{Common string|LOD Unoptimized}}
+| style="background:#F3A957; width: 40%" | {{Common string|LOD Optimized}}
+|}
 
 {| class="wikitable sortable grid"
 ! class="header" width="10%" | {{Common string|Class}}
@@ -356,4 +362,5 @@ if __name__ == '__main__':
 	verbose = True
 	f = open('LODTables.txt', 'wb')
 	f.write(main())
+	print 'Article written to LODTables.txt'
 	f.close()
