@@ -2,7 +2,7 @@ import os
 from vdfparser import VDF
 import re
 verbose = False
-rootdir = "/Users/joe/Github/TFWiki-scripts/decompiled/"
+rootdir = "decompiled"
 TF_classes = ['scout', 'soldier', 'pyro', 'demoman', 'heavy', 'engineer', 'medic', 'sniper', 'spy', 'multi-class', 'all classes']
 item_slots = ['primary', 'secondary', 'melee', 'pda', 'pda2', 'building', 'cosmetic', 'building2', 'class']
 max = {TF_class:0 for TF_class in TF_classes} # 2.7+, sorry :(
@@ -134,7 +134,6 @@ def gen_modelmap(allitems):
 			if style:
 				propername += '|style='+style
 		if 'level' in allitems[value[0]]: # Hack for engineer buildings
-			print 137
 			propername += '|level='+allitems[value[0]]['level']
 		if 'vision_filter_flags' in allitems[value[0]]: # Romevision bot armor
 			continue
@@ -164,16 +163,13 @@ def gen_files(modelmap):
 					file = file[:-5]
 				if file[-10:] == '_reference':
 					file = file[:-10]
-				if file[-5:] == 'shell':
+				if file[-5:] == 'shell': # Malformed files
 					continue
-				if file[-9:] == 'shell_xms':
-					continue
-				if file == 'c_flaregun_pyro_c_flaregun_shell' or file == 'c_xms_flaregun_c_flaregun_shell_xms':
-					print file[-5:]
+				if file[-9:] == 'shell_xms': # Malformed files
 					continue
 				parts = file.split('_')
 				modelname = parts[0]
-				# Converts 'c_backburner_c_flamethrower' -> 'c_backburner'
+				# Converts 'c_backburner_c_flamethrower' to 'c_backburner'
 				for p in range(1, len(parts)):
 					if parts[p] == parts[0]:
 						for q in range(1, p):
@@ -219,14 +215,11 @@ def gen_data(allitems, modelmap):
 		# Primary, secondary, melee, pda, pda2, building
 		if item_slot < 6 and max['Weapons'] < count:
 			max['Weapons'] = count
-		# Cosmetic
+		# Cosmetics
 		elif item_slot == 6 and max[TF_class] < count:
 			max[TF_class] = count
-		# Building2
-		elif item_slot == 7 and max['Building2'] < count:
-			print 227
-			max['Building2'] = count
-		# Class
+		elif item_slot == 7 and max['Buildings2'] < count:
+			max['Buildings2'] = count
 		elif item_slot == 8 and max['Classes'] < count:
 			max['Classes'] = count
 
@@ -272,7 +265,6 @@ def get_cosmetics(data, TF_class):
 def get_buildings(data):
 	output = ''
 	for TF_class in TF_classes:
-		print data[TF_class][7]
 		if len(data[TF_class][7]) == 0:
 			continue
 		output += '|rowspan="%d" data-sort-value="%d"| {{Class link|%s}}\n' % (len(data[TF_class][7]), TF_classes.index(TF_class), TF_class)
