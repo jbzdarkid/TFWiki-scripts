@@ -300,7 +300,13 @@ def main():
 
 	output = ''
 	output += '''== {{Item name|Weapons}} ==
-{| class="wikitable sortable grid"
+{| style="width: 30%; text-align: center"
+| style="width: 20%" | {{Common string|LOD Key}}
+| style="background:#93AECF; width: 40%" | {{Common string|LOD Unoptimized}}
+| style="background:#F3A957; width: 40%" | {{Common string|LOD Optimized}}
+|}
+
+{| class="wikitable sortable grid collapsible collapsed"
 ! class="header" width="10%" | {{Common string|Class}}
 ! class="header" width="7%" | {{Common string|LOD Slot}}
 ! class="header" width="17%" | {{Item name|Item}}
@@ -348,6 +354,12 @@ def main():
 	output += '''|}
 
 == {{Common string|Classes}} ==
+{| style="width: 30%; text-align: center"
+| style="width: 20%" | {{Common string|LOD Key}}
+| style="background:#93AECF; width: 40%" | {{Common string|LOD Unoptimized}}
+| style="background:#F3A957; width: 40%" | {{Common string|LOD Optimized}}
+|}
+
 {| class="wikitable sortable grid"
 ! class="header" width="10%" | {{Common string|Class}}
 ! class="header" width="44%" | {{Common string|LOD High Quality}}
