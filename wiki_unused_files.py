@@ -55,5 +55,5 @@ def main():
 if __name__ == '__main__':
 	f = open('wiki_unused_files.txt', 'wb')
 	f.write(main())
-	print("Article written to wiki_unused_files.txt")
+	print 'Article written to wiki_unused_files.txt'
 	f.close()
