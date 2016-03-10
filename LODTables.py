@@ -25,8 +25,10 @@ def gen_allitems():
 		item = allitems[key]
 		if 'prefab' in item and 'extra_wearable' not in item:
 			prefab = item['prefab']
-			if prefab[0] == 'valve': # Valve are silly and occasionally put their name into the prefabs
+			if isinstance(prefab, list) and prefab[0] == 'valve': # Valve are silly and occasionally put their name into the prefabs
 				prefab = prefab[1]
+			if prefab[-11:] == ' marketable':
+				prefab = prefab[:-11]
 			prefab = prefab.rpartition(' ')[2]
 			if prefab == 'weapon_melee_allclass' or prefab == 'weapon_shotgun': # Malformed & duplicate prefabs
 				continue
