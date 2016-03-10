@@ -24,7 +24,6 @@ def main():
 				lang = 0
 			unused_files.append([file.group(3), unquote(file.group(4)).lower(), lang])
 		i += step
-		print i
 	unused_files.sort(key=lambda s: (exts.index(s[1]), s[2], s[0]))
 	output = '{{DISPLAYTITLE:%d unused files}}\nUnused files, parsed from [[Special:UnusedFiles]]. Data accurate as of %s.\n' % (len(unused_files), strftime(r'%H:%M, %d %B %Y', gmtime()))
 	type = ''
