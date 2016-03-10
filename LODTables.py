@@ -16,10 +16,6 @@ def gen_allitems():
 	prefabs = schema.get_prefabs()
 	allitems = dict(items, **prefabs)
 
-	# Missing weapons: Batsaber, Giger Counter, Kritzkrieg, Shooting Star, Knife, Shotgun, C.A.P.P.E.R
-	# Missing hats: Co-Pilot, Digit Divulger, Hat With No Name, Cotton Head, HazMat Headcase, Cuban Bristle Crisis, Dictator, Special Eyes, Doc's Holiday, Mustachioed Mann, Toy Soldier, Exorcizor, Frenchman's Formals, Menpo, Cockfighter, Conspiracy Cap, Marxman, Public Accessor, Robot Chicken Hat
-	# Verify: Backburner, Medi Gun, Festive Bonesaw
-
 	# Fix for some broken weapons
 	for key in allitems:
 		item = allitems[key]
