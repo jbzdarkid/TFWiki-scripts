@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 import httplib
+import json
 import socket
 import urlparse
 import urllib
@@ -26,24 +27,37 @@ def is_good_title(title):
 			return False
 	return True
 
-def get_all_articles():
-	params = {
-		'action': 'query',
-		'list': 'allpages',
-		'aplimit': '500',
-		'apfilterredir': 'nonredirects'
-		}
+wikiAddress = r'https://wiki.teamfortress.com/w/api.php?action=query&list=allpages&apfilterredir=nonredirects&aplimit=500&format=json'
 
-	print 'Getting list of articles from API...'
+def get_all_articles(aufrom=None):
+	pageList = []
+	url = wikiAddress
+	while True:
+		result = json.loads(urllib.urlopen(url.encode('utf-8')).read())
+		pageList += [ page['title'] for page in result['query']['allpages'] ]
+		if 'continue' not in result:
+			break
+		url = wikiAddress + '&apcontinue=' + result['continue']['apcontinue']
+	return pageList
 
-	req = wikitools.api.APIRequest(wiki, params)
-	output = []
-	for res in req.queryGen():
-		output += [ page['title'] for page in res['query']['allpages'] if is_good_title(page['title']) ]
-	
-	print 'Done, found', len(output), 'pages'
-
-	return output
+# def get_all_articles():
+#   params = {
+#     'action': 'query',
+#     'list': 'allpages',
+#     'aplimit': '500',
+#     'apfilterredir': 'nonredirects'
+#     }
+#
+#   print 'Getting list of articles from API...'
+#
+#   req = wikitools.api.APIRequest(wiki, params)
+#   output = []
+#   for res in req.queryGen():
+#     output += [ page['title'] for page in res['query']['allpages'] if is_good_title(page['title']) ]
+#
+#   print 'Done, found', len(output), 'pages'
+#
+#   return output
 
 def strip_slashes(url):
 	if url.endswith('/') or url.endswith('\\'):
@@ -71,7 +85,7 @@ class Worker(threading.Thread):
 		self.tasks = tasks
 		self.daemon = True
 		self.start()
-	
+
 	def run(self):
 		while True:
 			func, args, kargs = self.tasks.get()
