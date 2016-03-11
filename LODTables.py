@@ -1,3 +1,4 @@
+# All-class hat "Pocket Villains" is somehow being typo'd to "Pocket Villians".
 import os
 from vdfparser import VDF
 import re
