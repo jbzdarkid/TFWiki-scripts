@@ -126,8 +126,8 @@ def worker(q, linkData):
 
 def main():
 	q = Queue()
-	linkData = {}
 	links = {}
+	linkData = []
 	threads = []
 
 	thread = Thread(target=generate_links, args=(q, links))
@@ -140,6 +140,18 @@ def main():
 	for thread in threads:
 		thread.join()
 
+	output = ''
+	linkData.sort()
+	lastError = ''
+	for error, link in linkData:
+		if lastError != error:
+			lastError = error
+			output += '== %s ==\n' % lastError
+		output += '=== %s ===\n' % link
+		for page in sorted(links[link]):
+			output += '* [[%s]]\n' % page
+
+	return output
 
 if __name__ == '__main__':
 	verbose = True
