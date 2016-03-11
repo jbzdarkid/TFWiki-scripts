@@ -68,10 +68,8 @@ def get_all_pages():
 		return ###
 		url = wikiAddress + '&apcontinue=' + result['continue']['apcontinue']
 
-def generate_links(q):
+def generate_links(q, links):
 	w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
-	links = {}
-
 	for page in get_all_pages():
 		print page
 		content = Page(w, page).getWikiText()
@@ -80,7 +78,8 @@ def generate_links(q):
 			if url not in links:
 				links[url] = []
 				q.put(url)
-			links[url].append(page)
+			if page not in links[url]:
+				links[url].append(page)
 
 	return links
 
@@ -126,14 +125,18 @@ def worker(q, linkData):
 def main():
 	q = Queue()
 	linkData = {}
+	links = {}
 	threads = []
-	for i in range(1): # Number of threads
+
+	thread = Thread(target=generate_links, args=(q, links))
+	threads.append(thread)
+	thread.start()
+	for i in range(50): # Number of threads
 		thread = Thread(target=worker, args=(q, linkData))
 		threads.append(thread)
 		thread.start()
 	for thread in threads:
 		thread.join()
-	generate_links(q)
 
 
 if __name__ == '__main__':
