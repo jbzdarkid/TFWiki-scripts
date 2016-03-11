@@ -71,7 +71,6 @@ def get_all_pages():
 def generate_links(q, links):
 	w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
 	for page in get_all_pages():
-		print page
 		content = Page(w, page).getWikiText()
 		linkRegex = return_link_regex()
 		for url in get_links(linkRegex, content):
