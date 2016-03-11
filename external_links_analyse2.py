@@ -84,9 +84,11 @@ def generate_links(q, links):
 	return links
 
 def worker(q, linkData):
+	firstLink = True
 	while True:
 		try:
-			link = q.get(True, 1)
+			link = q.get(True, 10 if firstLink else 1)
+			firstLink = False
 		except Empty:
 			return
 
