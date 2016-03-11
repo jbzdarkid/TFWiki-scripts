@@ -6,6 +6,7 @@ from threading import Thread
 from urllib2 import urlopen, build_opener, HTTPError, URLError
 from wikitools import wiki
 from wikitools.page import Page
+verbose = False
 
 # Shamelessly copied from the old external_links_analyse.
 def return_link_regex(withoutBracketed=False, onlyBracketed=False):
@@ -136,6 +137,8 @@ def main():
 
 
 if __name__ == '__main__':
-	f = open('external_links_analyse', 'wb')
+	verbose = True
+	f = open('external_links_analyse.txt', 'wb')
 	f.write(main())
+	print 'Article written to external_links_analyse.txt'
 	f.close()
