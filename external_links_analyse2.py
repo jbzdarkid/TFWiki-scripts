@@ -291,12 +291,16 @@ class LinkChecker(object):
 def get_all_pages():
 	wikiAddress = r'https://wiki.teamfortress.com/w/api.php?action=query&list=allpages&apfilterredir=nonredirects&aplimit=500&format=json'
 	url = wikiAddress
+	langs = ['ar', 'cs', 'da', 'de', 'es', 'fi' ,'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 	while True:
 		result = loads(urlopen(url.encode('utf-8')).read())
 		for page in result['query']['allpages']:
-			yield page
+			if page['title'].rpartition('/')[2] in langs:
+				continue # English pages only
+			yield page['title']
 		if 'continue' not in result:
 			return
+		return ###
 		url = wikiAddress + '&apcontinue=' + result['continue']['apcontinue']
 
 def generate_links(q):
@@ -305,13 +309,13 @@ def generate_links(q):
 
 	for page in get_all_pages():
 		print page
-		content = Page(w, page['title']).getWikiText()
+		content = Page(w, page).getWikiText()
 		linkRegex = return_link_regex()
 		for url in get_links(linkRegex, content):
 			if url not in links:
 				links[url] = []
+				q.put(url)
 			links[url].append(page)
-			q.put(url)
 
 	return links
 
@@ -332,15 +336,14 @@ def worker(q, linkData):
 def main():
 	q = Queue()
 	linkData = {}
-	# threads = []
-	# for i in range(1): # Number of threads
-	# 	thread = Thread(target=worker, args=(q, linkData))
-	# 	threads.append(thread)
-	# 	thread.start()
-	# for thread in threads:
-	# 	thread.join()
+	threads = []
+	for i in range(1): # Number of threads
+		thread = Thread(target=worker, args=(q, linkData))
+		threads.append(thread)
+		thread.start()
+	for thread in threads:
+		thread.join()
 	generate_links(q)
-	worker(q, linkData)
 
 
 if __name__ == '__main__':
