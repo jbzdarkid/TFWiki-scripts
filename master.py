@@ -6,7 +6,7 @@ w.login(username)
 
 summary = 'Automatic Update by %s using [https://github.com/jbzdarkid/TFWiki-scripts Wikitools]' % username
 
-import wiki_edit_stats, wiki_unused_files, equipregions, external_links_analyse, LODTables
+import wiki_edit_stats, wiki_unused_files, equipregions, external_links_analyse2, LODTables
 
 Page(w, 'Team Fortress Wiki:Reports/Users by edit count').edit(text=wiki_edit_stats.main(), summary=summary)
 
@@ -18,3 +18,5 @@ end = text.index('<noinclude>') # End of table
 Page(w, 'Template:Equip region table').edit(text=text[:start]+equipregions.main().encode('utf-8')+text[end:], summary=summary)
 
 Page(w, 'Template:LODTable').edit(text=LODTables.main(), summary=summary)
+
+Page(w, 'Team Fortress Wiki:Reports/External links').edit(text=external_links_analyse2.main(), summary=summary)
