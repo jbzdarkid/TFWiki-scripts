@@ -15,8 +15,8 @@ from socket import timeout as socket_timeout
 from socket import gaierror as socket_gaierror
 from socket import error as socket_error
 verbose = False
-PAGESCRAPERS = 1
-LINKCHECKERS = 1
+PAGESCRAPERS = 10
+LINKCHECKERS = 50
 
 # Shamelessly copied from the old external_links_analyse.
 def return_link_regex(withoutBracketed=False, onlyBracketed=False):
@@ -72,8 +72,8 @@ def allpages(page_q):
 		for page in result['query']['allpages']:
 			if page['title'].rpartition('/')[2] in langs:
 				continue # English pages only
-		if 'continue' not in result:
 			page_q.put(page['title'])
+		if 'continue' not in result:
 			global stage
 			stage = 1
 			return
@@ -88,14 +88,9 @@ def pagescraper(page_q, link_q, links):
 			global stage
 			if stage > 0: # This is still not totally thread-safe.
 				stage += 1
-				print 'Pagescraper exiting, stage:', stage
 				return
 			else:
-				print 'Pagescraper continuing <81>'
 				continue
-
-		# if verbose:
-		# 	print 'Getting links from', page
 
 		content = Page(w, page).getWikiText()
 		linkRegex = return_link_regex()
@@ -106,26 +101,22 @@ def pagescraper(page_q, link_q, links):
 			if page not in links[url]:
 				links[url].append(page)
 
-def linkchecker(links_q, linkData):
+def linkchecker(link_q, linkData):
 	while True:
 		try:
-			link = links_q.get(True, 1)
+			link = link_q.get(True, 1)
 		except Empty:
 			global stage
 			if stage > PAGESCRAPERS: # This is still not totally thread-safe.
 				stage += 1
-				print 'Linkscraper exiting, stage:', stage
 				return
 			else:
-				print 'Linkscraper continuing <103>'
 				continue
 
-		# if verbose:
-			# print 'Processing', link
 		try:
 			opener = build_opener()
 			opener.addheaders.append(('Cookie', 'viewed_welcome_page=1')) # For ESEA, to prevent a redirect loop.
-			opener.open(link, timeout=5).read() # Timeout is in seconds
+			opener.open(link, timeout=10).read() # Timeout is in seconds
 			continue # No error
 		except socket_timeout as e:
 			linkData.append(('Timeout', link))
@@ -150,8 +141,6 @@ def linkchecker(links_q, linkData):
 				linkData.append((e.reason.args[1], link))
 			else:
 				linkData.append((e.reason, link))
-		# if verbose:
-		# 	print 'Found dead link:', link
 
 def main():
 	global stage
@@ -178,9 +167,8 @@ def main():
 	for thread in threads:
 		thread.join()
 
-	output = ''
+	output = '== Dead or incorrectly behaving links ==\n'
 	linkData.sort()
-	lastError = ''
 	for error, link in linkData:
 		output += '* %s (%s)\n' % (link, error)
 		for page in sorted(links[link]):
@@ -202,6 +190,6 @@ def main():
 if __name__ == '__main__':
 	verbose = True
 	f = open('external_links_analyse.txt', 'wb')
-	f.write(main())
+	f.write(main().encode('utf-8'))
 	print 'Article written to external_links_analyse.txt'
 	f.close()
