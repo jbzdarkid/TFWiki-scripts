@@ -185,11 +185,11 @@ def main():
 		for page in sorted(links[link]):
 			output += '** [[%s]]\n' % page
 
-	return output
+	return output.encode('utf-8')
 
 if __name__ == '__main__':
 	verbose = True
 	f = open('external_links_analyse.txt', 'wb')
-	f.write(main().encode('utf-8'))
+	f.write(main())
 	print 'Article written to external_links_analyse.txt'
 	f.close()
