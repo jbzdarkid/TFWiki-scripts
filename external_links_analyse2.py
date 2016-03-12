@@ -1,11 +1,19 @@
 from json import loads
 from Queue import Queue, Empty
 from re import compile, DOTALL
-from socket import timeout, gaierror
 from threading import Thread
-from urllib2 import urlopen, build_opener, HTTPError, URLError
+from urllib2 import urlopen, build_opener
+from time import sleep
 from wikitools import wiki
 from wikitools.page import Page
+
+# Error imports
+from ssl import SSLError
+from urllib2 import HTTPError
+from urllib2 import URLError
+from socket import timeout as socket_timeout
+from socket import gaierror as socket_gaierror
+from socket import error as socket_error
 verbose = False
 PAGESCRAPERS = 1
 LINKCHECKERS = 1
@@ -119,28 +127,29 @@ def linkchecker(links_q, linkData):
 			opener.addheaders.append(('Cookie', 'viewed_welcome_page=1')) # For ESEA, to prevent a redirect loop.
 			opener.open(link, timeout=5).read() # Timeout is in seconds
 			continue # No error
-		except timeout as e:
+		except socket_timeout as e:
 			linkData.append(('Timeout', link))
+		except socket_error as e:
+			linkData.append((e.args[1], link))
 		except HTTPError as e:
-			if e.code == 404:
-				linkData.append(('Not Found', link))
-			elif e.code == 403:
-				linkData.append(('Not Permitted', link))
-			elif e.code == 503:
-				linkData.append(('Internal Server Error', link))
+			if e.code == 301 or e.code == 302 or e.code == 303:
+				linkData.append(('Redirect Loop', link))
+			elif e.code == 429: # Too many reqeusts
+				link_q.put(link)
+				sleep(10)
 			else:
-				print 1, e.code, e
 				linkData.append((e.reason, link))
 		except URLError as e:
-			if isinstance(e.reason, timeout):
+			if isinstance(e.reason, socket_timeout):
 				linkData.append(('Timeout', link))
-			elif isinstance(e.reason, gaierror):
+			elif isinstance(e.reason, socket_gaierror):
 				linkData.append(('Unknown Host', link))
+			elif isinstance(e.reason, SSLError):
+				linkData.append((e.reason.reason, link))
+			elif isinstance(e.reason, socket_error):
+				linkData.append((e.reason.args[1], link))
 			else:
-				print 2, e.args
 				linkData.append((e.reason, link))
-		except Exception as e:
-			raise e
 		# if verbose:
 		# 	print 'Found dead link:', link
 
