@@ -7,6 +7,8 @@ from urllib2 import urlopen, build_opener, HTTPError, URLError
 from wikitools import wiki
 from wikitools.page import Page
 verbose = False
+PAGESCRAPERS = 1
+LINKCHECKERS = 1
 
 # Shamelessly copied from the old external_links_analyse.
 def return_link_regex(withoutBracketed=False, onlyBracketed=False):
@@ -53,7 +55,7 @@ def get_links(regex, text):
 
 # End of stuff I shamelessly copied.
 
-def get_all_pages():
+def allpages(page_q):
 	wikiAddress = r'https://wiki.teamfortress.com/w/api.php?action=query&list=allpages&apfilterredir=nonredirects&aplimit=500&format=json'
 	url = wikiAddress
 	langs = ['ar', 'cs', 'da', 'de', 'es', 'fi' ,'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
@@ -62,37 +64,56 @@ def get_all_pages():
 		for page in result['query']['allpages']:
 			if page['title'].rpartition('/')[2] in langs:
 				continue # English pages only
-			yield page['title']
 		if 'continue' not in result:
+			page_q.put(page['title'])
+			global stage
+			stage = 1
 			return
-		return ###
 		url = wikiAddress + '&apcontinue=' + result['continue']['apcontinue']
 
-def generate_links(q, links):
+def pagescraper(page_q, link_q, links):
 	w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
-	for page in get_all_pages():
+	while True:
+		try:
+			page = page_q.get(True, 1)
+		except Empty:
+			global stage
+			if stage > 0: # This is still not totally thread-safe.
+				stage += 1
+				print 'Pagescraper exiting, stage:', stage
+				return
+			else:
+				print 'Pagescraper continuing <81>'
+				continue
+
+		# if verbose:
+		# 	print 'Getting links from', page
+
 		content = Page(w, page).getWikiText()
 		linkRegex = return_link_regex()
 		for url in get_links(linkRegex, content):
 			if url not in links:
 				links[url] = []
-				q.put(url)
+				link_q.put(url)
 			if page not in links[url]:
 				links[url].append(page)
 
-	return links
-
-def worker(q, linkData):
-	firstLink = True
+def linkchecker(links_q, linkData):
 	while True:
 		try:
-			link = q.get(True, 10 if firstLink else 1)
-			firstLink = False
+			link = links_q.get(True, 1)
 		except Empty:
-			return
+			global stage
+			if stage > PAGESCRAPERS: # This is still not totally thread-safe.
+				stage += 1
+				print 'Linkscraper exiting, stage:', stage
+				return
+			else:
+				print 'Linkscraper continuing <103>'
+				continue
 
-		if verbose:
-			print 'Processing', link
+		# if verbose:
+			# print 'Processing', link
 		try:
 			opener = build_opener()
 			opener.addheaders.append(('Cookie', 'viewed_welcome_page=1')) # For ESEA, to prevent a redirect loop.
@@ -120,20 +141,29 @@ def worker(q, linkData):
 				linkData.append((e.reason, link))
 		except Exception as e:
 			raise e
-		if verbose:
-			print 'Found dead link:', link
+		# if verbose:
+		# 	print 'Found dead link:', link
 
 def main():
-	q = Queue()
-	links = {}
-	linkData = []
+	global stage
+	stage = 0
 	threads = []
-
-	thread = Thread(target=generate_links, args=(q, links))
+	# Stage 0: Generate list of pages
+	page_q = Queue()
+	thread = Thread(target=allpages, args=(page_q,)) # args must be a tuple, (page_q) is not a tuple.
 	threads.append(thread)
 	thread.start()
-	for i in range(50): # Number of threads
-		thread = Thread(target=worker, args=(q, linkData))
+	# Stage 1: All pages generated. Pagescrapers are allowed to exit if Page Queue is empty.
+	links = {}
+	link_q = Queue()
+	for i in range(PAGESCRAPERS): # Number of threads
+		thread = Thread(target=pagescraper, args=(page_q, link_q, links))
+		threads.append(thread)
+		thread.start()
+	# Stage 2: All pages scraped. Linkscrapers are allowed to exit if Link Queue is empty.
+	linkData = []
+	for i in range(LINKCHECKERS): # Number of threads
+		thread = Thread(target=linkchecker, args=(link_q, linkData))
 		threads.append(thread)
 		thread.start()
 	for thread in threads:
@@ -146,7 +176,7 @@ def main():
 		if lastError != error:
 			lastError = error
 			output += '== %s ==\n' % lastError
-		output += '=== %s ===\n' % link
+		output += '=== [%s] ===\n' % link
 		for page in sorted(links[link]):
 			output += '* [[%s]]\n' % page
 
