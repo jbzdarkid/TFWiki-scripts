@@ -182,12 +182,20 @@ def main():
 	linkData.sort()
 	lastError = ''
 	for error, link in linkData:
-		if lastError != error:
-			lastError = error
-			output += '== %s ==\n' % lastError
-		output += '=== [%s] ===\n' % link
+		output += '* %s (%s)\n' % (link, error)
 		for page in sorted(links[link]):
-			output += '* [[%s]]\n' % page
+			output += '** [[%s]]\n' % page
+	output += '== Suspicious links ==\n'
+	for link in links:
+		suspicious = False
+		for domain in ['wiki.tf2.com', 'wiki.teamfortress.com', 'wiki.tf', 'pastie', 'paste']:
+			if domain in link:
+				suspicious = True
+				break
+		if suspicious:
+			output += '* %s\n' % link
+		for page in sorted(links[link]):
+			output += '** [[%s]]\n' % page
 
 	return output
 
