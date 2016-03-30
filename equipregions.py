@@ -205,10 +205,10 @@ def main():
     regionsDict = sorted(regionsDict.items())
     if verbose:
         print 'Generating output...'
-    return generate_output()
+    return generate_output().encode('utf-8')
 
 if __name__ == "__main__":
     verbose = True
     f = open('equipregions.txt', 'wb')
-    f.write(main().encode('utf-8'))
+    f.write(main())
     f.close()

@@ -15,7 +15,7 @@ Page(w, 'Team Fortress Wiki:Reports/Unused files').edit(text=wiki_unused_files.m
 text = Page(w, 'Template:Equip region table').getWikiText()
 start = text.index('! {{item name|') # Start of equip regions
 end = text.index('<noinclude>') # End of table
-Page(w, 'Template:Equip region table').edit(text=text[:start]+equipregions.main().encode('utf-8')+text[end:], summary=summary)
+Page(w, 'Template:Equip region table').edit(text=text[:start]+equipregions.main()+text[end:], summary=summary)
 
 Page(w, 'Template:LODTable').edit(text=LODTables.main(), summary=summary)
 
