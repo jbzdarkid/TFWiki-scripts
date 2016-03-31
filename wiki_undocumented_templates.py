@@ -4,7 +4,7 @@ from Queue import Queue, Empty
 from threading import Thread
 from wikitools import wiki
 from wikitools.page import Page
-from re import search
+from re import search, sub
 
 verbose = False
 PAGESCRAPERS = 10
@@ -15,10 +15,25 @@ def allpages(page_q):
 	while True:
 		result = loads(urlopen(url.encode('utf-8')).read())
 		for page in result['query']['allpages']:
-			if page['title'].rpartition('/')[2] == 'doc':
-				continue # Don't include doc subpages
-			elif page['title'].rpartition('/')[2] == 'sandbox' or page['title'].rpartition('/')[2] == 'Sandbox':
-				continue # Don't include sandboxes
+			if '/' in page['title']:
+				continue # Don't include subpages
+			elif page['title'].partition('/')[0] == 'Template:Dictionary':
+				continue # Don't include dictionary subpages
+			elif page['title'].partition('/')[0] == 'Template:PatchDiff':
+				continue # Don't include patch diffs.
+			elif page['title'][:13] == 'Template:User':
+				continue # Don't include userboxes.
+			page_q.put(page['title'])
+		if 'continue' not in result:
+			break
+		url = wikiAddress + '&apcontinue=' + result['continue']['apcontinue']
+	wikiAddress = r'http://wiki.teamfortress.com/w/api.php?action=query&list=allpages&apfilterredir=nonredirects&apnamespace=828&aplimit=500&format=json' # Namespace 828 is Modules
+	url = wikiAddress
+	while True:
+		result = loads(urlopen(url.encode('utf-8')).read())
+		for page in result['query']['allpages']:
+			if '/' in page['title']:
+				continue # Don't include subpages
 			elif page['title'].partition('/')[0] == 'Template:Dictionary':
 				continue # Don't include dictionary subpages
 			elif page['title'].partition('/')[0] == 'Template:PatchDiff':
@@ -53,7 +68,14 @@ def pagescraper(page_q, badpages):
 			else:
 				continue
 
-		match = search('{{([Dd]oc begin|[Tt]emplate doc)}}', Page(w, page).getWikiText())
+		page_text = Page(w, page).getWikiText()
+		page_visible = sub('<includeonly>.*?</includeonly>', '', page_text)
+		if len(page_text) - len(page_visible) < 150:
+			continue # Pages that don't hide much of their information, e.g. nav templates
+		else:
+			print page, 'hides', len(page_text) - len(page_visible), 'characters'
+
+		match = search('{{([Dd]oc begin|[Tt]emplate doc|[Dd]ocumentation|[Ww]ikipedia doc)}}', page_text)
 		if not match:
 			count = whatlinkshere(page)
 			print 'Page %s does not transclude a documentation template and has %d backlinks' % (page, count)
