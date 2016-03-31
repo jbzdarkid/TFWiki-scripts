@@ -70,12 +70,12 @@ def pagescraper(page_q, badpages):
 
 		page_text = Page(w, page).getWikiText()
 		page_visible = sub('<includeonly>.*?</includeonly>', '', page_text)
-		if len(page_text) - len(page_visible) < 150:
-			continue # Pages that don't hide much of their information, e.g. nav templates
+		if float(len(page_visible)) / len(page_text) > .8:
+			continue # Pages that show >8% of their information, e.g. nav templates
 		else:
-			print page, 'hides', len(page_text) - len(page_visible), 'characters'
+			print page, 'shows', float(len(page_visible)) / len(page_text) * 100, '%'
 
-		match = search('{{([Dd]oc begin|[Tt]emplate doc|[Dd]ocumentation|[Ww]ikipedia doc)}}', page_text)
+		match = search('{{([Dd]oc begin|[Tt]emplate doc|[Dd]ocumentation|[Ww]ikipedia doc|[dD]ictionary/wrapper)}}', page_text)
 		if not match:
 			count = whatlinkshere(page)
 			print 'Page %s does not transclude a documentation template and has %d backlinks' % (page, count)
