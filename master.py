@@ -1,7 +1,6 @@
 from wikitools.page import Page
 from wikitools import wiki
 import config
-w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
 
 w = wiki.Wiki(config['wikiApi'])
 w.login(config['wikiUsername'], config['wikiPassword'])
