@@ -73,12 +73,14 @@ def pagescraper(page_q, badpages):
 		if float(len(page_visible)) / len(page_text) > .8:
 			continue # Pages that show >8% of their information, e.g. nav templates
 		else:
-			print page, 'shows', float(len(page_visible)) / len(page_text) * 100, '%'
+			if verbose:
+				print page, 'shows', float(len(page_visible)) / len(page_text) * 100, '%'
 
 		match = search('{{([Dd]oc begin|[Tt]emplate doc|[Dd]ocumentation|[Ww]ikipedia doc|[dD]ictionary/wrapper)}}', page_text)
 		if not match:
 			count = whatlinkshere(page)
-			print 'Page %s does not transclude a documentation template and has %d backlinks' % (page, count)
+			if verbose:
+				print 'Page %s does not transclude a documentation template and has %d backlinks' % (page, count)
 			badpages.append([count, page])
 
 def main():

@@ -6,9 +6,11 @@ w.login(username)
 
 summary = 'Automatic Update by %s using [https://github.com/jbzdarkid/TFWiki-scripts Wikitools]' % username
 
-import wiki_edit_stats, wiki_unused_files, equipregions, external_links_analyse2, LODTables
+import wiki_edit_stats, wiki_undocumented_templates, wiki_unused_files, equipregions, external_links_analyse2, LODTables
 
 Page(w, 'Team Fortress Wiki:Reports/Users by edit count').edit(text=wiki_edit_stats.main(), summary=summary)
+
+Page(w, 'Team Fortress Wiki:Reports/Undocumented templates').edit(text=wiki_undocumented_templates.main(), summary=summary)
 
 Page(w, 'Team Fortress Wiki:Reports/Unused files').edit(text=wiki_unused_files.main(), summary=summary)
 
