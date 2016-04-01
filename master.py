@@ -1,10 +1,11 @@
 from wikitools.page import Page
 from wikitools import wiki
 w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
-username = raw_input('Username: ')
-w.login(username)
 
-summary = 'Automatic Update by %s using [https://github.com/jbzdarkid/TFWiki-scripts Wikitools]' % username
+w = wiki.Wiki(config['wikiApi'])
+w.login(config['wikiUsername'], config['wikiPassword'])
+
+summary = 'Automatic Update by %s using [https://github.com/jbzdarkid/TFWiki-scripts Wikitools]' % config['wikiUsername']
 
 import wiki_edit_stats, wiki_undocumented_templates, wiki_unused_files, equipregions, external_links_analyse2, LODTables
 
