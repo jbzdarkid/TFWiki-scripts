@@ -17,7 +17,8 @@ itemExceptions = [ # These are keywords which, if present, will make the item ig
     'Voodoo-Cursed Soul',
 
     'Arms Race',
-    'Asiafortress Cup',
+    'AsiaFortress Cup',
+    'AsiaFortress Mercenaries',
     'AU Highlander Community League',
     'BETA LAN',
     'DeutschLAN',
@@ -34,6 +35,7 @@ itemExceptions = [ # These are keywords which, if present, will make the item ig
     'LBTF2',
     'OSL.tf',
     'OWL',
+    'ozfortress',
     'Ready Steady Pan',
     'RETF2',
     'TF2Connexion',
@@ -61,6 +63,7 @@ def add_region(itemname, TF_classlist, region):
         if verbose:
             print 'Added region', region
     for TF_class in TF_classlist:
+        TF_class = TF_class.lower() # Typo in a lot of new items
         if itemname not in regionsDict[region][TF_class]:
             regionsDict[region][TF_class].append(itemname)
 
