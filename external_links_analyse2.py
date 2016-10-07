@@ -8,6 +8,7 @@ from wikitools import wiki
 from wikitools.page import Page
 
 # Error imports
+from ssl import CertificateError
 from ssl import SSLError
 from urllib2 import HTTPError
 from urllib2 import URLError
@@ -122,6 +123,8 @@ def linkchecker(link_q, linkData):
 			linkData.append(('Timeout', link))
 		except socket_error as e:
 			linkData.append((e.args[1], link))
+		except CertificateError as e:
+			linkData.append(('IT report as Malicious', link))
 		except HTTPError as e:
 			if e.code == 301 or e.code == 302 or e.code == 303:
 				linkData.append(('Redirect Loop', link))
