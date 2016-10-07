@@ -202,7 +202,7 @@ def gen_data(allitems, modelmap):
 			continue
 		usedby = allitems[name]['used_by_classes']
 		if len(usedby) == 1:
-			TF_class = usedby.keys()[0]
+			TF_class = usedby.keys()[0].lower()
 		elif len(usedby) == 9:
 			TF_class = 'all classes'
 		else:
