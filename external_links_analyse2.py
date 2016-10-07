@@ -150,10 +150,14 @@ def main():
 	stage = 0
 	threads = []
 	# Stage 0: Generate list of pages
+	if verbose:
+		print 'Generating page list'
 	page_q = Queue()
 	thread = Thread(target=allpages, args=(page_q,)) # args must be a tuple, (page_q) is not a tuple.
 	threads.append(thread)
 	thread.start()
+	if verbose:
+		print 'All pages generated, entering stage 1'
 	# Stage 1: All pages generated. Pagescrapers are allowed to exit if Page Queue is empty.
 	links = {}
 	link_q = Queue()
@@ -161,6 +165,8 @@ def main():
 		thread = Thread(target=pagescraper, args=(page_q, link_q, links))
 		threads.append(thread)
 		thread.start()
+	if verbose:
+		print 'All pages scraped, entering stage 2'
 	# Stage 2: All pages scraped. Linkscrapers are allowed to exit if Link Queue is empty.
 	linkData = []
 	for i in range(LINKCHECKERS): # Number of threads
@@ -169,6 +175,9 @@ def main():
 		thread.start()
 	for thread in threads:
 		thread.join()
+
+	if verbose:
+		print 'Done scraping links, generating output'
 
 	output = '== Dead or incorrectly behaving links ==\n'
 	linkData.sort()
