@@ -35,4 +35,6 @@ summary = 'Automatic Update by %s using [https://github.com/jbzdarkid/TFWiki-scr
 # Page(w, 'Template:LODTable').edit(text=LODTables.main(), summary=summary)
 
 import external_links_analyse2
+verbose = True
+external_links_analyse2.verbose = True
 Page(w, 'Team Fortress Wiki:Reports/External links').edit(text=external_links_analyse2.main(), summary=summary)
