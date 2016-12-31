@@ -3,8 +3,8 @@ from wikitools import wiki
 from os import environ
 print environ
 
-# travis encrypt WIKI_USERNAME=pootis --add env.matrix
-# travis encrypt WIKI_PASSWORD=woooki --add env.matrix
+# travis encrypt WIKI_USERNAME=pootis -a -x
+# travis encrypt WIKI_PASSWORD=woooki -a -p
 
 config = {
     'wikiApi': 'http://wiki.teamfortress.com/w/api.php',
