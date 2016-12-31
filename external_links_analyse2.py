@@ -8,6 +8,7 @@ from wikitools import wiki
 from wikitools.page import Page
 
 # Error imports
+from httplib import BadStatusLine
 from ssl import CertificateError
 from ssl import SSLError
 from urllib2 import HTTPError
@@ -147,6 +148,8 @@ def linkchecker(link_q, linkData):
 				linkData.append((e.reason.args[1], link))
 			else:
 				linkData.append((e.reason, link))
+		except BadStatusLine as e:
+			linkData.append(('Unknown error', link))
 
 def main():
 	global stage
