@@ -122,6 +122,8 @@ def linkchecker(link_q, linkData):
 		except socket_timeout as e:
 			linkData.append(('Timeout', link))
 		except socket_error as e:
+			print e
+			print e.args
 			linkData.append((e.args[1], link))
 		except CertificateError as e:
 			linkData.append(('IT report as Malicious', link))

@@ -16,14 +16,14 @@ w.login(config['wikiUsername'], config['wikiPassword'])
 
 summary = 'Automatic Update by %s using [https://github.com/jbzdarkid/TFWiki-scripts Wikitools]' % config['wikiUsername']
 
-import wiki_edit_stats
-Page(w, 'Team Fortress Wiki:Reports/Users by edit count').edit(text=wiki_edit_stats.main(), summary=summary)
+# import wiki_edit_stats
+# Page(w, 'Team Fortress Wiki:Reports/Users by edit count').edit(text=wiki_edit_stats.main(), summary=summary)
 
-import wiki_undocumented_templates
-Page(w, 'Team Fortress Wiki:Reports/Undocumented templates').edit(text=wiki_undocumented_templates.main(), summary=summary)
+# import wiki_undocumented_templates
+# Page(w, 'Team Fortress Wiki:Reports/Undocumented templates').edit(text=wiki_undocumented_templates.main(), summary=summary)
 
-import wiki_unused_files
-Page(w, 'Team Fortress Wiki:Reports/Unused files').edit(text=wiki_unused_files.main(), summary=summary)
+# import wiki_unused_files
+# Page(w, 'Team Fortress Wiki:Reports/Unused files').edit(text=wiki_unused_files.main(), summary=summary)
 
 # import equipregions
 # text = Page(w, 'Template:Equip region table').getWikiText()
