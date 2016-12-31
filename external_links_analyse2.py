@@ -203,8 +203,6 @@ def main():
 		for page in sorted(links[link]):
 			output += '** [[%s]]\n' % page
 
-	print len(output)
-
 	return output.encode('utf-8')
 
 if __name__ == '__main__':
