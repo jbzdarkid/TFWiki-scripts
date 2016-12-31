@@ -1,7 +1,11 @@
 from wikitools.page import Page
 from wikitools import wiki
-from sys import argv
+from platform import system
+print system()
 from os import environ
+
+# travis encrypt --add username SET WIKI_USERNAME=pootis
+# travis encrypt --add password SET WIKI_PASSWORD=woooki
 
 config = {
     'wikiApi': 'http://wiki.teamfortress.com/w/api.php',
