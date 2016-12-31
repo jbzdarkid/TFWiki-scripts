@@ -4,11 +4,13 @@ notifications:
     on_success: never
     on_failure: change
 python:
-  - '2.7'
+- '2.7'
 os:
-  - windows
+- windows
 before_install:
-  - pip install wikitools
-script: python master.py darkid $WIKI_PASSWORD
+- pip install wikitools
+- echo $
+script: python master.py
+# travis encrypt -a environ "SET WIKI_USERNAME=pootis && SET WIKI_PASSWORD=test"
 environ:
-  secure: nBoRvjBBCGcWPsmeXocuzaalKTefG9G12g4D64m00Mhb52EfaoZIMg8SfHZhHA6aqDrl5z2pQ21qSBHBVhb7MFTFAs1jXeQtG92phkP9rfxBRMPfj/1lHYgU9GaTMkX1dIg1nn7pPj2vKdzZThFleVm7FnVE1/5gkkoR18Cl2SUJ91m6ASQm1NLCj6iJWkkENWcP6VpuUt8Sz+SpcZHTbMwAj0wwLxCBFR3B9etXMn2knV3k8kqit/LBdqHtrWS/CjZZjQTsu5S4UhK+v5gBicomNCb0V262voCIqI+5HmB/ifZDnQyet9X8MqdoBL2nxgru0uZw1eD+DZbMw4a4kbGIhoju4X8cfMtYC/Mg5q/E62vedMbW9klG634J5Pxsq2XDBwlBkrfAeVA33VdNKxr26SruPXmAhKS32wz2/5ULP6R8J/P0Rtpl0eBcwF7i7TmCm9lE37N4xkx9PoYMkIfpWC0146zGXnPk/1K59w+pmMXKBfn8cfw4kCCw6Lvf8iihjuBvpVk/fLB2VAWwIK506MdGO1Ad4SWvrArWbd7NZe7S/p+k0f/D5pS4V7hRfXR1xWst2z8DKcmKOSNRB3O4aEGq38ALDEcc/hTJ50FWkl6LQ/i+OsVHzlvdrfiNnEEVzZwjGO6WyzPW7XjH/VTuGDugU3eFi3DQyXVNR/U=
+  secure: HkVQh2a0CPy04LJHI1/zlMKoGBqWg1FwLqdFKS0+xvegwz4GKeUDdvghI1lAVITgr2oWXgIMRv4FmS7Mey6gNVBqBAwm/yj9vl0Z1HsxvdUdF/kyxrviBaj2TV5v3cpyCw1fgpZHZN26cOrK8brx8R47BlGJkLd/5vl1LF6IU2fLK+jccnyJKxCbx//+338M0wOx0qDollbz88mZtHrLrqHqOWftcrkERbJFJyQlEqJXZ4/CbV65oDZ2Am8jH+r65bdIVSvxyBRhy6nMnhEdDi6NahPD9pFMUDp25vja+mSR2/9BpPGFcvnqEX9vhi6FAXliUlWNuGxAJ3ZWbUNsQ0dXNkgGnYkpObTBoSTlZokaYO/BpdAg7SjLOsIBaZn+tXqQII/781koKOXo10Ff4V33Y9sUbG0HrX5s7PDjY75SvagSh9cH79uInp7ZjkSiblNkIMUdiBC665uxAw6b+Y3qd4e33gbXBI+TElaLEku320hInmGHMAOJhr5qSUntJ+WL5dYtEQ5DSRgrgcazWQMXG03yYoitoC2kQmADLobER2Q7K6cTkCkzRP2TQ+qgm+pMKOKRvaj4asyan1N+qtGpPqzVVtpvU/TH4JMIc+Zldd9KT6dVHp2qVyPbUDM33AVrc4pPM09pCtcm7QUY5VKD47nywS3vo5ljA25+74s=
