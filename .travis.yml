@@ -9,7 +9,8 @@ os:
 - windows
 before_install:
 - pip install wikitools
-- echo $
+- ECHO %WIKI_USERNAME%
+- ECHO %WIKI_PASSWORD%
 script: python master.py
 # travis encrypt -a environ "SET WIKI_USERNAME=pootis && SET WIKI_PASSWORD=test"
 environ:
