@@ -1,12 +1,12 @@
 from wikitools.page import Page
 from wikitools import wiki
-# import config
 from sys import argv
+from os import environ
 
 config = {
     'wikiApi': 'http://wiki.teamfortress.com/w/api.php',
-    'wikiPassword': argv[2],
-    'wikiUsername': argv[1],
+    'wikiUsername': environ['WIKI_USERNAME'],
+    'wikiPassword': environ['WIKI_PASSWORD'],
 }
 
 w = wiki.Wiki(config['wikiApi'])
