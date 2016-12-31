@@ -118,7 +118,7 @@ def linkchecker(link_q, linkData):
 		try:
 			opener = build_opener()
 			opener.addheaders.append(('Cookie', 'viewed_welcome_page=1')) # For ESEA, to prevent a redirect loop.
-			opener.open(link, timeout=10).read() # Timeout is in seconds
+			opener.open(link, timeout=20).read() # Timeout is in seconds
 			continue # No error
 		except socket_timeout as e:
 			linkData.append(('Timeout', link))
