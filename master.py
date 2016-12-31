@@ -5,16 +5,10 @@ from os import environ
 # travis encrypt WIKI_USERNAME=pootis -a -x
 # travis encrypt WIKI_PASSWORD=woooki -a -p
 
-config = {
-    'wikiApi': 'http://wiki.teamfortress.com/w/api.php',
-    'wikiUsername': environ['WIKI_USERNAME'],
-    'wikiPassword': environ['WIKI_PASSWORD'],
-}
+w = wiki.Wiki('http://wiki.teamfortress.com/w/api.php')
+w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD'])
 
-w = wiki.Wiki(config['wikiApi'])
-w.login(config['wikiUsername'], config['wikiPassword'])
-
-summary = 'Automatic Update by %s using [https://github.com/jbzdarkid/TFWiki-scripts Wikitools]' % config['wikiUsername']
+summary = 'Automatic Update by %s using Travis-ci and [https://github.com/jbzdarkid/TFWiki-scripts Wikitools]' % environ['WIKI_USERNAME']
 
 # import wiki_edit_stats
 # Page(w, 'Team Fortress Wiki:Reports/Users by edit count').edit(text=wiki_edit_stats.main(), summary=summary)
