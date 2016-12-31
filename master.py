@@ -19,8 +19,6 @@ summary = 'Automatic Update by %s using [https://github.com/jbzdarkid/TFWiki-scr
 import wiki_edit_stats
 Page(w, 'Team Fortress Wiki:Reports/Users by edit count').edit(text=wiki_edit_stats.main(), summary=summary)
 
-exit(0)
-
 import wiki_undocumented_templates
 Page(w, 'Team Fortress Wiki:Reports/Undocumented templates').edit(text=wiki_undocumented_templates.main(), summary=summary)
 
