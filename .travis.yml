@@ -4,11 +4,11 @@ notifications:
     on_success: never
     on_failure: change
 python:
-- '2.7'
+  - "2.7"
 os:
-- windows
+  - windows
 before_install:
-- pip install wikitools
+  - pip install wikitools
 script: python master.py
 username:
   secure: aUJGOI5vFWil3bvMq/HriaH5DhAENHtfw+1OpSi28cvwS3H7kkQUqRMVE5UoMPmeKYEWPvSI90OrunK2WNXZWcnSg4RfteiHkgZ1ZkLGTWj3BG49dHZPc2Wj0g3LHyjomvL/SB8OixwSSDuSH+KV1AU93alTEnjUM4hPj2ACs3q0/BiyHmQnRVvLTCvKfJYrWUfv72zCbmOIYlgGZ/7f7qfNhHVMhpPDkkz1IEwMlxHAJ/3kNqV29R4apoPHJdcSicHvlzdGP0h95Y7OS1Uup0j6aVUhOmGleXlzqq6ZH/HgUQMdKKLxLr247yK8PTncDZUQLyDxh+2iB9mq3i6Zn7UfrOeOCzG2WjrtmV47f6oLCFhdMREwpsN2RO+ECW6IyMrK1GaumKbkcc1wAaFa7gXN7PxFXP2Yvs2TVm7DoVvWZAC9oFZRMK0whwrT/S3gxkW6A019cYt0eY7pCJFtFzp5nCULTT+TgraUThyBv/4trqodfjzh6uFhHH1pemFN9n1owtZlrxxtLHmywg55eiQTEdxTMEALnNTea2y6xe/8WxSUSEeUAhgTpkm6zy+sEiYSQq9eiWnsoKrVakiQevOb6HHitr2sFh2d1oPyaIlhfr2yDZB5ZpEzbul0O2k3Dos5EE2EI/oQJwx5hpAR9IwQWs8HFO3iRAIlJvOEJAU=
