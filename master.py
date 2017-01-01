@@ -34,5 +34,8 @@ res = Page(w, 'Team Fortress Wiki:Reports/External links').edit(text=external_li
 # Dealing with the link blacklist
 if res['edit']['result'] == 'Failure':
     for url in res['edit']['spamblacklist'].split('|'):
-        external_links.replace(url, url[::-1])
+        url = url.encode('utf-8')
+        print url
+        print url in external_links
+        external_links = external_links.replace(url, url[::-1])
     res = Page(w, 'Team Fortress Wiki:Reports/External links').edit(text=external_links, summary=summary)
