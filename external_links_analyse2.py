@@ -203,6 +203,7 @@ def main():
 		for page in sorted(links[link]):
 			output += '** [[%s]]\n' % page
 
+	output = output.replace('tumblr', 'tumbl') # Link blacklist
 	return output.encode('utf-8')
 
 if __name__ == '__main__':

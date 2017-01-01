@@ -29,13 +29,4 @@ summary = 'Automatic Update by %s using Travis-ci and [https://github.com/jbzdar
 # Page(w, 'Template:LODTable').edit(text=LODTables.main(), summary=summary)
 
 import external_links_analyse2
-external_links = external_links_analyse2.main()
-res = Page(w, 'Team Fortress Wiki:Reports/External links').edit(text=external_links, summary=summary)
-# Dealing with the link blacklist
-if res['edit']['result'] == 'Failure':
-    for url in res['edit']['spamblacklist'].split('|'):
-        url = url.encode('utf-8')
-        print url
-        print url in external_links
-        external_links = external_links.replace(url, url[::-1])
-    res = Page(w, 'Team Fortress Wiki:Reports/External links').edit(text=external_links, summary=summary)
+Page(w, 'Team Fortress Wiki:Reports/External links').edit(text=external_links_analyse2.main(), summary=summary)
