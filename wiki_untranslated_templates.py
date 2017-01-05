@@ -139,7 +139,7 @@ def main():
 			if translations[language][template] == 0:
 				continue
 			output += '* {{tl|%s}}\n' % template
-	return output
+	return output.encode('utf-8')
 
 if __name__ == '__main__':
 	verbose = True
