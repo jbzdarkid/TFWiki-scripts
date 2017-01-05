@@ -146,7 +146,7 @@ Pages missing in {{lang info|{lang}}}: '''<onlyinclude>{count}</onlyinclude>''' 
 == List ==
 """.format(
 			lang=language,
-			count=len(translations[lang]),
+			count=len(translations[language]),
 			date=strftime(r'%H:%M, %d %B %Y', gmtime()))
 		output += '#%s\n'.join(sorted(translations[language]))
 		outputs.append([language, output.encode('utf-8')])
