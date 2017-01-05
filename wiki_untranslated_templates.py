@@ -101,6 +101,8 @@ def pagescraper(page_q, translations):
 			template = match.group(1).strip().lower()
 			languages = []
 			if template == 'lang': # And count out their params
+				if page_text[match.start()-2:match.start()+1] == '{{{':
+					continue # Skip any parameters named lang, viz.: {{{lang|}}}
 				for match2 in finditer('\|(.*?)=', buffer[match.start()]):
 					languages.append(match2.group(1).strip().lower())
 				for language in translations:
