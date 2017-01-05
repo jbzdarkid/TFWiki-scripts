@@ -28,5 +28,8 @@ summary = 'Automatic Update by %s using Travis-ci and [https://github.com/jbzdar
 # import LODTables
 # Page(w, 'Template:LODTable').edit(text=LODTables.main(), summary=summary)
 
-import external_links_analyse2
-Page(w, 'Team Fortress Wiki:Reports/External links').edit(text=external_links_analyse2.main(), summary=summary)
+# import external_links_analyse2
+# Page(w, 'Team Fortress Wiki:Reports/External links').edit(text=external_links_analyse2.main(), summary=summary)
+
+import wiki_untranslated_templates
+Page(w, 'Team Fortress Wiki:Reports/Untranslated templates').edit(wiki_untranslated_templates.main(), summary=summary)
