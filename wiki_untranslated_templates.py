@@ -135,7 +135,7 @@ def main():
 		pages = translations[language].keys()
 		pages.sort(key=lambda page: (-translations[language][page], page))
 		for template in pages:
-			if translations[language][page] == 0:
+			if translations[language][template] == 0:
 				continue
 			output += '* {{tl|%s}}\n' % template
 	return output
