@@ -32,4 +32,6 @@ summary = 'Automatic Update by %s using Travis-ci and [https://github.com/jbzdar
 # Page(w, 'Team Fortress Wiki:Reports/External links').edit(text=external_links_analyse2.main(), summary=summary)
 
 import wiki_untranslated_templates
-Page(w, 'Team Fortress Wiki:Reports/Untranslated templates').edit(wiki_untranslated_templates.main(), summary=summary)
+outputs = wiki_untranslated_templates.main()
+for lang, output in outputs:
+  Page(w, 'Team Fortress Wiki:Reports/Untranslated templates/%s' % lang).edit(output, summary=summary)

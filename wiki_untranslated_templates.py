@@ -5,6 +5,7 @@ from threading import Thread
 from wikitools import wiki
 from wikitools.page import Page
 from re import finditer, DOTALL
+from time import gmtime, strftime
 
 verbose = False
 PAGESCRAPERS = 50
@@ -92,7 +93,6 @@ def pagescraper(page_q, translations):
 
 		print page, 'contains', len(buffer), 'pairs of braces'
 
-		link_count = whatlinkshere(page)
 		missing_languages = set()
 		for language in translations:
 			translations[language][page] = 0
@@ -107,9 +107,7 @@ def pagescraper(page_q, translations):
 					languages.append(match2.group(1).strip().lower())
 				for language in translations:
 					if language not in languages: # Add missing translations
-						# Weight their importance based on number of transclusions
-						# times number of missing translations
-						translations[language][page] += link_count
+						translations[language][page] += 1
 						missing_languages.add(language)
 		if len(missing_languages) > 0:
 			print page, 'is not translated into', len(missing_languages), 'languages:', ', '.join(missing_languages)
@@ -132,20 +130,33 @@ def main():
 	for thread in threads:
 		thread.join()
 
-	output = '{{DISPLAYTITLE:Templates needing translation}}\n'
+	outputs = []
 	for language in sorted(translations.keys()):
-		output += '== %s ==\n' % language
-		pages = translations[language].keys()
-		pages.sort(key=lambda page: (-translations[language][page], page))
-		for template in pages:
-			if translations[language][template] == 0:
-				continue
-			output += '* {{tl|%s}}\n' % template
-	return output.encode('utf-8')
+		output = """
+{{DISPLAYTITLE: {count} templates missing {{lang name|lang|{lang}}} translation}}
+Pages missing in {{lang info|{lang}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.
+
+'''Notice:''' Please do not translate any of the articles in the [[WebAPI]] namespace, as the language is very technical and can lead to loss of context and meaning.
+
+; See also
+* [[TFW:Reports/All articles/{lang}|All articles in {{lang name|name|{lang}}}]]
+* [[TFW:Reports/Missing translations/{lang}|Missing article translations in {{lang name|name|{lang}}}]]
+* [[Special:RecentChangesLinked/Project:Reports/All articles/{lang}|Recent changes to articles in {{lang name|name|{lang}}}]]
+
+== List ==
+""".format(
+			lang=lang,
+			count=len(translations[lang]),
+			date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+		output += '#%s\n'.join(sorted(translations[language]))
+		outputs.append([language, output.encode('utf-8')])
+	return outputs
 
 if __name__ == '__main__':
 	verbose = True
 	f = open('wiki_undocumented_templates.txt', 'wb')
-	f.write(main())
+	for lang, output in main():
+		f.write('\n===== %s =====\n' % lang)
+		f.write(output)
 	print 'Article written to wiki_undocumented_templates.txt'
 	f.close()
