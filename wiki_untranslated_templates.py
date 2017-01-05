@@ -109,7 +109,7 @@ def pagescraper(page_q, translations):
 					# times number of missing translations
 					translations[language][page] += link_count
 					missing_languages.add(language)
-		print page, 'is not translated into: ', ', '.join(missing_languages)
+		print page, 'is not translated into', len(missing_languages), 'languages:', ', '.join(missing_languages)
 
 def main():
 	global stage
