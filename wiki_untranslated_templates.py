@@ -103,13 +103,14 @@ def pagescraper(page_q, translations):
 			if template == 'lang': # And count out their params
 				for match2 in finditer('\|(.*?)=', buffer[match.start()]):
 					languages.append(match2.group(1).strip().lower())
-			for language in translations:
-				if language not in languages: # Add missing translations
-					# Weight their importance based on number of transclusions
-					# times number of missing translations
-					translations[language][page] += link_count
-					missing_languages.add(language)
-		print page, 'is not translated into', len(missing_languages), 'languages:', ', '.join(missing_languages)
+				for language in translations:
+					if language not in languages: # Add missing translations
+						# Weight their importance based on number of transclusions
+						# times number of missing translations
+						translations[language][page] += link_count
+						missing_languages.add(language)
+		if len(missing_languages) > 0:
+			print page, 'is not translated into', len(missing_languages), 'languages:', ', '.join(missing_languages)
 
 def main():
 	global stage
