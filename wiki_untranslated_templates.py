@@ -133,8 +133,10 @@ def main():
 	for language in sorted(translations.keys()):
 		output += '== %s ==\n' % language
 		pages = translations[language].keys()
-		pages.sort(key=lambda s: (-translations[language][s], s))
+		pages.sort(key=lambda page: (-translations[language][page], page))
 		for template in pages:
+			if translations[language][page] == 0:
+				continue
 			output += '* {{tl|%s}}\n' % template
 	return output
 
