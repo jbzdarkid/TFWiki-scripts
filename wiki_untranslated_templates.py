@@ -94,8 +94,6 @@ def pagescraper(page_q, translations):
 		print page, 'contains', len(buffer), 'pairs of braces'
 
 		missing_languages = set()
-		for language in translations:
-			translations[language][page] = 0
 		# Finally, search through for lang templates via positive lookahead
 		for match in finditer('{(?=(.*?)\|)', page_text, DOTALL):
 			template = match.group(1).strip().lower()
@@ -107,7 +105,7 @@ def pagescraper(page_q, translations):
 					languages.append(match2.group(1).strip().lower())
 				for language in translations:
 					if language not in languages: # Add missing translations
-						translations[language][page] += 1
+						translations[language].add(page)
 						missing_languages.add(language)
 		if len(missing_languages) > 0:
 			print page, 'is not translated into', len(missing_languages), 'languages:', ', '.join(missing_languages)
@@ -122,7 +120,7 @@ def main():
 	threads.append(thread)
 	thread.start()
 	# Stage 1: All pages generated. Pagescrapers are allowed to exit if Page Queue is empty.
-	translations = {lang: {} for lang in 'ar, cs, da, de, en, es, fi, fr, hu, it, ja, ko, nl, no, pl, pt, pt-br, ro, ru, tr, sv, zh-hans, zh-hant'.split(', ')}
+	translations = {lang: set() for lang in 'ar, cs, da, de, en, es, fi, fr, hu, it, ja, ko, nl, no, pl, pt, pt-br, ro, ru, tr, sv, zh-hans, zh-hant'.split(', ')}
 	for i in range(PAGESCRAPERS): # Number of threads
 		thread = Thread(target=pagescraper, args=(page_q, translations))
 		threads.append(thread)
@@ -133,22 +131,22 @@ def main():
 	outputs = []
 	for language in sorted(translations.keys()):
 		output = """
-{{DISPLAYTITLE: {count} templates missing {{lang name|lang|{lang}}} translation}}
-Pages missing in {{lang info|{lang}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.
+{{{{DISPLAYTITLE: {count} templates missing {{{{lang name|lang|{lang}}}}} translation}}}}
+Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.
 
 '''Notice:''' Please do not translate any of the articles in the [[WebAPI]] namespace, as the language is very technical and can lead to loss of context and meaning.
 
 ; See also
-* [[TFW:Reports/All articles/{lang}|All articles in {{lang name|name|{lang}}}]]
-* [[TFW:Reports/Missing translations/{lang}|Missing article translations in {{lang name|name|{lang}}}]]
-* [[Special:RecentChangesLinked/Project:Reports/All articles/{lang}|Recent changes to articles in {{lang name|name|{lang}}}]]
+* [[TFW:Reports/All articles/{lang}|All articles in {{{{lang name|name|{lang}}}}}]]
+* [[TFW:Reports/Missing translations/{lang}|Missing article translations in {{{{lang name|name|{lang}}}}}]]
+* [[Special:RecentChangesLinked/Project:Reports/All articles/{lang}|Recent changes to articles in {{{{lang name|name|{lang}}}}}]]
 
-== List ==
-""".format(
+== List ==""".format(
 			lang=language,
 			count=len(translations[language]),
 			date=strftime(r'%H:%M, %d %B %Y', gmtime()))
-		output += '#%s\n'.join(sorted(translations[language]))
+		for template in sorted(translations[language]):
+			output += '\n#[[%s]]' % template
 		outputs.append([language, output.encode('utf-8')])
 	return outputs
 
