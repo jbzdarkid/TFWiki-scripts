@@ -84,14 +84,16 @@ def pagescraper(page_q, translations):
 			except IndexError: # Unmached parenthesis, e.g. Class Weapons Tables
 				buffer[0] += page_text[lastIndex:index] # Add text to default layer
 				stack.append(None) # So there's something to .pop()
-				print 'Found a closing brace without a matched opening brace, exiting'
+				if verbose:
+					print 'Found a closing brace without a matched opening brace, exiting'
 			if value == 1:
 				stack.append(index)
 			elif value == -1:
 				stack.pop()
 			lastIndex = index + 1
 
-		print page, 'contains', len(buffer), 'pairs of braces'
+		if verbose:
+			print page, 'contains', len(buffer), 'pairs of braces'
 
 		missing_languages = set()
 		# Finally, search through for lang templates via positive lookahead
@@ -108,7 +110,8 @@ def pagescraper(page_q, translations):
 						translations[language].add(page)
 						missing_languages.add(language)
 		if len(missing_languages) > 0:
-			print page, 'is not translated into', len(missing_languages), 'languages:', ', '.join(missing_languages)
+			if verbose:
+				print page, 'is not translated into', len(missing_languages), 'languages:', ', '.join(missing_languages)
 
 def main():
 	global stage
