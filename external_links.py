@@ -73,7 +73,7 @@ def pagescraper(page_q, done, link_q, links):
       page = page_q.get(True, 1)['title']
     except Empty:
       global stage
-      if done.is_set(): # This is still not totally thread-safe.
+      if done.is_set():
         stage += 1
         return
       else:
@@ -137,6 +137,7 @@ def linkchecker(link_q, linkData):
       linkData.append(('Unknown error', link))
 
 def main():
+  verbose = True
   global stage
   stage = 0
   threads = []
