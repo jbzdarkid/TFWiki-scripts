@@ -10,8 +10,8 @@ w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD'])
 
 summary = 'Automatic update using Travis-ci and https://github.com/jbzdarkid/TFWiki-scripts'
 
-import wiki_edit_stats
-print Page(w, 'Team Fortress Wiki:Reports/Users by edit count').edit(text=wiki_edit_stats.main(), bot=True, summary=summary)
+import edit_stats
+print Page(w, 'Team Fortress Wiki:Reports/Users by edit count').edit(text=edit_stats.main(), bot=True, summary=summary)
 
 
 import wiki_unused_files

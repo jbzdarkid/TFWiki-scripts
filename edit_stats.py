@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-from urllib2 import urlopen
 from datetime import date, datetime
-from json import loads
 from operator import itemgetter
 from time import strftime, strptime, gmtime
 from urllib import quote
+import utilities
 
 verbose = False
 global NUMYEARS
@@ -16,17 +15,6 @@ usernameSubs = {
 				'I-ghost': 'i-ghost',
 				'Darkid': 'darkid',
 				}
-
-def populate_list(aufrom=None):
-	usersList = []
-	url = wikiAddress
-	while True:
-		result = loads(urlopen(url.encode('utf-8')).read())
-		usersList += result['query']['allusers']
-		if 'continue' not in result:
-			break
-		url = wikiAddress + '&aufrom=' + result['continue']['aufrom']
-	return usersList
 
 def userEditCount(sortedList, nlower, nupper=None):
 	count = 0
@@ -142,8 +130,9 @@ def addTopUsers(sortedList, count):
 	return output
 
 def main():
-	usersList = populate_list() # Fills the global usersList
-
+	usersList, done = utilities.get_list('users')
+  done.wait() # Since get_list is async, wait for it to complete
+  
 	sortedList = sorted(usersList, key=itemgetter('editcount'), reverse=True)
 	timeSortedList = sorted(usersList, key=itemgetter('registration'))
 
