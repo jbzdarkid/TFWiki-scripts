@@ -63,6 +63,6 @@ def whatlinkshere(page):
     result = loads(urlopen(url.encode('utf-8')).read())
     if 'continue' in result:
       link_count += len(result['query']['embeddedin'])
-      url = '%s&%s=%s' % (wiki_address, continue_key, result['continue']['eicontinue'])
+      url = wiki_api + '&eicontinue=' + result['continue']['eicontinue']
     else:
       return link_count
