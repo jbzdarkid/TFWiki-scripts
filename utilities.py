@@ -43,6 +43,7 @@ def _get_list(type, pages, done):
         elif page[page_key][:13] == 'Template:User':
           continue # Don't include userboxes.
       pages.put(page[page_key])
+    print result['continue'][continue_key]
     if 'continue' in result:
       url = base_url + '&apcontinue=' + result['continue'][continue_key]
     else:
