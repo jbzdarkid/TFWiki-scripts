@@ -21,16 +21,17 @@ def get_list(type):
 def _get_list(type, pages, done):
   if type == 'users':
     base_url = wiki_api + '&list=allusers&aulimit=500'
+    query_key = 'allusers'
   elif type == 'pages' or type == 'english':
     base_url = wiki_api + '&list=allpages&aplimit=500&apfilterredir=nonredirects'
+    query_key = 'allpages'
   elif type == 'templates':
     base_url = wiki_api + '&list=allpages&aplimit=500&apfilterredir=nonredirects&apnamespace=10'
+    query_key = 'allpages'
   url = base_url + '&continue='
 
   while True:
     result = loads(urlopen(url.encode('utf-8')).read())
-    print result
-    print result['query']
     for page in result['query'][query_key]:
       if type == 'english' and page['title'].rpartition('/')[2] in langs:
         continue
