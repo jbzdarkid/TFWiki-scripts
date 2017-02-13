@@ -147,6 +147,7 @@ def main():
     print 'Generating page list'
   page_q, done = utilities.get_list('pages')
   done.wait()
+  print len(page_q.queue)
   if verbose:
     print 'All pages generated, entering stage 1'
   # Stage 1: All pages generated. Pagescrapers are allowed to exit if Page Queue is empty.
