@@ -8,10 +8,10 @@ LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl',
 def get_list(type):
   pages = Queue()
   done = Event()
-  Thread(target=_get_list, args=(type, page_q, done)).start()
+  Thread(target=_get_list, args=(type, pages, done)).start()
   return pages, done
 
-def _get_list(type, page_q, done):
+def _get_list(type, pages, done):
   if type == 'users':
     url = wiki_api + '&list=allusers&aulimit=500'
     query_key = 'allusers'
@@ -39,7 +39,7 @@ def _get_list(type, page_q, done):
           continue # Don't include patch diffs.
         elif page['title'][:13] == 'Template:User':
           continue # Don't include userboxes.
-      page_q.add(page['title'])
+      pages.add(page['title'])
     if 'continue' in result:
       url = '%s&%s=%s' % (wiki_address, continue_key, result['continue'][continue_key])
     else:
