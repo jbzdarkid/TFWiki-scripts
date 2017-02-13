@@ -46,7 +46,6 @@ def _get_list(type, pages, done):
     if 'continue' in result:
       if result['continue'][continue_key] == 'The lost child':
         print result
-        exit(0)
       url = base_url + '&' + continue_key + '=' + result['continue'][continue_key]
       print url
     else:
