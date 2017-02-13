@@ -18,14 +18,14 @@ def _get_list(type, pages, done):
     base_url = wiki_api + '&list=allusers&aulimit=500'
     query_key = 'allusers'
     continue_key = 'aucontinue'
+    page_key = 'name'
   elif type == 'pages' or type == 'english':
     base_url = wiki_api + '&list=allpages&aplimit=500&apfilterredir=nonredirects'
+    if type == 'templates':
+      base_url += '&apnamespace=10'
     query_key = 'allpages'
     continue_key = 'apcontinue'
-  elif type == 'templates':
-    base_url = wiki_api + '&list=allpages&aplimit=500&apfilterredir=nonredirects&apnamespace=10'
-    query_key = 'allpages'
-    continue_key = 'apcontinue'
+    page_key = 'title'
   url = base_url + '&continue='
 
   while True:
@@ -34,18 +34,18 @@ def _get_list(type, pages, done):
     print result['query']
     print result['query'][query_key]
     for page in result['query'][query_key]:
-      if type == 'english' and page['title'].rpartition('/')[2] in langs:
+      if type == 'english' and page[page_key].rpartition('/')[2] in langs:
         continue
       if type == 'templates':
-        if '/' in page['title']: # FIXME: Necessary?
+        if '/' in page[page_key]: # FIXME: Necessary?
           continue # Don't include subpages
-        elif page['title'].partition('/')[0] == 'Template:Dictionary':
+        elif page[page_key].partition('/')[0] == 'Template:Dictionary':
           continue # Don't include dictionary subpages
-        elif page['title'].partition('/')[0] == 'Template:PatchDiff':
+        elif page[page_key].partition('/')[0] == 'Template:PatchDiff':
           continue # Don't include patch diffs.
-        elif page['title'][:13] == 'Template:User':
+        elif page[page_key][:13] == 'Template:User':
           continue # Don't include userboxes.
-      pages.put(page['title'])
+      pages.put(page[page_key])
     if 'continue' in result:
       url = base_url + '&apcontinue=' + result['continue'][continue_key]
     else:
