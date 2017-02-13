@@ -177,6 +177,7 @@ def main():
   output = output.replace('tumblr', 'tumbl') # Link blacklist
   return output.encode('utf-8')
 
+verbose = True
 if __name__ == '__main__':
   verbose = True
   f = open('external_links_analyse.txt', 'wb')

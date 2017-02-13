@@ -14,9 +14,7 @@ import edit_stats
 print Page(w, 'Team Fortress Wiki:Reports/Users by edit count').edit(text=edit_stats.main(), bot=True, summary=summary)
 
 import external_links
-verbose=True
 print Page(w, 'Team Fortress Wiki:Reports/External links').edit(text=external_links.main(), bot=True, summary=summary)
-verbose=False
 
 import undocumented_templates
 print Page(w, 'Team Fortress Wiki:Reports/Undocumented templates').edit(text=undocumented_templates.main(), bot=True, summary=summary)
