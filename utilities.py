@@ -18,31 +18,29 @@ def _get_list(type, pages, done):
     base_url = wiki_api + '&list=allusers&auprop=editcount|registration&auwitheditsonly&aulimit=500'
     query_key = 'allusers'
     continue_key = 'aufrom'
-    page_key = 'name'
   elif type == 'pages' or type == 'english':
     base_url = wiki_api + '&list=allpages&aplimit=500&apfilterredir=nonredirects'
     if type == 'templates':
       base_url += '&apnamespace=10'
     query_key = 'allpages'
     continue_key = 'apcontinue'
-    page_key = 'title'
   url = base_url + '&continue='
 
   while True:
     result = loads(urlopen(url.encode('utf-8')).read())
     for page in result['query'][query_key]:
-      if type == 'english' and page[page_key].rpartition('/')[2] in langs:
+      if type == 'english' and page['title'].rpartition('/')[2] in langs:
         continue
       if type == 'templates':
-        if '/' in page[page_key]: # FIXME: Necessary?
+        if '/' in page['title']: # FIXME: Necessary?
           continue # Don't include subpages
-        elif page[page_key].partition('/')[0] == 'Template:Dictionary':
+        elif page['title'].partition('/')[0] == 'Template:Dictionary':
           continue # Don't include dictionary subpages
-        elif page[page_key].partition('/')[0] == 'Template:PatchDiff':
+        elif page['title'].partition('/')[0] == 'Template:PatchDiff':
           continue # Don't include patch diffs.
-        elif page[page_key][:13] == 'Template:User':
+        elif page['title'][:13] == 'Template:User':
           continue # Don't include userboxes.
-      pages.put(page[page_key])
+      pages.put(page)
     if 'continue' in result:
       url = base_url + '&' + continue_key + '=' + result['continue'][continue_key]
     else:

@@ -14,7 +14,7 @@ def pagescraper(page_q, done, badpages):
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   while True:
     try:
-      page = page_q.get(True, 1)
+      page = page_q.get(True, 1)['title']
     except Empty:
       if done.is_set(): # Pages are done being generated
         return
