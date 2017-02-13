@@ -29,7 +29,7 @@ def _get_list(type, pages, done):
   while True:
     result = loads(urlopen(url.encode('utf-8')).read())
     for page in result['query'][query_key]:
-      if type == 'english' and page['title'].rpartition('/')[2] in langs:
+      if type == 'english' and page['title'].rpartition('/')[2] in LANGS:
         continue
       if type == 'templates':
         if '/' in page['title']: # FIXME: Necessary?
