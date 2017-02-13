@@ -1,6 +1,5 @@
-from urllib2 import urlopen, quote
-from json import loads
-from Queue import Queue, Empty
+from urllib2 import quote
+from Queue import Empty
 from threading import Thread
 from wikitools import wiki
 from wikitools.page import Page
@@ -37,9 +36,9 @@ def pagescraper(page_q, done, badpages):
       badpages.append([count, page])
 
 def main():
-  threads = []
   page_q, done = utilities.get_list('templates')
   badpages = []
+  threads = []
   for i in range(PAGESCRAPERS): # Number of threads
     thread = Thread(target=pagescraper, args=(page_q, done, badpages))
     threads.append(thread)
