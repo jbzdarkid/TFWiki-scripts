@@ -22,6 +22,7 @@ def _get_list(type, pages, done):
   if type == 'users':
     base_url = wiki_api + '&list=allusers&aulimit=500'
     query_key = 'allusers'
+    continue_key = 'aucontinue'
   elif type == 'pages' or type == 'english':
     base_url = wiki_api + '&list=allpages&aplimit=500&apfilterredir=nonredirects'
     query_key = 'allpages'
@@ -29,6 +30,7 @@ def _get_list(type, pages, done):
   elif type == 'templates':
     base_url = wiki_api + '&list=allpages&aplimit=500&apfilterredir=nonredirects&apnamespace=10'
     query_key = 'allpages'
+    continue_key = 'apcontinue'
   url = base_url + '&continue='
 
   while True:
