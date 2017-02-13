@@ -45,6 +45,7 @@ def _get_list(type, pages, done):
       pages.put(page[page_key])
     if 'continue' in result:
       url = base_url + '&' + continue_key + '=' + result['continue'][continue_key]
+      print url
     else:
       done.set()
       return
