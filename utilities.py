@@ -17,7 +17,7 @@ def _get_list(type, pages, done):
   if type == 'users':
     base_url = wiki_api + '&list=allusers&aulimit=500'
     query_key = 'allusers'
-    continue_key = 'aucontinue'
+    continue_key = 'aufrom'
     page_key = 'name'
   elif type == 'pages' or type == 'english':
     base_url = wiki_api + '&list=allpages&aplimit=500&apfilterredir=nonredirects'
