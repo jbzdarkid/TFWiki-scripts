@@ -14,8 +14,6 @@ import edit_stats
 print Page(w, 'Team Fortress Wiki:Reports/Users by edit count').edit(text=edit_stats.main(), bot=True, summary=summary)
 
 
-import wiki_unused_files
-print Page(w, 'Team Fortress Wiki:Reports/Unused files').edit(text=wiki_unused_files.main(), bot=True, summary=summary)
 import undocumented_templates
 print Page(w, 'Team Fortress Wiki:Reports/Undocumented templates').edit(text=undocumented_templates.main(), bot=True, summary=summary)
 
@@ -31,7 +29,10 @@ print Page(w, 'Team Fortress Wiki:Reports/Undocumented templates').edit(text=und
 import external_links_analyse2
 print Page(w, 'Team Fortress Wiki:Reports/External links').edit(text=external_links_analyse2.main(), bot=True, summary=summary)
 
-import wiki_untranslated_templates
-outputs = wiki_untranslated_templates.main()
+import untranslated_templates
+outputs = untranslated_templates.main()
 for lang, output in outputs:
   print Page(w, 'Team Fortress Wiki:Reports/Untranslated templates/%s' % lang).edit(output, bot=True, summary=summary)
+  
+  import unused_files
+print Page(w, 'Team Fortress Wiki:Reports/Unused files').edit(text=unused_files.main(), bot=True, summary=summary)

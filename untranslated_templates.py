@@ -1,53 +1,21 @@
-from urllib2 import urlopen, quote
-from json import loads
-from Queue import Queue, Empty
+from Queue import Empty
 from threading import Thread
 from wikitools import wiki
 from wikitools.page import Page
 from re import finditer, DOTALL
 from time import gmtime, strftime
+import utilities
 
 verbose = False
 PAGESCRAPERS = 50
 
-def allpages(page_q):
-	wikiAddress = r'http://wiki.teamfortress.com/w/api.php?action=query&list=allpages&apfilterredir=nonredirects&apnamespace=10&aplimit=500&format=json' # Namespace 10 is Templates
-	url = wikiAddress
-	while True:
-		result = loads(urlopen(url.encode('utf-8')).read())
-		for page in result['query']['allpages']:
-			if '/' in page['title']:
-				continue # Don't include subpages
-			elif page['title'].partition('/')[0] == 'Template:Dictionary':
-				continue # Don't include dictionary subpages
-			elif page['title'].partition('/')[0] == 'Template:PatchDiff':
-				continue # Don't include patch diffs.
-			elif page['title'][:13] == 'Template:User':
-				continue # Don't include userboxes.
-			page_q.put(page['title'])
-		if 'continue' not in result:
-			global stage
-			stage = 1
-			return
-		url = wikiAddress + '&apcontinue=' + result['continue']['apcontinue']
-
-def whatlinkshere(page):
-	url = r'http://wiki.teamfortress.com/w/api.php?action=query&list=embeddedin&eifilterredir=nonredirects&eititle=%s&eilimit=500&format=json' % quote(page.encode('utf-8'))
-	result = loads(urlopen(url.encode('utf-8')).read())
-	if 'continue' not in result:
-		return len(result['query']['embeddedin'])
-	else:
-		return 1000 # >500
-
-def pagescraper(page_q, translations):
+def pagescraper(page_q, done, translations):
 	w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
 	while True:
 		try:
 			page = page_q.get(True, 1)
 		except Empty:
-			global stage
-			if stage > 0: # This is still not totally thread-safe.
-				stage += 1
+      if done.is_set():
 				return
 			else:
 				continue
@@ -114,18 +82,11 @@ def pagescraper(page_q, translations):
 				print page, 'is not translated into', len(missing_languages), 'languages:', ', '.join(missing_languages)
 
 def main():
-	global stage
-	stage = 0
-	threads = []
-	# Stage 0: Generate list of pages
-	page_q = Queue()
-	thread = Thread(target=allpages, args=(page_q,)) # args must be a tuple, (page_q) is not a tuple.
-	threads.append(thread)
-	thread.start()
-	# Stage 1: All pages generated. Pagescrapers are allowed to exit if Page Queue is empty.
+	page_q, done = utilities.get_links('templates')
 	translations = {lang: set() for lang in 'ar, cs, da, de, en, es, fi, fr, hu, it, ja, ko, nl, no, pl, pt, pt-br, ro, ru, tr, sv, zh-hans, zh-hant'.split(', ')}
+	threads = []
 	for i in range(PAGESCRAPERS): # Number of threads
-		thread = Thread(target=pagescraper, args=(page_q, translations))
+		thread = Thread(target=pagescraper, args=(page_q, done, translations))
 		threads.append(thread)
 		thread.start()
 	for thread in threads:
