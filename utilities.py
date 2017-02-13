@@ -31,7 +31,7 @@ def _get_list(type, page_q, done):
     continue_key = 'apcontinue'
 
   while True:
-		result = loads(urlopen(url.encode('utf-8')).read())
+    result = loads(urlopen(url.encode('utf-8')).read())
     for page in result['query'][query_key]:
       if type == 'english' and page['title'].rpartition('/')[2] in langs:
         continue
@@ -45,20 +45,20 @@ def _get_list(type, page_q, done):
         elif page['title'][:13] == 'Template:User':
           continue # Don't include userboxes.
       page_q.add(page['title'])
-		if 'continue' in result:
+    if 'continue' in result:
       url = '%s&%s=%s' % (wiki_address, continue_key, result['continue'][continue_key])
-		else:
+    else:
       done.set()
       return
 
 # Returns the number of embed calls for a template.
 def whatlinkshere(page):
   link_count = 0
-	url = wiki_api + r'&list=embeddedin&eifilterredir=nonredirects&eilimit=500&eititle=' + quote(page.encode('utf-8'))
+  url = wiki_api + r'&list=embeddedin&eifilterredir=nonredirects&eilimit=500&eititle=' + quote(page.encode('utf-8'))
   while True:
-		result = loads(urlopen(url.encode('utf-8')).read())
-		if 'continue' in result:
+    result = loads(urlopen(url.encode('utf-8')).read())
+    if 'continue' in result:
       link_count += len(result['query']['embeddedin'])
       url = '%s&%s=%s' % (wiki_address, continue_key, result['continue']['eicontinue'])
-		else:
+    else:
       return link_count
