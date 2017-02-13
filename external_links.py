@@ -68,7 +68,7 @@ def pagescraper(pages, done, link_q, links):
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   while True:
     try:
-      page = pages.get(True, 1)
+      page = pages.get(True, 1)['title']
     except Empty:
       if done.is_set():
         return
