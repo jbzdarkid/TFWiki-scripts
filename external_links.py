@@ -75,6 +75,7 @@ def pagescraper(page_q, done, link_q, links):
       global stage
       if done.is_set():
         stage += 1
+        print '<78>', stage
         return
       else:
         continue
@@ -145,6 +146,7 @@ def main():
   if verbose:
     print 'Generating page list'
   page_q, done = utilities.get_list('pages')
+  done.wait()
   if verbose:
     print 'All pages generated, entering stage 1'
   # Stage 1: All pages generated. Pagescrapers are allowed to exit if Page Queue is empty.
