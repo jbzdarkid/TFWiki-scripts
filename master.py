@@ -13,11 +13,11 @@ summary = 'Automatic update using Travis-ci and https://github.com/jbzdarkid/TFW
 import wiki_edit_stats
 print Page(w, 'Team Fortress Wiki:Reports/Users by edit count').edit(text=wiki_edit_stats.main(), bot=True, summary=summary)
 
-import wiki_undocumented_templates
-print Page(w, 'Team Fortress Wiki:Reports/Undocumented templates').edit(text=wiki_undocumented_templates.main(), bot=True, summary=summary)
 
 import wiki_unused_files
 print Page(w, 'Team Fortress Wiki:Reports/Unused files').edit(text=wiki_unused_files.main(), bot=True, summary=summary)
+import undocumented_templates
+print Page(w, 'Team Fortress Wiki:Reports/Undocumented templates').edit(text=undocumented_templates.main(), bot=True, summary=summary)
 
 # import equipregions
 # text = Page(w, 'Template:Equip region table').getWikiText()
