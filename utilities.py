@@ -1,3 +1,10 @@
+from urllib2 import urlopen, quote
+from json import loads
+from Queue import Queue, Empty
+from threading import Thread
+from wikitools import wiki
+from wikitools.page import Page
+from re import search, sub
 from Queue import Queue
 from threading import Thread, Event
 
