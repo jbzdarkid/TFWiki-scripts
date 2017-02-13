@@ -31,7 +31,7 @@ def pagescraper(page_q, done, badpages):
 
     match = search('{{([Dd]oc begin|[Tt]emplate doc|[Dd]ocumentation|[Ww]ikipedia doc|[dD]ictionary/wrapper)}}', page_text)
     if not match:
-      count = whatlinkshere(page)
+      count = utilities.whatlinkshere(page)
       if verbose:
         print 'Page %s does not transclude a documentation template and has %d backlinks' % (page, count)
       badpages.append([count, page])
@@ -47,10 +47,10 @@ def main():
   for thread in threads:
     thread.join()
 
-  badpages.sort(key=lambda s: (1000-s[0], s[1]))
+  badpages.sort(key=lambda s: (-s[0], s[1]))
   output = '{{DISPLAYTITLE:%d templates without documentation}}\n' % len(badpages)
   for page in badpages:
-    output += '* [[%s|]] ([{{fullurl:Special:WhatLinksHere/%s|limit=%d}} %s use%s])\n' % (page[1], page[1], page[0], str(page[0]) if page[0] < 500 else '500+', '' if page[0] == 1 else 's')
+    output += '* [[%s|]] ([{{fullurl:Special:WhatLinksHere/%s|limit=%d}} %d use%s])\n' % (page[1], page[1], page[0], page[0], '' if page[0] == 1 else 's')
   return output.encode('utf-8')
 
 if __name__ == '__main__':
