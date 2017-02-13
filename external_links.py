@@ -145,7 +145,7 @@ def main():
   # Stage 0: Generate list of pages
   if verbose:
     print 'Generating page list'
-  page_q, done = utilities.get_list('pages')
+  page_q, done = utilities.get_list('english')
   done.wait()
   print len(page_q.queue)
   if verbose:
