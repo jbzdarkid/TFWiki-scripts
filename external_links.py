@@ -70,7 +70,7 @@ def pagescraper(page_q, done, link_q, links):
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   while True:
     try:
-      page = page_q.get(True, 1)
+      page = page_q.get(True, 1)['title']
     except Empty:
       global stage
       if done.is_set(): # This is still not totally thread-safe.
