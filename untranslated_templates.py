@@ -9,11 +9,11 @@ import utilities
 verbose = False
 PAGESCRAPERS = 50
 
-def pagescraper(page_q, done, translations):
+def pagescraper(pages, done, translations):
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   while True:
     try:
-      page = page_q.get(True, 1)
+      page = pages.get(True, 1)
     except Empty:
       if done.is_set():
         return
@@ -82,11 +82,11 @@ def pagescraper(page_q, done, translations):
         print page, 'is not translated into', len(missing_languages), 'languages:', ', '.join(missing_languages)
 
 def main():
-  page_q, done = utilities.get_links('templates')
+  pages, done = utilities.get_list('templates')
   translations = {lang: set() for lang in 'ar, cs, da, de, en, es, fi, fr, hu, it, ja, ko, nl, no, pl, pt, pt-br, ro, ru, tr, sv, zh-hans, zh-hant'.split(', ')}
   threads = []
   for i in range(PAGESCRAPERS): # Number of threads
-    thread = Thread(target=pagescraper, args=(page_q, done, translations))
+    thread = Thread(target=pagescraper, args=(pages, done, translations))
     threads.append(thread)
     thread.start()
   for thread in threads:
