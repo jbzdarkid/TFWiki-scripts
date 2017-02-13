@@ -18,7 +18,7 @@ def _get_list(type, pages, done):
     base_url = wiki_api + '&list=allusers&auprop=editcount|registration&auwitheditsonly&aulimit=500'
     query_key = 'allusers'
     continue_key = 'aufrom'
-  elif type == 'pages' or type == 'english':
+  elif type in ['pages', 'english', 'templates']:
     base_url = wiki_api + '&list=allpages&aplimit=500&apfilterredir=nonredirects'
     if type == 'templates':
       base_url += '&apnamespace=10'
