@@ -1,4 +1,4 @@
-from Queue import Empty
+from Queue import Queue, Empty
 from re import compile, DOTALL
 from threading import Thread
 from urllib2 import build_opener
