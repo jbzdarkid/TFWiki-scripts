@@ -1,10 +1,5 @@
 from urllib2 import urlopen, quote
 from json import loads
-from Queue import Queue, Empty
-from threading import Thread
-from wikitools import wiki
-from wikitools.page import Page
-from re import search, sub
 from Queue import Queue
 from threading import Thread, Event
 
@@ -50,7 +45,6 @@ def _get_list(type, pages, done):
       pages.put(page['title'])
     if 'continue' in result:
       url = base_url + '&apcontinue=' + result['continue'][continue_key]
-      print url
     else:
       done.set()
       return
