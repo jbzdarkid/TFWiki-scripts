@@ -71,9 +71,11 @@ def pagescraper(pages, done, link_q, links):
       page = pages.get(True, 1)['title']
     except Empty:
       if done.is_set():
+        print '<74>'
         return
       else:
         continue
+    print '<77>'
 
     content = Page(w, page).getWikiText()
     linkRegex = return_link_regex()
@@ -90,7 +92,6 @@ def linkchecker(link_q, done, linkData):
       link = link_q.get(True, 1)
     except Empty:
       if done.is_set():
-        print '<93>'
         return
       else:
         continue
