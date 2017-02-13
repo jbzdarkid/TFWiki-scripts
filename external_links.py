@@ -6,6 +6,7 @@ from urllib2 import urlopen, build_opener
 from time import sleep
 from wikitools import wiki
 from wikitools.page import Page
+import utilities
 
 # Error imports
 from httplib import BadStatusLine
@@ -37,7 +38,7 @@ def return_link_regex(withoutBracketed=False, onlyBracketed=False):
   notInside = '\]\s<>"'
   # The first half of this regular expression is required because '' is
   # not allowed inside links. For example, in this wiki text:
-  #     ''Please see http://www.example.org.''
+  #   ''Please see http://www.example.org.''
   # .'' shouldn't be considered as part of the link.
   regex = r'(?P<url>http[s]?://[^' + notInside + ']*?[^' + notAtEnd \
     + '](?=[' + notAtEnd+ ']*\'\')|http[s]?://[^' + notInside \
@@ -65,30 +66,14 @@ def get_links(regex, text):
 
 # End of stuff I shamelessly copied.
 
-def allpages(page_q):
-  wikiAddress = r'https://wiki.teamfortress.com/w/api.php?action=query&list=allpages&apfilterredir=nonredirects&aplimit=500&format=json'
-  url = wikiAddress
-  langs = ['ar', 'cs', 'da', 'de', 'es', 'fi' ,'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
-  while True:
-    result = loads(urlopen(url.encode('utf-8')).read())
-    for page in result['query']['allpages']:
-      if page['title'].rpartition('/')[2] in langs:
-        continue # English pages only
-      page_q.put(page['title'])
-    if 'continue' not in result:
-      global stage
-      stage = 1
-      return
-    url = wikiAddress + '&apcontinue=' + result['continue']['apcontinue']
-
-def pagescraper(page_q, link_q, links):
+def pagescraper(page_q, done, link_q, links):
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   while True:
     try:
       page = page_q.get(True, 1)
     except Empty:
       global stage
-      if stage > 0: # This is still not totally thread-safe.
+      if done.is_set(): # This is still not totally thread-safe.
         stage += 1
         return
       else:
@@ -158,17 +143,14 @@ def main():
   # Stage 0: Generate list of pages
   if verbose:
     print 'Generating page list'
-  page_q = Queue()
-  thread = Thread(target=allpages, args=(page_q,)) # args must be a tuple, (page_q) is not a tuple.
-  threads.append(thread)
-  thread.start()
+  page_q, done = utilities.get_list('pages')
   if verbose:
     print 'All pages generated, entering stage 1'
   # Stage 1: All pages generated. Pagescrapers are allowed to exit if Page Queue is empty.
   links = {}
   link_q = Queue()
   for i in range(PAGESCRAPERS): # Number of threads
-    thread = Thread(target=pagescraper, args=(page_q, link_q, links))
+    thread = Thread(target=pagescraper, args=(page_q, done, link_q, links))
     threads.append(thread)
     thread.start()
   if verbose:
