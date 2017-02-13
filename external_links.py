@@ -70,7 +70,7 @@ def pagescraper(pages, done, link_q, links):
     try:
       page = pages.get(True, 1)
     except Empty:
-      if done.is_set()
+      if done.is_set():
         return
       else:
         continue
@@ -89,7 +89,7 @@ def linkchecker(link_q, done, linkData):
     try:
       link = link_q.get(True, 1)
     except Empty:
-      if done.is_set()
+      if done.is_set():
         return
       else:
         continue
