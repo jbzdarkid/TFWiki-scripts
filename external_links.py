@@ -72,10 +72,7 @@ def pagescraper(page_q, done, link_q, links):
     try:
       page = page_q.get(True, 1)['title']
     except Empty:
-      global stage
       if done.is_set():
-        stage += 1
-        print '<78>', stage
         return
       else:
         continue
@@ -89,14 +86,12 @@ def pagescraper(page_q, done, link_q, links):
       if page not in links[url]:
         links[url].append(page)
 
-def linkchecker(link_q, linkData):
+def linkchecker(link_q, done, linkData):
   while True:
     try:
       link = link_q.get(True, 1)
     except Empty:
-      global stage
-      if stage > PAGESCRAPERS: # This is still not totally thread-safe.
-        stage += 1
+      if done.is_set():
         return
       else:
         continue
@@ -138,16 +133,11 @@ def linkchecker(link_q, linkData):
       linkData.append(('Unknown error', link))
 
 def main():
-  verbose = True
-  global stage
-  stage = 0
   threads = []
   # Stage 0: Generate list of pages
   if verbose:
     print 'Generating page list'
   page_q, done = utilities.get_list('english')
-  done.wait()
-  print len(page_q.queue)
   if verbose:
     print 'All pages generated, entering stage 1'
   # Stage 1: All pages generated. Pagescrapers are allowed to exit if Page Queue is empty.
@@ -160,19 +150,18 @@ def main():
   if verbose:
     print 'All pages scraped, entering stage 2'
   # Stage 2: All pages scraped. Linkscrapers are allowed to exit if Link Queue is empty.
-  linkData = []
+  _linkData = []
   for i in range(LINKCHECKERS): # Number of threads
-    thread = Thread(target=linkchecker, args=(link_q, linkData))
+    thread = Thread(target=linkchecker, args=(link_q, done, _linkData))
     threads.append(thread)
     thread.start()
-  for thread in threads:
-    thread.join()
+  sleep(5*60) # Run for 5 minutes, then give up to avoid travis timeout
 
   if verbose:
     print 'Done scraping links, generating output'
 
   output = '== Dead or incorrectly behaving links ==\n'
-  linkData.sort()
+  linkData = sorted(_linkData)
   for error, link in linkData:
     output += '* %s (%s)\n' % (link, error)
     for page in sorted(links[link]):
