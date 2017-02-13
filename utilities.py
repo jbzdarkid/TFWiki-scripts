@@ -30,9 +30,6 @@ def _get_list(type, pages, done):
 
   while True:
     result = loads(urlopen(url.encode('utf-8')).read())
-    print result
-    print result['query']
-    print result['query'][query_key]
     for page in result['query'][query_key]:
       if type == 'english' and page[page_key].rpartition('/')[2] in langs:
         continue
