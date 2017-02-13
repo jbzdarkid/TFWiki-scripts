@@ -22,8 +22,8 @@ def pagescraper(page_q, done, badpages):
 
     page_text = Page(w, page).getWikiText()
     page_visible = sub('<includeonly>.*?</includeonly>', '', page_text)
-    if float(len(page_visible)) / len(page_text) > .8:
-      continue # Pages that show >8% of their information, e.g. nav templates
+    if float(len(page_visible)) / len(page_text) > .80:
+      continue # Pages that show >80% of their information, e.g. nav templates
     else:
       if verbose:
         print page, 'shows', float(len(page_visible)) / len(page_text) * 100, '%'
