@@ -133,6 +133,7 @@ def main():
   pages, done = utilities.get_list('users')
   done.wait() # Since get_list is async, wait for it to complete
   usersList = list(pages.queue) # Convert a queue to list
+  print usersList
   
   sortedList = sorted(usersList, key=itemgetter('editcount'), reverse=True)
   timeSortedList = sorted(usersList, key=itemgetter('registration'))
