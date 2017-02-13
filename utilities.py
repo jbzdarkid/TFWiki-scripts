@@ -25,6 +25,7 @@ def _get_list(type, pages, done):
   elif type == 'pages' or type == 'english':
     base_url = wiki_api + '&list=allpages&aplimit=500&apfilterredir=nonredirects'
     query_key = 'allpages'
+    continue_key = 'apcontinue'
   elif type == 'templates':
     base_url = wiki_api + '&list=allpages&aplimit=500&apfilterredir=nonredirects&apnamespace=10'
     query_key = 'allpages'
@@ -46,7 +47,8 @@ def _get_list(type, pages, done):
           continue # Don't include userboxes.
       pages.put(page['title'])
     if 'continue' in result:
-      url = base_url + '&continue=' + result['continue']
+      url = base_url + '&apcontinue=' + result['continue'][continue_key]
+      print url
     else:
       done.set()
       return
