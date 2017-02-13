@@ -48,7 +48,7 @@ def _get_list(type, pages, done):
           continue # Don't include userboxes.
       pages.put(page['title'])
     if 'continue' in result:
-      url = '%s&%s=%s' % (wiki_address, continue_key, result['continue'][continue_key])
+      url = '%s&%s=%s' % (wiki_api, continue_key, result['continue'][continue_key])
     else:
       done.set()
       return
