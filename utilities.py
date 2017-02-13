@@ -46,7 +46,7 @@ def _get_list(type, pages, done):
           continue # Don't include patch diffs.
         elif page['title'][:13] == 'Template:User':
           continue # Don't include userboxes.
-      pages.add(page['title'])
+      pages.put(page['title'])
     if 'continue' in result:
       url = '%s&%s=%s' % (wiki_address, continue_key, result['continue'][continue_key])
     else:
