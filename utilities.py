@@ -8,7 +8,7 @@ LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl',
 def get_list(type):
   pages = Queue()
   done = Event()
-  Thread(target=_get_list, args=(type, english, page_q, done)).start()
+  Thread(target=_get_list, args=(type, page_q, done)).start()
   return pages, done
 
 def _get_list(type, page_q, done):
@@ -16,15 +16,10 @@ def _get_list(type, page_q, done):
     url = wiki_api + '&list=allusers&aulimit=500'
     query_key = 'allusers'
     continue_key = 'aufrom'
-  elif type == 'pages':
+  elif type == 'pages' or type == 'english':
     url = wiki_api + '&list=allpages&aplimit=500&apfilterredir=nonredirects'
     query_key = 'allpages'
     continue_key = 'apcontinue'
-  elif type == 'english':
-    url = wiki_api + '&list=allpages&aplimit=500&apfilterredir=nonredirects'
-    query_key = 'allpages'
-    continue_key = 'apcontinue'
-    english = True
   elif type == 'templates':
     url = wiki_api + '&list=allpages&aplimit=500&apfilterredir=nonredirects&apnamespace=10'
     query_key = 'allpages'
