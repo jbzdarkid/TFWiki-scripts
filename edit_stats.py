@@ -130,8 +130,9 @@ def addTopUsers(sortedList, count):
   return output
 
 def main():
-  usersList, done = utilities.get_list('users')
+  pages, done = utilities.get_list('users')
   done.wait() # Since get_list is async, wait for it to complete
+  usersList = list(pages.queue) # Convert a queue to list
   
   sortedList = sorted(usersList, key=itemgetter('editcount'), reverse=True)
   timeSortedList = sorted(usersList, key=itemgetter('registration'))
