@@ -90,6 +90,7 @@ def linkchecker(link_q, done, linkData):
       link = link_q.get(True, 1)
     except Empty:
       if done.is_set():
+        print '<93>'
         return
       else:
         continue
@@ -143,6 +144,7 @@ def main():
     thread = Thread(target=pagescraper, args=(pages, done, link_q, links))
     threads.append(thread)
     thread.start()
+  print link_q.queue
   if verbose:
     print 'All pages scraped, entering stage 2'
   linkData = []
