@@ -1,11 +1,11 @@
+from json import loads
 from Queue import Queue, Empty
 from re import compile, DOTALL
 from threading import Thread
-from urllib2 import build_opener
+from urllib2 import urlopen, build_opener
 from time import sleep
 from wikitools import wiki
 from wikitools.page import Page
-import utilities
 
 # Error imports
 from httplib import BadStatusLine
@@ -20,7 +20,7 @@ verbose = False
 PAGESCRAPERS = 10
 LINKCHECKERS = 50
 
-### Shamelessly copied from the old external_links_analyse.
+# Shamelessly copied from the old external_links_analyse.
 def return_link_regex(withoutBracketed=False, onlyBracketed=False):
   """Return a regex that matches external links."""
   # RFC 2396 says that URLs may only contain certain characters.
@@ -62,15 +62,34 @@ def get_links(regex, text):
 
   for m in regex.finditer(text):
     yield m.group('url')
-### End of stuff I shamelessly copied.
 
-def pagescraper(pages, done, link_q, links):
+# End of stuff I shamelessly copied.
+
+def allpages(page_q):
+  wikiAddress = r'https://wiki.teamfortress.com/w/api.php?action=query&list=allpages&apfilterredir=nonredirects&aplimit=500&format=json'
+  url = wikiAddress
+  langs = ['ar', 'cs', 'da', 'de', 'es', 'fi' ,'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
+  while True:
+    result = loads(urlopen(url.encode('utf-8')).read())
+    for page in result['query']['allpages']:
+      if page['title'].rpartition('/')[2] in langs:
+        continue # English pages only
+      page_q.put(page['title'])
+    if 'continue' not in result:
+      global stage
+      stage = 1
+      return
+    url = wikiAddress + '&apcontinue=' + result['continue']['apcontinue']
+
+def pagescraper(page_q, link_q, links):
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   while True:
     try:
-      page = pages.get(True, 1)['title']
+      page = page_q.get(True, 1)
     except Empty:
-      if done.is_set():
+      global stage
+      if stage > 0: # This is still not totally thread-safe.
+        stage += 1
         return
       else:
         continue
@@ -84,16 +103,17 @@ def pagescraper(pages, done, link_q, links):
       if page not in links[url]:
         links[url].append(page)
 
-def linkchecker(link_q, done, linkData):
+def linkchecker(link_q, linkData):
   while True:
     try:
       link = link_q.get(True, 1)
     except Empty:
-      if done.is_set():
+      global stage
+      if stage > PAGESCRAPERS: # This is still not totally thread-safe.
+        stage += 1
         return
       else:
         continue
-    print '<98>', link
 
     try:
       opener = build_opener()
@@ -132,24 +152,31 @@ def linkchecker(link_q, done, linkData):
       linkData.append(('Unknown error', link))
 
 def main():
+  global stage
+  stage = 0
+  threads = []
+  # Stage 0: Generate list of pages
   if verbose:
     print 'Generating page list'
-  pages, done = utilities.get_list('pages')
+  page_q = Queue()
+  thread = Thread(target=allpages, args=(page_q,)) # args must be a tuple, (page_q) is not a tuple.
+  threads.append(thread)
+  thread.start()
   if verbose:
     print 'All pages generated, entering stage 1'
+  # Stage 1: All pages generated. Pagescrapers are allowed to exit if Page Queue is empty.
   links = {}
   link_q = Queue()
-  threads = []
   for i in range(PAGESCRAPERS): # Number of threads
-    thread = Thread(target=pagescraper, args=(pages, done, link_q, links))
+    thread = Thread(target=pagescraper, args=(page_q, link_q, links))
     threads.append(thread)
     thread.start()
-  print link_q.queue
   if verbose:
     print 'All pages scraped, entering stage 2'
+  # Stage 2: All pages scraped. Linkscrapers are allowed to exit if Link Queue is empty.
   linkData = []
   for i in range(LINKCHECKERS): # Number of threads
-    thread = Thread(target=linkchecker, args=(link_q, done, linkData))
+    thread = Thread(target=linkchecker, args=(link_q, linkData))
     threads.append(thread)
     thread.start()
   for thread in threads:
@@ -179,7 +206,6 @@ def main():
   output = output.replace('tumblr', 'tumbl') # Link blacklist
   return output.encode('utf-8')
 
-verbose = True
 if __name__ == '__main__':
   verbose = True
   f = open('external_links_analyse.txt', 'wb')
