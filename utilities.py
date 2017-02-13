@@ -15,7 +15,7 @@ def get_list(type):
 
 def _get_list(type, pages, done):
   if type == 'users':
-    base_url = wiki_api + '&list=allusers&aulimit=500'
+    base_url = wiki_api + '&list=allusers&auprop=editcount|registration&auwitheditsonly&aulimit=500'
     query_key = 'allusers'
     continue_key = 'aufrom'
     page_key = 'name'
