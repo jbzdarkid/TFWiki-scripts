@@ -1,10 +1,8 @@
-from urllib2 import quote
-from Queue import Empty
-from threading import Thread
+from queue import Queue, Empty
+from threading import Thread, Event
 from wikitools import wiki
 from wikitools.page import Page
 from re import search, sub
-import utilities
 
 verbose = False
 PAGESCRAPERS = 10
@@ -20,31 +18,47 @@ def pagescraper(page_q, done, badpages):
       else:
         continue
 
-    page_text = Page(w, page).getWikiText()
+    page_text = Page(w, page).get_wiki_text()
     page_visible = sub('<includeonly>.*?</includeonly>', '', page_text)
     if float(len(page_visible)) / len(page_text) > .80:
       continue # Pages that show >80% of their information, e.g. nav templates
     else:
       if verbose:
-        print page, 'shows', float(len(page_visible)) / len(page_text) * 100, '%'
+        print(page, 'shows', float(len(page_visible)) / len(page_text) * 100, '%')
 
     match = search('{{([Dd]oc begin|[Tt]emplate doc|[Dd]ocumentation|[Ww]ikipedia doc|[dD]ictionary/wrapper)}}', page_text)
     if not match:
-      count = utilities.whatlinkshere(page)
+      count = Page(w, page).get_transclusion_count()
       if verbose:
-        print 'Page %s does not transclude a documentation template and has %d backlinks' % (page, count)
+        print('Page %s does not transclude a documentation template and has %d backlinks' % (page, count))
       badpages.append([count, page])
 
 def main():
-  page_q, done = utilities.get_list('templates')
+  page_q, done = Queue(), Event()
   badpages = []
   threads = []
   for i in range(PAGESCRAPERS): # Number of threads
     thread = Thread(target=pagescraper, args=(page_q, done, badpages))
     threads.append(thread)
     thread.start()
-  for thread in threads:
-    thread.join()
+
+  try:
+    w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+    for page in w.get_all_templates():
+      if '/' in page['title']: # FIXME: Necessary?
+        continue # Don't include subpages
+      elif page['title'].partition('/')[0] == 'Template:Dictionary':
+        continue # Don't include dictionary subpages
+      elif page['title'].partition('/')[0] == 'Template:PatchDiff':
+        continue # Don't include patch diffs.
+      elif page['title'][:13] == 'Template:User':
+        continue # Don't include userboxes.
+      page_q.put(page)
+
+  finally:
+    done.set()
+    for thread in threads:
+      thread.join()
 
   badpages.sort(key=lambda s: (-s[0], s[1]))
   output = '{{DISPLAYTITLE:%d templates without documentation}}\n' % len(badpages)
@@ -56,5 +70,5 @@ if __name__ == '__main__':
   verbose = True
   f = open('wiki_undocumented_templates.txt', 'wb')
   f.write(main())
-  print 'Article written to wiki_undocumented_templates.txt'
+  print('Article written to wiki_undocumented_templates.txt')
   f.close()
