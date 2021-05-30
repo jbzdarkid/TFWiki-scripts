@@ -19,3 +19,11 @@ class Page:
     )
     return sum(1 for _ in transclusions)
 
+  def edit(text, summary, bot=True):
+    return self.post_with_login('edit',
+      title=self.title,
+      text=text,
+      summary=summary,
+      bot=bot,
+      token=self.wiki.get_csrf_token(),
+    )

@@ -2,21 +2,21 @@ from json import loads
 from Queue import Queue, Empty
 from re import compile, DOTALL
 from threading import Thread
-from urllib2 import urlopen, build_opener
+import requests
 from time import sleep
 from wikitools import wiki
 from wikitools.page import Page
-import utilities
+# import utilities
 
 # Error imports
-from httplib import BadStatusLine
-from ssl import CertificateError
-from ssl import SSLError
-from urllib2 import HTTPError
-from urllib2 import URLError
-from socket import timeout as socket_timeout
-from socket import gaierror as socket_gaierror
-from socket import error as socket_error
+# from httplib import BadStatusLine
+# from ssl import CertificateError
+# from ssl import SSLError
+# from urllib2 import HTTPError
+# from urllib2 import URLError
+# from socket import timeout as socket_timeout
+# from socket import gaierror as socket_gaierror
+# from socket import error as socket_error
 verbose = False
 PAGESCRAPERS = 10
 LINKCHECKERS = 50
@@ -97,10 +97,14 @@ def linkchecker(link_q, done, linkData):
         continue
 
     try:
-      opener = build_opener()
-      opener.addheaders.append(('Cookie', 'viewed_welcome_page=1')) # For ESEA, to prevent a redirect loop.
-      opener.open(link, timeout=20).read() # Timeout is in seconds
+      headers = {
+        'Cookie': 'viewed_welcome_page=1', # For ESEA, to prevent a redirect loop.
+      }
+      r = requests.get(link, timeout=20, headers=headers)
       continue # No error
+    except Exception as e:
+      print(e)
+    """
     except socket_timeout as e:
       linkData.append(('Timeout', link))
     except socket_error as e:
@@ -131,15 +135,16 @@ def linkchecker(link_q, done, linkData):
         linkData.append((e.reason, link))
     except BadStatusLine as e:
       linkData.append(('Unknown error', link))
+    """
 
 def main():
   threads = []
   # Stage 0: Generate list of pages
   if verbose:
-    print 'Generating page list'
+    print('Generating page list')
   page_q, done = utilities.get_list('english')
   if verbose:
-    print 'All pages generated, entering stage 1'
+    print('All pages generated, entering stage 1')
   # Stage 1: All pages generated. Pagescrapers are allowed to exit if Page Queue is empty.
   links = {}
   link_q = Queue()
@@ -148,7 +153,7 @@ def main():
     threads.append(thread)
     thread.start()
   if verbose:
-    print 'All pages scraped, entering stage 2'
+    print('All pages scraped, entering stage 2')
   # Stage 2: All pages scraped. Linkscrapers are allowed to exit if Link Queue is empty.
   _linkData = []
   for i in range(LINKCHECKERS): # Number of threads
@@ -158,7 +163,7 @@ def main():
   sleep(5*60) # Run for 5 minutes, then give up to avoid travis timeout
 
   if verbose:
-    print 'Done scraping links, generating output'
+    print('Done scraping links, generating output')
 
   output = '== Dead or incorrectly behaving links ==\n'
   linkData = sorted(_linkData)
@@ -185,5 +190,5 @@ if __name__ == '__main__':
   verbose = True
   f = open('external_links_analyse.txt', 'wb')
   f.write(main())
-  print 'Article written to external_links_analyse.txt'
+  print('Article written to external_links_analyse.txt')
   f.close()

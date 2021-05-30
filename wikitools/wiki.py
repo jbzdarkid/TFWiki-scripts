@@ -3,13 +3,14 @@ import requests
 class Wiki:
   def __init__(self, api_url):
     self.api_url = api_url
+    self.lgtoken = None
 
   def get(self, action, **kwargs):
     kwargs.update({
       'action': action,
       'format': 'json',
     })
-    r = requests.get(self.api_url, kwargs)
+    r = requests.get(self.api_url, data=kwargs)
     return r.json()
 
   def get_with_continue(self, action, entry_key, **kwargs):
@@ -29,6 +30,20 @@ class Wiki:
       else:
         break
 
+  def post_with_login(self, action, **kwargs):
+    if not self.lgtoken:
+      raise ValueError('Error: Not logged in')
+    kwargs.update({
+      'lgtoken': self.lgtoken,
+      'action': action,
+      'format': 'json',
+    })
+    r = requests.post(self.api_url, data=kwargs)
+    return r.json()
+
+  def get_csrf_token(self):
+    return self.get('query', meta=tokens)['query']['tokens']['csrftoken']
+
   def get_all_templates(self):
     return self.get_with_continue('query', 'allpages',
       list='allpages',
@@ -44,3 +59,34 @@ class Wiki:
       auprop='editcount|registration',
       auwitheditsonly='true',
     )
+  
+  def get_all_english_pages(self):
+
+  def login(self, username, password=None):
+    self.lgtoken = self.get('query',
+      meta='tokens',
+      type='login',
+    )['query']['tokens']['login']
+
+    if not password:
+      import getpass
+      password = getpass.getpass(f'Wiki password for {username}: ')
+
+    data = self.post_with_login('login',
+      lgname=username,
+      lgpassword=password,
+    ) 
+    if data['login']['result'] == 'NeedToken':
+      self.lgtoken = data['login']['token']
+      kwargs['lgtoken'] = self.lgtoken
+      data = self.get('login', **kwargs)
+
+    if data['login']['result'] != 'Success':
+      try:
+        print(data['login']['result'])
+      except KeyError:
+        print(data['error']['code'])
+        print(data['error']['info'])
+      return False
+
+    return True
