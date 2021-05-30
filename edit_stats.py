@@ -2,8 +2,8 @@
 from datetime import date, datetime
 from operator import itemgetter
 from time import strftime, strptime, gmtime
-from urllib import quote
-import utilities
+from urllib.parse import quote
+from wikitools import wiki
 
 verbose = False
 global NUMYEARS
@@ -26,7 +26,7 @@ def userEditCount(sortedList, nlower, nupper=None):
 
 def addTableRow(sortedList, nlower, nupper=None):
   if verbose:
-    print "Adding users with edit count", nlower, "-", nupper
+    print("Adding users with edit count", nlower, "-", nupper)
   count = userEditCount(sortedList, nlower, nupper)
   if nupper is None:
     return """|-
@@ -67,7 +67,7 @@ def monthName(n):
 
 def addTimeData(timeSortedList):
   if verbose:
-    print "Adding user signups"
+    print("Adding user signups")
   timeRange = [[0]*12 for i in range(NUMYEARS)] # timeRange[year][month]
   for user in timeSortedList:
     time = user['registration']
@@ -94,7 +94,7 @@ def addTimeData(timeSortedList):
 
 def addTopUsers(sortedList, count):
   if verbose:
-    print "Adding top", count, "users"
+    print("Adding top", count, "users")
   output = ""
   i = 0
   while (i < count):
@@ -130,9 +130,8 @@ def addTopUsers(sortedList, count):
   return output
 
 def main():
-  pages, done = utilities.get_list('users')
-  done.wait() # Since get_list is async, wait for it to complete
-  usersList = list(pages.queue) # Convert a queue to list
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  usersList = list(w.get_all_users())
   
   sortedList = sorted(usersList, key=itemgetter('editcount'), reverse=True)
   timeSortedList = sorted(usersList, key=itemgetter('registration'))

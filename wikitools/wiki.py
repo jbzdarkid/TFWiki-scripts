@@ -37,3 +37,10 @@ class Wiki:
       apnamespace='10',
     )
 
+  def get_all_users(self):
+    return self.get_with_continue('query', 'allusers',
+      list='allusers',
+      aulimit='500',
+      auprop='editcount|registration',
+      auwitheditsonly='true',
+    )
