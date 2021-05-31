@@ -1,12 +1,11 @@
 from json import loads
-from Queue import Queue, Empty
+from queue import Queue, Empty
 from re import compile, DOTALL
-from threading import Thread
+from threading import Thread, Event
 import requests
 from time import sleep
 from wikitools import wiki
 from wikitools.page import Page
-# import utilities
 
 # Error imports
 # from httplib import BadStatusLine
@@ -142,7 +141,14 @@ def main():
   # Stage 0: Generate list of pages
   if verbose:
     print('Generating page list')
-  page_q, done = utilities.get_list('english')
+  page_q, done = Queue(), Event()
+  LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  for page in w.get_all_pages():
+    if page['title'].rpartition('/')[2] in LANGS:
+      continue # Filter out non-english pages
+    page_q.put(page)
+  done.set()
   if verbose:
     print('All pages generated, entering stage 1')
   # Stage 1: All pages generated. Pagescrapers are allowed to exit if Page Queue is empty.
