@@ -11,6 +11,9 @@ class Wiki:
       'format': 'json',
     })
     r = requests.get(self.api_url, data=kwargs)
+    if r.status_code >= 400 and r.status_code <= 499:
+      print(kwargs)
+      raise ValueError(f'Request to "{r.url}" failed with code {r.status_code}:\n{r.text}')
     return r.json()
 
   def get_with_continue(self, action, entry_key, **kwargs):
@@ -42,6 +45,7 @@ class Wiki:
     return r.json()
 
   def get_csrf_token(self):
+    # On any login request, maybe?
     return self.get('query', meta=tokens)['query']['tokens']['csrftoken']
 
   def get_all_templates(self):
@@ -60,7 +64,12 @@ class Wiki:
       auwitheditsonly='true',
     )
   
-  def get_all_english_pages(self):
+  def get_all_pages(self):
+    return self.get_with_continue('query', 'allpages',
+      list='allpages',
+      aplimit='500',
+      apfilterredir='nonredirects', # Filter out redirects
+    )
 
   def login(self, username, password=None):
     self.lgtoken = self.get('query',

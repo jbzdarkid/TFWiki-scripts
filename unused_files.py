@@ -1,6 +1,6 @@
+import requests
 from re import finditer, search
-from urllib import unquote
-from urllib2 import urlopen
+from urllib.parse import unquote
 from time import strftime, gmtime
 languages = 'en, ar, cs, es, da, de, fi, fr, hu, it, ja, ko, nl, no, pl, pt, pt-br, ro, ru, sv, tr, zh-hans, zh-hant'.split(', ')
 full_languages = 'English, Arabic, Czech, Spanish, Danish, German, Finnish, French, Hungarian, Italian, Japanese, Korean, Dutch, Norwegian, Polish, Portuguese, Portuguese (Brazil), Romanian, Russian, Swedish, Turkish, Chinese (Simplified), Chinese (Traditinal)'.split(', ')
@@ -11,12 +11,12 @@ def main():
   unused_files = []
   i = 0
   while (True):
-    data = urlopen("https://wiki.teamfortress.com/wiki/Special:UnusedFiles?limit=%d&offset=%d" % (step, i)).read()
+    data = requests.get("https://wiki.teamfortress.com/wiki/Special:UnusedFiles?limit=%d&offset=%d" % (step, i)).text
     m = search('There are no results for this report\.', data)
     if m is not None:
       break
-    for m in finditer('data-url="(.*?)"', data):
-      file = search('(.*)/(1024px-|)(.*)\.(.*)', m.group(1))
+    for m in finditer('src="/w/images/(.*?)"', data):
+      file = search('(.*)/(120px-|)(.*)\.(.*)', m.group(1))
       lang = file.group(3).split('_')[-1]
       if lang in languages:
         lang = languages.index(lang)
@@ -51,10 +51,10 @@ Unused files, parsed from [[Special:UnusedFiles]]. Data accurate as of %s.
       lang = file[2]
       output += '=== %s ===\n' % full_languages[lang]
     output += '*[[Special:WhatLinksHere/File:%s|%s]]\n' % (file[0]+'.'+file[1], unquote(file[0])+'.'+file[1])
-  return output
+  return output.encode('utf-8')
 
 if __name__ == '__main__':
   f = open('wiki_unused_files.txt', 'wb')
   f.write(main())
-  print 'Article written to wiki_unused_files.txt'
+  print('Article written to wiki_unused_files.txt')
   f.close()
