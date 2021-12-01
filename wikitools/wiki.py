@@ -45,6 +45,7 @@ class Wiki:
       'format': 'json',
     })
     r = self.session.post(self.api_url, data=kwargs)
+    print(r, r.text)
     return r.json()
 
   def get_csrf_token(self):
