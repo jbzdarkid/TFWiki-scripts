@@ -44,7 +44,7 @@ class Wiki:
       'action': action,
       'format': 'json',
     })
-    r = self.session.post(self.api_url, data=kwargs)
+    r = self.session.post(self.api_url + '?format=json', data=kwargs)
     print(r, r.text)
     return r.json()
 
@@ -88,7 +88,7 @@ class Wiki:
 
     data = self.post_with_login('login',
       lgname=username,
-      lgpassword=password,
+      lgpassword=requests.utils.quote(password),
     )
 
     if data['login']['result'] == 'NeedToken':
