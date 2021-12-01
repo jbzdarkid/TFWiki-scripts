@@ -16,9 +16,6 @@ else:
 import edit_stats
 print(Page(w, f'{root}/Users by edit count').edit(text=edit_stats.main(), bot=True, summary=summary))
 
-import external_links
-print(Page(w, f'{root}/External links').edit(text=external_links.main(), bot=True, summary=summary))
-
 import undocumented_templates
 print(Page(w, f'{root}/Undocumented templates').edit(text=undocumented_templates.main(), bot=True, summary=summary))
 
@@ -29,3 +26,6 @@ for lang, output in outputs:
   
 import unused_files
 print(Page(w, f'{root}/Unused files').edit(text=unused_files.main(), bot=True, summary=summary))
+
+import external_links
+print(Page(w, f'{root}/External links').edit(text=external_links.main(), bot=True, summary=summary))
