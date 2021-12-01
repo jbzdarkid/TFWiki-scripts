@@ -10,11 +10,6 @@ global NUMYEARS
 NUMYEARS = date.today().year-2010 + 1 # 2014 - 2010 + 1 = 5 (years)
 
 wikiAddress = r'http://wiki.teamfortress.com/w/api.php?action=query&list=allusers&auprop=editcount|registration&auwitheditsonly&aulimit=500&format=json'
-usernameSubs = {
-  'Ohyeahcrucz': 'Cructo',
-  'I-ghost': 'i-ghost',
-  'Darkid': 'darkid',
-}
 
 def userEditCount(sortedList, nlower, nupper=None):
   count = 0
@@ -102,12 +97,10 @@ def addTopUsers(sortedList, count):
     username = user['name']
     usereditcount = user['editcount']
     userregistration = user['registration']
-    wikifi_link = 'http://stats.wiki.tf/user/tf/'+quote(username.encode('utf-8'))
     userlink = 'User:'+username
-    if username in usernameSubs:
-      username = usernameSubs[username]
     place = i+1 # List is indexed 0-99, editors are indexed 1-100
-    if 'BOT' in username:
+    # TODO: this is dumb, pls check user rights instead - T 01/12/19
+    if 'BOT' in username or username in ['Pillownet', 'PhoneWave']:
       place = "<small>''BOT''</small>"
       del sortedList[i]
       i -= 1
@@ -116,7 +109,7 @@ def addTopUsers(sortedList, count):
     editsperday = round(float(usereditcount) / timedelta, 2)
     output += u"""|-
   | {place} || [[{userlink}|{username}]] || {editcount} || {editday}
-  | data-sort-value="{sortabledate}" | {date} || [{wikifi_link} {username}]\n""".format(
+  | data-sort-value="{sortabledate}" | {date}\n""".format(
         place = place, # List is indexed 0-99, editors are indexed 1-100
         userlink = userlink,
         username = username,
@@ -124,7 +117,6 @@ def addTopUsers(sortedList, count):
         editday = str(editsperday),
         sortabledate = strftime(r'%Y-%m-%d %H:%M:00', userstarttime),
         date = strftime(r'%H:%M, %d %B %Y', userstarttime),
-        wikifi_link = wikifi_link
         )
     i += 1
   return output
@@ -136,7 +128,7 @@ def main():
   sortedList = sorted(usersList, key=itemgetter('editcount'), reverse=True)
   timeSortedList = sorted(usersList, key=itemgetter('registration'))
 
-  output = """User edits statistics. Data accurate as of """ + str(strftime(r'%H:%M, %d %B %Y', gmtime())) + """ (GMT). Further stats available at [http://stats.wiki.tf/wiki/tf stats.wiki.tf].
+  output = """User edits statistics. Data accurate as of """ + str(strftime(r'%H:%M, %d %B %Y', gmtime())) + """ (GMT).
 ;Note: All data excludes registered users with no edits.
 
 == Edit count distribution ==
@@ -166,7 +158,6 @@ def main():
 ! class="header" | Edit count
 ! class="header" | Edits per day
 ! class="header" | Registration date
-! class="header unsortable" | Wiki-fi link
 """ + addTopUsers(sortedList, 100) + """
 |}"""
 
