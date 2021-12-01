@@ -27,5 +27,5 @@ for lang, output in outputs:
 import unused_files
 print(Page(w, f'{root}/Unused files').edit(text=unused_files.main(), bot=True, summary=summary))
 
-import external_links
-print(Page(w, f'{root}/External links').edit(text=external_links.main(), bot=True, summary=summary))
+#import external_links
+#print(Page(w, f'{root}/External links').edit(text=external_links.main(), bot=True, summary=summary))
