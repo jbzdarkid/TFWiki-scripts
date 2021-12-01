@@ -5,12 +5,15 @@ class Wiki:
     self.api_url = api_url
     self.lgtoken = None
 
+    # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
+    self.session = requests.Session()
+
   def get(self, action, **kwargs):
     kwargs.update({
       'action': action,
       'format': 'json',
     })
-    r = requests.get(self.api_url, data=kwargs)
+    r = self.session.get(self.api_url, params=kwargs)
     if r.status_code >= 400 and r.status_code <= 499:
       print(kwargs)
       raise ValueError(f'Request to "{r.url}" failed with code {r.status_code}:\n{r.text}')
@@ -41,7 +44,7 @@ class Wiki:
       'action': action,
       'format': 'json',
     })
-    r = requests.post(self.api_url, data=kwargs)
+    r = self.session.post(self.api_url, data=kwargs)
     return r.json()
 
   def get_csrf_token(self):
@@ -63,7 +66,7 @@ class Wiki:
       auprop='editcount|registration',
       auwitheditsonly='true',
     )
-  
+
   def get_all_pages(self):
     return self.get_with_continue('query', 'allpages',
       list='allpages',
@@ -72,10 +75,11 @@ class Wiki:
     )
 
   def login(self, username, password=None):
+    print(f'Logging in as {username}...')
     self.lgtoken = self.get('query',
       meta='tokens',
       type='login',
-    )['query']['tokens']['login']
+    )['query']['tokens']['logintoken']
 
     if not password:
       import getpass
@@ -84,11 +88,14 @@ class Wiki:
     data = self.post_with_login('login',
       lgname=username,
       lgpassword=password,
-    ) 
+    )
+
     if data['login']['result'] == 'NeedToken':
       self.lgtoken = data['login']['token']
-      kwargs['lgtoken'] = self.lgtoken
-      data = self.get('login', **kwargs)
+      data = self.post_with_login('login',
+        lgname=username,
+        lgpassword=password,
+      )
 
     if data['login']['result'] != 'Success':
       try:
@@ -98,4 +105,5 @@ class Wiki:
         print(data['error']['info'])
       return False
 
+    print(f'Successfully logged in as {username}')
     return True
