@@ -44,13 +44,12 @@ class Wiki:
       'action': action,
       'format': 'json',
     })
-    r = self.session.post(self.api_url + '?format=json', data=kwargs)
-    print(r, r.text)
+    r = self.session.post(self.api_url, data=kwargs)
     return r.json()
 
   def get_csrf_token(self):
     # On any login request, maybe?
-    return self.get('query', meta=tokens)['query']['tokens']['csrftoken']
+    return self.get('query', meta='tokens')['query']['tokens']['csrftoken']
 
   def get_all_templates(self):
     return self.get_with_continue('query', 'allpages',
@@ -88,7 +87,7 @@ class Wiki:
 
     data = self.post_with_login('login',
       lgname=username,
-      lgpassword=requests.utils.quote(password),
+      lgpassword=password,
     )
 
     if data['login']['result'] == 'NeedToken':
@@ -99,11 +98,7 @@ class Wiki:
       )
 
     if data['login']['result'] != 'Success':
-      try:
-        print(data['login']['result'])
-      except KeyError:
-        print(data['error']['code'])
-        print(data['error']['info'])
+      print('Login failed: ' + data['login']['reason'])
       return False
 
     print(f'Successfully logged in as {username}')

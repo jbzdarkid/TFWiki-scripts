@@ -2,8 +2,9 @@ from wikitools.page import Page
 from wikitools import wiki
 from os import environ
 
-w = wiki.Wiki('http://wiki.teamfortress.com/w/api.php')
-w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD'])
+w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+if not w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD']):
+  exit(1)
 
 summary = 'Automatic update via https://github.com/jbzdarkid/TFWiki-scripts'
 

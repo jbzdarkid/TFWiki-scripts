@@ -1,10 +1,8 @@
 name: TFWiki Stats
 on:
   schedule:
-    - cron: '0 0 1 * *' # Monthly
+    - cron: '0 1 * * *' # Daily
   workflow_dispatch:
-  push:
-    
 
 jobs:
   run:

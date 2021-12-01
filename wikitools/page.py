@@ -1,4 +1,3 @@
-
 class Page:
   def __init__(self, wiki, title):
     self.wiki = wiki
@@ -19,8 +18,8 @@ class Page:
     )
     return sum(1 for _ in transclusions)
 
-  def edit(text, summary, bot=True):
-    return self.post_with_login('edit',
+  def edit(self, text, summary, bot=True):
+    return self.wiki.post_with_login('edit',
       title=self.title,
       text=text,
       summary=summary,

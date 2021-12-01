@@ -76,7 +76,7 @@ def pagescraper(page_q, done, link_q, links):
       else:
         continue
 
-    content = Page(w, page).getWikiText()
+    content = Page(w, page).get_wiki_text()
     linkRegex = return_link_regex()
     for url in get_links(linkRegex, content):
       if url not in links:
