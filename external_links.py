@@ -162,12 +162,13 @@ def main():
     for page in sorted(links[link]):
       output += '** [[%s]]\n' % page
 
-  output = output.replace('tumblr', 'tumbl') # Link blacklist
+  output = output.replace('tumblr', 'tumb1r') # Link blacklist
+  output = output.replace('amazon', 'amaz0n') # Link blacklist
   return output
 
 if __name__ == '__main__':
   verbose = True
-  f = open('external_links_analyse.txt', 'w')
+  f = open('wiki_external_links.txt', 'w')
   f.write(main())
-  print('Article written to external_links_analyse.txt')
+  print('Article written to wiki_external_links.txt')
   f.close()

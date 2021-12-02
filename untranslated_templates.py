@@ -109,7 +109,7 @@ def main():
   outputs = []
   for language in sorted(translations.keys()):
     output = """
-{{{{DISPLAYTITLE: {count} templates missing {{{{lang name|lang|{lang}}}}} translation}}}}
+{{{{DISPLAYTITLE: {count} templates missing {{{{lang name|name|{lang}}}}} translation}}}}
 Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.
 
 '''Notice:''' Please do not translate any of the articles in the [[WebAPI]] namespace, as the language is very technical and can lead to loss of context and meaning.
@@ -124,7 +124,7 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       count=len(translations[language]),
       date=strftime(r'%H:%M, %d %B %Y', gmtime()))
     for template in sorted(translations[language]):
-      output += '\n#[[%s]]' % template
+      output += f'\n# [[{template}]]'
     outputs.append([language, output])
   return outputs
 

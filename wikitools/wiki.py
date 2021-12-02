@@ -3,6 +3,7 @@ import requests
 class Wiki:
   def __init__(self, api_url):
     self.api_url = api_url
+    self.wiki_url = api_url.replace('api.php', 'index.php')
     self.lgtoken = None
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.

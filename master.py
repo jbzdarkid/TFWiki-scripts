@@ -13,22 +13,30 @@ if True: # TODO: Disable testing once I think it works.
 else:
   root = 'Team Fortress Wiki:Reports'
 
-import edit_stats
-print(Page(w, f'{root}/Users by edit count').edit(text=edit_stats.main(), bot=True, summary=summary))
+from edit_stats import main
+print(Page(w, f'{root}/Users by edit count').edit(text=main(), bot=True, summary=summary))
 
-import undocumented_templates
-print(Page(w, f'{root}/Undocumented templates').edit(text=undocumented_templates.main(), bot=True, summary=summary))
-
-import untranslated_templates
-for lang, output in untranslated_templates.main():
-  print(Page(w, f'{root}/Untranslated templates/{lang}').edit(output, bot=True, summary=summary))
+from undocumented_templates import main
+print(Page(w, f'{root}/Undocumented templates').edit(text=main(), bot=True, summary=summary))
   
-import unused_files
-print(Page(w, f'{root}/Unused files').edit(text=unused_files.main(), bot=True, summary=summary))
+from unused_files import main
+print(Page(w, f'{root}/Unused files').edit(text=main(), bot=True, summary=summary))
 
-import external_links
-print(Page(w, f'{root}/External links').edit(text=external_links.main(), bot=True, summary=summary))
+from untranslated_templates import main
+for lang, output in main():
+  print(Page(w, f'{root}/Untranslated templates/{lang}').edit(output, bot=True, summary=summary))
+
+from missing_translations import main
+for lang, output in main():
+  print(Page(w, f'{root}/Missing translations/{lang}').edit(output, bot=True, summary=summary))
+
+from all_articles import main
+for lang, output in main():
+  print(Page(w, f'{root}/Missing translations/{lang}').edit(output, bot=True, summary=summary))
+
+from external_links import main
+print(Page(w, f'{root}/External links').edit(text=main(), bot=True, summary=summary))
 
 # I remember writing a script (no idea where it went) to check for mismatched braces/brackets on article pages.
+# I need to decide what to do about some of the reports on TFW:Reports which seem useless. I should also check history; I think I cut some of these a while ago.
 # I would like to write a script which scrapes Special:WantedTemplates to check for Templates which are used in (Main).
-# I would like to restore Missing translations/lang and All articles/lang.

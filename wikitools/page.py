@@ -1,13 +1,20 @@
+import requests
+
 class Page:
   def __init__(self, wiki, title):
     self.wiki = wiki
-    self.title = title
+    self.title = title.replace(' ', '_') # Saves some redirects
 
   def __str__(self):
     return self.title
 
   def get_wiki_text(self):
     return self.wiki.get('parse', page=self.title, prop='wikitext')['parse']['wikitext']['*']
+
+  def exists(self):
+    raise # Do not use this. Just iterate all pages instead.
+    r = requests.head(self.wiki.wiki_url, allow_redirects=True, params={'title': self.title})
+    return r.status_code == 200
 
   def get_transclusion_count(self):
     transclusions = self.wiki.get_with_continue('query', 'embeddedin',
@@ -19,10 +26,21 @@ class Page:
     return sum(1 for _ in transclusions)
 
   def edit(self, text, summary, bot=True):
-    return self.wiki.post_with_login('edit',
+    data = self.wiki.post_with_login('edit',
       title=self.title,
       text=text,
       summary=summary,
       bot=bot,
       token=self.wiki.get_csrf_token(),
     )
+    if data['edit']['result'] != 'Success':
+      print(f'Failed to edit {self.title}')
+      print(result['edit'])
+      return False
+    elif 'new' in data['edit']:
+      print('Created page ' + data['edit']['title'])
+    elif 'nochange' in data['edit']:
+      print('No change to ' + data['edit']['title'])
+    else:
+      print('Edited ' + data['edit']['title'])
+    return True
