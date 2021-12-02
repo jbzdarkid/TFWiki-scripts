@@ -32,7 +32,7 @@ for lang, output in main():
 
 from all_articles import main
 for lang, output in main():
-  print(Page(w, f'{root}/Missing translations/{lang}').edit(output, bot=True, summary=summary))
+  print(Page(w, f'{root}/All articles/{lang}').edit(output, bot=True, summary=summary))
 
 from external_links import main
 print(Page(w, f'{root}/External links').edit(text=main(), bot=True, summary=summary))
