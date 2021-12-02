@@ -7,15 +7,6 @@ from time import sleep
 from wikitools import wiki
 from wikitools.page import Page
 
-# Error imports
-# from httplib import BadStatusLine
-# from ssl import CertificateError
-# from ssl import SSLError
-# from urllib2 import HTTPError
-# from urllib2 import URLError
-# from socket import timeout as socket_timeout
-# from socket import gaierror as socket_gaierror
-# from socket import error as socket_error
 verbose = False
 PAGESCRAPERS = 10
 LINKCHECKERS = 50
@@ -96,45 +87,24 @@ def linkchecker(link_q, done, linkData):
         continue
 
     try:
-      headers = {
-        'Cookie': 'viewed_welcome_page=1', # For ESEA, to prevent a redirect loop.
-      }
-      r = requests.get(link, timeout=20, headers=headers)
+      r = requests.get(link, timeout=20)
+      r.raise_for_status()
       continue # No error
-    except Exception as e:
-      print(e)
-    """
-    except socket_timeout as e:
+    except requests.exceptions.ConnectionError:
+      linkData.append(('Not found', link))
+    except requests.exceptions.Timeout:
       linkData.append(('Timeout', link))
-    except socket_error as e:
-      if e.args[0] == 'The read operation timed out.':
-        linkData.append(('Timeout', link))
-      else:
-        linkData.append((e.args[1], link))
-    except CertificateError as e:
-      linkData.append(('IT report as Malicious', link))
-    except HTTPError as e:
-      if e.code == 301 or e.code == 302 or e.code == 303:
+    except requests.exceptions.TooManyRedirects:
+      linkData.append(('Redirect loop', link))
+    except requests.exceptions.HTTPError as e:
+      code = e.response.status_code
+      if code == 301 or code == 302 or code == 303:
         linkData.append(('Redirect Loop', link))
-      elif e.code == 429: # Too many reqeusts
-        link_q.put(link)
-        sleep(10)
       else:
-        linkData.append((e.reason, link))
-    except URLError as e:
-      if isinstance(e.reason, socket_timeout):
-        linkData.append(('Timeout', link))
-      elif isinstance(e.reason, socket_gaierror):
-        linkData.append(('Unknown Host', link))
-      elif isinstance(e.reason, SSLError):
-        linkData.append((e.reason.reason, link))
-      elif isinstance(e.reason, socket_error):
-        linkData.append((e.reason.args[1], link))
-      else:
-        linkData.append((e.reason, link))
-    except BadStatusLine as e:
-      linkData.append(('Unknown error', link))
-    """
+        linkData.append((e.response.reason, link))
+
+    if verbose:
+      print(f'Found an error for {link}')
 
 def main():
   threads = []
@@ -166,7 +136,10 @@ def main():
     thread = Thread(target=linkchecker, args=(link_q, done, _linkData))
     threads.append(thread)
     thread.start()
-  sleep(5*60) # Run for 5 minutes, then give up to avoid travis timeout
+  if verbose:
+    print('Waiting for linkscrapers to finish')
+  for thread in threads:
+    thread.join()
 
   if verbose:
     print('Done scraping links, generating output')
@@ -190,11 +163,11 @@ def main():
       output += '** [[%s]]\n' % page
 
   output = output.replace('tumblr', 'tumbl') # Link blacklist
-  return output.encode('utf-8')
+  return output
 
 if __name__ == '__main__':
   verbose = True
-  f = open('external_links_analyse.txt', 'wb')
+  f = open('external_links_analyse.txt', 'w')
   f.write(main())
   print('Article written to external_links_analyse.txt')
   f.close()

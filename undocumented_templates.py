@@ -64,11 +64,11 @@ def main():
   output = '{{DISPLAYTITLE:%d templates without documentation}}\n' % len(badpages)
   for page in badpages:
     output += '* [[%s|]] ([{{fullurl:Special:WhatLinksHere/%s|limit=%d}} %d use%s])\n' % (page[1], page[1], page[0], page[0], '' if page[0] == 1 else 's')
-  return output.encode('utf-8')
+  return output
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_undocumented_templates.txt', 'wb')
+  f = open('wiki_undocumented_templates.txt', 'w')
   f.write(main())
   print('Article written to wiki_undocumented_templates.txt')
   f.close()

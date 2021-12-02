@@ -20,12 +20,15 @@ import undocumented_templates
 print(Page(w, f'{root}/Undocumented templates').edit(text=undocumented_templates.main(), bot=True, summary=summary))
 
 import untranslated_templates
-outputs = untranslated_templates.main()
-for lang, output in outputs:
+for lang, output in untranslated_templates.main():
   print(Page(w, f'{root}/Untranslated templates/{lang}').edit(output, bot=True, summary=summary))
   
 import unused_files
 print(Page(w, f'{root}/Unused files').edit(text=unused_files.main(), bot=True, summary=summary))
 
-#import external_links
-#print(Page(w, f'{root}/External links').edit(text=external_links.main(), bot=True, summary=summary))
+import external_links
+print(Page(w, f'{root}/External links').edit(text=external_links.main(), bot=True, summary=summary))
+
+# I remember writing a script (no idea where it went) to check for mismatched braces/brackets on article pages.
+# I would like to write a script which scrapes Special:WantedTemplates to check for Templates which are used in (Main).
+# I would like to restore Missing translations/lang and All articles/lang.

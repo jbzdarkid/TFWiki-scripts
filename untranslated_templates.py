@@ -52,7 +52,7 @@ def pagescraper(pages, done, translations):
         buffer[0] += page_text[lastIndex:index] # Add text to default layer
         stack.append(None) # So there's something to .pop()
         if verbose:
-          print('Found a closing brace without a matched opening brace, exiting')
+          print('Found a closing brace without a matched opening brace')
       if value == 1:
         stack.append(index)
       elif value == -1:
@@ -91,15 +91,15 @@ def main():
   try:
     w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
     for page in w.get_all_templates():
-      if '/' in page['title']: # FIXME: Necessary?
-        continue # Don't include subpages
-      elif page['title'].partition('/')[0] == 'Template:Dictionary':
+      #if '/' in page['title']: # FIXME: Necessary?
+      #  continue # Don't include subpages
+      if page['title'].partition('/')[0] == 'Template:Dictionary':
         continue # Don't include dictionary subpages
-      elif page['title'].partition('/')[0] == 'Template:PatchDiff':
+      if page['title'].partition('/')[0] == 'Template:PatchDiff':
         continue # Don't include patch diffs.
-      elif page['title'][:13] == 'Template:User':
+      if page['title'][:13] == 'Template:User':
         continue # Don't include userboxes.
-      page_q.put(page)
+      pages.put(page)
 
   finally:
     done.set()
@@ -125,14 +125,14 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       date=strftime(r'%H:%M, %d %B %Y', gmtime()))
     for template in sorted(translations[language]):
       output += '\n#[[%s]]' % template
-    outputs.append([language, output.encode('utf-8')])
+    outputs.append([language, output])
   return outputs
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_undocumented_templates.txt', 'wb')
+  f = open('wiki_untranslated_templates.txt', 'w')
   for lang, output in main():
     f.write('\n===== %s =====\n' % lang)
     f.write(output)
-  print('Article written to wiki_undocumented_templates.txt')
+  print('Article written to wiki_untranslated_templates.txt')
   f.close()
