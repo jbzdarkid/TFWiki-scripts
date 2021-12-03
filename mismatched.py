@@ -14,6 +14,7 @@ pairs = [
   ['（', '）'],
 ]
 
+verbose = False
 PAGESCRAPERS = 50
 
 def get_indices(char, string):
