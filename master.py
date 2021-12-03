@@ -7,7 +7,7 @@ from wikitools.page import Page
 # I need to decide what to do about some of the reports on TFW:Reports which seem useless. I should also check history; I think I cut some of these a while ago.
 # I would like to write a script which scrapes Special:WantedTemplates to check for Templates which are used in (Main).
 
-if argv[1] == 'testing':
+if argv[1] == 'workflow_dispatch':
   root = 'User:Darkid/Reports'
   is_daily = True
   is_weekly = True
