@@ -11,7 +11,11 @@ def main():
   english_pages = set()
   for page in w.get_all_pages():
     all_pages.add(page['title'])
-    if page['title'].rpartition('/')[2] not in LANGS:
+    if page['title'].rpartition('/')[2] in LANGS:
+      pass # Not english
+    elif 'OTFWH' in page['title']: # ETF2L Highlander Community Challenge/OTFWH
+      pass # Do not translate
+    else:
       english_pages.add(page['title'])
 
   outputs = []
@@ -21,7 +25,7 @@ def main():
       if f'{page}/{language}' not in all_pages:
         missing_pages.add(page)
 
-    output = """
+    output = """\
 {{{{DISPLAYTITLE: {count} pages missing {{{{lang name|name|{lang}}}}} translation}}}}
 Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.
 

@@ -108,7 +108,7 @@ def main():
 
   outputs = []
   for language in sorted(translations.keys()):
-    output = """
+    output = """\
 {{{{DISPLAYTITLE: {count} templates missing {{{{lang name|name|{lang}}}}} translation}}}}
 Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.
 

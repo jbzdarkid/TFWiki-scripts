@@ -10,17 +10,17 @@ def main():
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   all_pages = {language: set() for language in LANGS}
   for page in w.get_all_pages():
-    lang_suffix = page['title'].rpartition('/')[2]
-    if lang_suffix in LANGS:
-      all_pages[lang_suffix].add(page['title'])
+    basename, _, lang = page['title'].rpartition('/')[2]
+    if lang in LANGS:
+      all_pages[lang].add(basename)
+    elif 'OTFWH' in page['title']: # ETF2L Highlander Community Challenge/OTFWH
+      pass # Do not translate
     else:
-      # There are apparently some exceptions here, according to seb__
-      # badguys = [ 'OTFWH', 'titles', 'Archive', 'Header', 'Footer', 'diff' ]
       all_pages['en'].add(page['title'])
 
   outputs = []
   for language in LANGS:
-    output = """
+    output = """\
 {{{{DISPLAYTITLE: {count} pages in {{{{lang name|name|{lang}}}}}}}}}
 All articles in {{{{lang info|{lang}}}}}; '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.
 
@@ -37,7 +37,7 @@ All articles in {{{{lang info|{lang}}}}}; '''<onlyinclude>{count}</onlyinclude>'
       output = sub('\n.*?Missing translations/en.*?\n', '\n', output)
 
     for page in sorted(all_pages[language]):
-      output += f'\n# [[{page}]]'
+      output += f'\n# [[{page}/{language}]]'
     outputs.append([language, output])
   return outputs
 

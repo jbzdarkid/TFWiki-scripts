@@ -1,25 +1,28 @@
-from wikitools import wiki
-from os import environ
 from datetime import datetime
-
-w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
-if not w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD']):
-  exit(1)
-
-summary = 'Automatic update via https://github.com/jbzdarkid/TFWiki-scripts'
+from os import environ
+from sys import argv
+from wikitools import wiki
 
 # I remember writing a script (no idea where it went) to check for mismatched braces/brackets on article pages.
 # I need to decide what to do about some of the reports on TFW:Reports which seem useless. I should also check history; I think I cut some of these a while ago.
 # I would like to write a script which scrapes Special:WantedTemplates to check for Templates which are used in (Main).
 
-if True: # TODO: Disable testing once I think it works.
+if argv[0] == 'test':
   root = 'User:Darkid/Reports'
+  is_daily = True
+  is_weekly = True
+  is_monthly = True
+  summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
 else:
   root = 'Team Fortress Wiki:Reports'
+  is_daily = True
+  is_weekly = datetime.now().weekday() == 0 # Monday
+  is_monthly = datetime.now().day == 1 # 1st of every month
+  summary = 'Automatic update via https://github.com/jbzdarkid/TFWiki-scripts'
 
-is_daily = True
-is_weekly = datetime.now().weekday() == 0 # Monday
-is_monthly = datetime.now().day == 1 # 1st of every month
+w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+if not w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD']):
+  exit(1)
 
 if is_daily:
   from untranslated_templates import main
