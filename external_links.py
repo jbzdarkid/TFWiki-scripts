@@ -8,6 +8,7 @@ from wikitools import wiki
 from wikitools.page import Page
 
 verbose = False
+LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 PAGESCRAPERS = 10
 LINKCHECKERS = 50
 
@@ -112,7 +113,6 @@ def main():
   if verbose:
     print('Generating page list')
   page_q, done = Queue(), Event()
-  LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   for page in w.get_all_pages():
     if page['title'].rpartition('/')[2] in LANGS:

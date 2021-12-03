@@ -15,6 +15,7 @@ pairs = [
 ]
 
 verbose = False
+LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 PAGESCRAPERS = 50
 
 def get_indices(char, string):
@@ -111,7 +112,6 @@ def main():
     for thread in threads:
       thread.join()
   
-  LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
   page_keys = sorted(page_data.keys())
 
   output = ''
