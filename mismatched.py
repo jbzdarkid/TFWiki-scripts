@@ -32,14 +32,14 @@ def pagescraper(pages, done, page_data):
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   while True:
     try:
-      page = pages.get(True, 1)['title']
+      page = Page(w, pages.get(True, 1)['title'])
     except Empty:
       if done.is_set():
         return
       else:
         continue
 
-    text = Page(w, page).get_wiki_text()
+    text = page.get_wiki_text()
     errors = []
     for pair in pairs:
       locations = []
@@ -62,20 +62,21 @@ def pagescraper(pages, done, page_data):
 
     if len(errors) > 0:
       if verbose:
-        print(f'Found {len(errors)} errors for page {page}')
-      edit_url = 'https://wiki.teamfortress.com/w/index.php?action=edit&title=' + quote(page)
-      data = f'=== [{edit_url} {page}] ===\n'
+        print(f'Found {len(errors)} errors for page {page.title}')
+      data = f'=== [{page.get_edit_url()} {page.title}] ===\n'
       errors.sort()
       for error in errors:
         # For display purposes, we want to highlight the mismatched symbol. To do so, we replicate the symbol on the line below, at the same horizontal offset.
         # For sanity reasons, we don't want to show too long of a line.
 
-        start = text.rfind('\n', error-80, error) # Find the start of the line (max 80 chars behind)
+        start = text.rfind('\n', error-60, error) # Find the start of the line (max 80 chars behind)
         if start == -1:
-          start = max(0, error-80) # Not found
+          start = max(0, error-60) # Not found
         else:
           start += 1 # We don't actually want to include the \n
-        end = text.find('\n', error, start+120) # Find the end of the line (max 120 chars total)
+
+        # Find the next EOL, potentially including >1 line if EOL is within 20 characters.
+        end = text.find('\n', start+10, start+120)
         if end == -1:
           end = start+120
 
@@ -88,7 +89,7 @@ def pagescraper(pages, done, page_data):
         extra_width = int(widths.count('W') * 0.8) # ... a guess
         data += ' '*(error-start+extra_width) + text[error] + '\n'
         data += '</pre>\n'
-      page_data[page] = data
+      page_data[page.title] = data
 
 def main():
   pages, done = Queue(), Event()
@@ -102,7 +103,7 @@ def main():
     w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
     for page in w.get_all_pages():
       pages.put(page)
-      if page['title'].startswith('F'):
+      if page['title'].startswith('K'):
         break # There are a lot of pages in this report. Let's not go too crazy just yet.
 
   finally:
@@ -110,9 +111,21 @@ def main():
     for thread in threads:
       thread.join()
   
+  LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
+  page_keys = sorted(page_data.keys())
+
   output = ''
-  for page in sorted(page_data.keys()):
-    output += page_data[page]
+  output += f'{{{{DISPLAYTITLE: {len(page_keys)} pages with mismatched parenthesis}}\n'
+  output += '{{TOC limit|2}}\n'
+
+  for language in LANGS:
+    output += f'== {{{{lang info|{language}}}}} ==\n'
+    for page in page_keys:
+      if page.endswith(language):
+        output += page_data[page]
+      elif language == 'en':
+        output += page_data[page]
+
   return output
 
 if __name__ == '__main__':

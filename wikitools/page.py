@@ -3,7 +3,7 @@ import requests
 class Page:
   def __init__(self, wiki, title):
     self.wiki = wiki
-    self.title = title.replace(' ', '_') # Saves some redirects
+    self.title = title.replace(' ', '_')
 
   def __str__(self):
     return self.title
@@ -15,6 +15,9 @@ class Page:
     raise # Do not use this. Just iterate all pages instead.
     r = requests.head(self.wiki.wiki_url, allow_redirects=True, params={'title': self.title})
     return r.status_code == 200
+
+  def get_edit_url(self):
+    return f'{self.wiki.wiki_url}?title={self.title}&action=edit'
 
   def get_transclusion_count(self):
     transclusions = self.wiki.get_with_continue('query', 'embeddedin',
