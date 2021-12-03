@@ -6,18 +6,22 @@ from wikitools import wiki
 # I need to decide what to do about some of the reports on TFW:Reports which seem useless. I should also check history; I think I cut some of these a while ago.
 # I would like to write a script which scrapes Special:WantedTemplates to check for Templates which are used in (Main).
 
-if argv[0] == 'test':
+if argv[1] == 'testing':
   root = 'User:Darkid/Reports'
   is_daily = True
   is_weekly = True
   is_monthly = True
   summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
-else:
-  root = 'Team Fortress Wiki:Reports'
+elif argv[1] == 'schedule':
+  # root = 'Team Fortress Wiki:Reports'
+  root = 'User:Darkid/Reports'
   is_daily = True
   is_weekly = datetime.now().weekday() == 0 # Monday
   is_monthly = datetime.now().day == 1 # 1st of every month
   summary = 'Automatic update via https://github.com/jbzdarkid/TFWiki-scripts'
+else:
+  print(argv[1])
+  exit(1)
 
 w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
 if not w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD']):
