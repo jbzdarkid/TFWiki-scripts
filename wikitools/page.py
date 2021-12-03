@@ -34,13 +34,10 @@ class Page:
       token=self.wiki.get_csrf_token(),
     )
     if data['edit']['result'] != 'Success':
-      print(f'Failed to edit {self.title}')
-      print(result['edit'])
-      return False
+      return f'Failed to edit {self.title}:\n' + data['edit']
     elif 'new' in data['edit']:
-      print('Created page ' + data['edit']['title'])
+      return 'Successfully created page ' + data['edit']['title']
     elif 'nochange' in data['edit']:
-      print('No change to ' + data['edit']['title'])
+      return 'No change to ' + data['edit']['title']
     else:
-      print('Edited ' + data['edit']['title'])
-    return True
+      return 'Successfully edited ' + data['edit']['title']
