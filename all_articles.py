@@ -10,7 +10,7 @@ def main():
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   all_pages = {language: set() for language in LANGS}
   for page in w.get_all_pages():
-    basename, _, lang = page['title'].rpartition('/')[2]
+    basename, _, lang = page['title'].rpartition('/')
     if lang in LANGS:
       all_pages[lang].add(basename)
     elif 'OTFWH' in page['title']: # ETF2L Highlander Community Challenge/OTFWH
