@@ -62,8 +62,8 @@ def main():
 
   badpages.sort(key=lambda s: (-s[0], s[1]))
   output = '{{DISPLAYTITLE:%d templates without documentation}}\n' % len(badpages)
-  for page in badpages:
-    output += '* [[%s|]] ([{{fullurl:Special:WhatLinksHere/%s|limit=%d}} %d use%s])\n' % (page[1], page[1], page[0], page[0], '' if page[0] == 1 else 's')
+  for count, title in badpages:
+    output += '* [[%s|]] ([{{fullurl:Special:WhatLinksHere/%s|limit=%d|namespace=0|hideredirs=1|hidelinks=1}} %d use%s])\n' % (title, title, count, count, '' if count == 1 else 's')
   return output
 
 if __name__ == '__main__':

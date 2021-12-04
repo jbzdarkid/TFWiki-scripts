@@ -23,10 +23,21 @@ class Page:
     transclusions = self.wiki.get_with_continue('query', 'embeddedin',
       list='embeddedin',
       eifilterredir='nonredirects', # Filter out redirects
+      einamespace='0', # Links from the Main namespace only
       eilimit='500',
       eititle=self.title,
     )
     return sum(1 for _ in transclusions)
+
+  def get_link_count(self):
+    links = self.wiki.get_with_continue('query', 'pages',
+      generator='linkshere',
+      glhshow='!redirect', # Filter out redirects
+      glhnamespace='0', # Links from the Main namespace only
+      glhlimit='500',
+      titles=self.title,
+    )
+    return sum(1 for _ in links)
 
   def edit(self, text, summary, bot=True):
     data = self.wiki.post_with_login('edit',

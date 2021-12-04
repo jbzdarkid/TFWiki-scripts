@@ -4,7 +4,7 @@ from sys import argv
 from wikitools import wiki
 from wikitools.page import Page
 
-# I need to decide what to do about some of the reports on TFW:Reports which seem useless. I should also check history; I think I cut some of these a while ago.
+# I need to decide what to do about some of the reports on TFW:Reports which seem useless.
 # I would like to write a script which scrapes Special:WantedTemplates to check for Templates which are used in (Main).
 
 if argv[1] == 'workflow_dispatch':
@@ -56,6 +56,9 @@ if is_daily or is_weekly or is_monthly:
 
   from mismatched import main
   print(Page(w, f'{root}/Mismatched parenthesis').edit(text=main(), bot=True, summary=summary))
+
+  from duplicate_files import main
+  print(Page(w, f'{root}/Duplicate files').edit(text=main(), bot=True, summary=summary))
 
   from external_links import main
   print(Page(w, f'{root}/External links').edit(text=main(), bot=True, summary=summary))

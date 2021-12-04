@@ -99,7 +99,7 @@ def addTopUsers(sortedList, count):
     userregistration = user['registration']
     userlink = 'User:'+username
     place = i+1 # List is indexed 0-99, editors are indexed 1-100
-    # TODO: this is dumb, pls check user rights instead - T 01/12/19
+    # TODO: wiki.get_all_bots
     if 'BOT' in username or username in ['Pillownet', 'PhoneWave']:
       place = "<small>''BOT''</small>"
       del sortedList[i]

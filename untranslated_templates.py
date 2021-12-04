@@ -6,6 +6,7 @@ from re import finditer, DOTALL
 from time import gmtime, strftime
 
 verbose = False
+LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 PAGESCRAPERS = 50
 
 def pagescraper(pages, done, translations):
@@ -82,7 +83,7 @@ def pagescraper(pages, done, translations):
 
 def main():
   pages, done = Queue(), Event()
-  translations = {lang: set() for lang in 'ar, cs, da, de, en, es, fi, fr, hu, it, ja, ko, nl, no, pl, pt, pt-br, ro, ru, tr, sv, zh-hans, zh-hant'.split(', ')}
+  translations = {lang: set() for lang in LANGS}
   threads = []
   for i in range(PAGESCRAPERS): # Number of threads
     thread = Thread(target=pagescraper, args=(pages, done, translations))
@@ -107,7 +108,7 @@ def main():
       thread.join()
 
   outputs = []
-  for language in sorted(translations.keys()):
+  for language in LANGS:
     output = """\
 {{{{DISPLAYTITLE: {count} templates missing {{{{lang name|name|{lang}}}}} translation}}}}
 Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.

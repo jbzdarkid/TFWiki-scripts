@@ -1,5 +1,7 @@
 import requests
 
+# List of namespaces: https://wiki.teamfortress.com/w/api.php?action=query&meta=siteinfo&siprop=namespaces
+
 class Wiki:
   def __init__(self, api_url):
     self.api_url = api_url
@@ -23,14 +25,20 @@ class Wiki:
   def get_with_continue(self, action, entry_key, **kwargs):
     while 1:
       data = self.get(action, **kwargs)
+      if data == {'batchcomplete': ''}:
+        return # No entries for this query
       try:
         entries = data[action][entry_key]
       except KeyError:
-        print(f'Entry key "{entry_key}" was not found in data. Did you mean one of these keys: {data.keys()}')
+        print(f'Entry key "{entry_key}" was not found in data. Did you mean one of these keys: {data[action].keys()}')
         break
 
-      for entry in entries:
-        yield entry
+      if 'list' in kwargs:
+        for entry in entries:
+          yield entry
+      elif 'generator' in kwargs:
+        for value in entries.values():
+          yield value
 
       if 'continue' in data:
         kwargs.update(data['continue'])
@@ -68,11 +76,25 @@ class Wiki:
       auwitheditsonly='true',
     )
 
+  def get_all_bots(self):
+    return self.get_with_continue('query', 'allusers',
+      list='allusers',
+      aulimit='500',
+      aurights='bot', # Only return bots
+    )
+
   def get_all_pages(self):
     return self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit='500',
       apfilterredir='nonredirects', # Filter out redirects
+    )
+
+  def get_all_files(self):
+    return self.get_with_continue('query', 'pages',
+      generator='allimages',
+      gailimit='500',
+      prop='duplicatefiles', # Include info about duplicates
     )
 
   def login(self, username, password=None):
