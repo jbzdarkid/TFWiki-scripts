@@ -1,4 +1,5 @@
 import requests
+from json.decoder import JSONDecodeError
 
 # List of namespaces: https://wiki.teamfortress.com/w/api.php?action=query&meta=siteinfo&siprop=namespaces
 
@@ -20,7 +21,12 @@ class Wiki:
     if r.status_code >= 400 and r.status_code <= 499:
       print(kwargs)
       raise ValueError(f'Request to "{r.url}" failed with code {r.status_code}:\n{r.text}')
-    return r.json()
+    try:
+      return r.json()
+    except JSONDecodeError:
+      print(r.status_code, r.url)
+      print(r.text)
+      return ''
 
   def get_with_continue(self, action, entry_key, **kwargs):
     while 1:
