@@ -1,5 +1,5 @@
-from json.decoder import JSONDecodeError
 from requests.exceptions import RequestException
+from time import sleep
 import requests
 
 # List of namespaces: https://wiki.teamfortress.com/w/api.php?action=query&meta=siteinfo&siprop=namespaces
@@ -67,7 +67,7 @@ class Wiki:
       try:
         kwargs['csrf_token'] = self.get('query', meta='tokens')['query']['tokens']['csrftoken']
         return self.post_with_login(action, **kwargs)
-      except RequestException as e:
+      except RequestException:
         if i < 5:
           i += 1
           sleep(4**i)

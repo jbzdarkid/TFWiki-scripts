@@ -88,7 +88,7 @@ def addTopUsers(sortedList, count):
     print("Adding top", count, "users")
   output = ""
   i = 0
-  while (i < count):
+  while i < count:
     user = sortedList[i]
     username = user['name']
     usereditcount = user['editcount']

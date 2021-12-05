@@ -3,9 +3,8 @@ from time import strftime, gmtime
 from urllib.parse import unquote
 import requests
 
-# TODO: Use LANGS and a template for full_languages
-languages = 'en, ar, cs, es, da, de, fi, fr, hu, it, ja, ko, nl, no, pl, pt, pt-br, ro, ru, sv, tr, zh-hans, zh-hant'.split(', ')
-full_languages = 'English, Arabic, Czech, Spanish, Danish, German, Finnish, French, Hungarian, Italian, Japanese, Korean, Dutch, Norwegian, Polish, Portuguese, Portuguese (Brazil), Romanian, Russian, Swedish, Turkish, Chinese (Simplified), Chinese (Traditinal)'.split(', ')
+verbose = False
+LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 exts = 'png, jpg, jpeg, mp3, wav, txt, gif'.split(', ')
 
 def main():
@@ -51,7 +50,7 @@ Unused files, parsed from [[Special:UnusedFiles]]. Data accurate as of %s.
       lang = -1
     if lang != file[2]:
       lang = file[2]
-      output += '=== %s ===\n' % full_languages[lang]
+      output += '=== {{#language:%s}} ===\n' % lang
     output += '*[[Special:WhatLinksHere/File:%s|%s]]\n' % (file[0]+'.'+file[1], unquote(file[0])+'.'+file[1])
   return output.encode('utf-8')
 
