@@ -4,6 +4,7 @@ class Page:
   def __init__(self, wiki, title):
     self.wiki = wiki
     self.title = title.replace(' ', '_')
+    self.base, _, self.lang = title.rpartition('/')
 
   def __str__(self):
     return self.title

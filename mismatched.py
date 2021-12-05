@@ -1,3 +1,4 @@
+from re import finditer
 from queue import Queue, Empty
 from threading import Thread, Event
 from unicodedata import east_asian_width as width
@@ -5,29 +6,35 @@ from wikitools import wiki
 from wikitools.page import Page
 
 pairs = [
-  ['(', ')'],
-  ['[', ']'],
-  ['{', '}'],
-  ['<', '>'],
+  ['\\(', '\\)'],
   ['（', '）'],
+  ['\\[', '\\]'],
+  ['{', '}'],
+  ['<!--', '-->'],
+  ['<([a-zA-Z]*)(?: [^>/]*)?>', '</([a-zA-Z]*?)>'], # HTML tags, e.g. <div width="2px"> </div>
 ]
+
+# Some pages are expected to have mismatched parenthesis (as they are part of the update history, item description, etc)
+exemptions = {
+  'Advanced_Weaponiser': pairs[5],  # Includes example console commands
+  'Bots': pairs[5],                 # Includes example console commands 
+  'Uber Update': pairs[0],          # The update notes include 1) 2)
+}
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 PAGESCRAPERS = 50
 
-def get_indices(char, string):
-  index = -1
-  indices = []
-  while 1:
-    try:
-      index = string.index(char, index+1)
-    except ValueError:
-      break
-    indices.append(index)
-  return indices
+# For regex matches which have a group, we want to include the group contents, so that we can compare pairs of HTML tags.
+# For pure punctuation matches, we don't need any comparison.
+def get_match_info(m):
+  groups = m.groups()
+  if len(groups) == 0:
+    return None
+  else:
+    return groups[0].lower()
 
-def pagescraper(pages, done, page_data):
+def pagescraper(pages, done, translation_data):
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   while True:
     try:
@@ -40,24 +47,36 @@ def pagescraper(pages, done, page_data):
 
     text = page.get_wiki_text()
     errors = []
-    for pair in pairs:
+    for i, pair in enumerate(pairs):
       locations = []
-      for open in get_indices(pair[0], text):
-        locations.append([open, 1])
-      for close in get_indices(pair[1], text):
-        locations.append([close, -1])
+      if pair in exemptions.get(page.base, []):
+        continue
+
+      for m in finditer(pair[0], text):
+        match_info = get_match_info(m)
+        if match_info == 'br':
+          continue # The <br> tag is self-contained, and does not need a matching </br>
+        locations.append([m.start(), +1, match_info])
+
+      for m in finditer(pair[1], text):
+        locations.append([m.start(), -1, get_match_info(m)])
+
       locations.sort()
 
       opens = []
-      for index, val in locations:
-        if val == 1:
-          opens.append(index)
-        elif len(opens) == 0:
-          errors.append(index) # Closing without opening
-        else:
-          opens.pop()
+      for index, val, contents in locations:
+        if val == +1:
+          opens.append([index, contents])
+        elif val == -1:
+          if len(opens) == 0:
+            errors.append(index) # Closing tag without a matching opening
+          elif opens[-1][1] != contents: # Mismatched HTML tag
+            errors.append(index) # Mark the closing tag, hopefully not too confusing if it was actually the open tag's fault
+          else:
+            opens.pop() # Matching
 
-      errors.extend(opens) # Opening without closing
+      for extra_open in opens:
+        errors.append(extra_open[0]) # Opening tags without a matching closing
 
     if len(errors) > 0:
       if verbose:
@@ -88,41 +107,38 @@ def pagescraper(pages, done, page_data):
         extra_width = int(widths.count('W') * 0.8) # ... a guess
         data += ' '*(error-start+extra_width) + text[error] + '\n'
         data += '</pre>\n'
-      page_data[page.title] = data
+      if page.lang in LANGS:
+        translation_data[page.lang].append(data)
+      else:
+        translation_data['en'].append(data)
 
 def main():
   pages, done = Queue(), Event()
-  page_data = {}
+  translation_data = {lang: [] for lang in LANGS}
   threads = []
   for _ in range(PAGESCRAPERS): # Number of threads
-    thread = Thread(target=pagescraper, args=(pages, done, page_data))
+    thread = Thread(target=pagescraper, args=(pages, done, translation_data))
     threads.append(thread)
     thread.start()
   try:
     w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
     for page in w.get_all_pages():
       pages.put(page)
-      if page['title'].startswith('K'):
-        break # There are a lot of pages in this report. Let's not go too crazy just yet.
 
   finally:
     done.set()
     for thread in threads:
       thread.join()
 
-  page_keys = sorted(page_data.keys())
-
-  output = ''
-  output += f'{{{{DISPLAYTITLE: {len(page_keys)} pages with mismatched parenthesis}}\n'
+  count = sum(len(lang_pages) for lang_pages in translation_data.values())
+  output = '{{DISPLAYTITLE: %d pages with mismatched parenthesis}}\n' % count
   output += '{{TOC limit|2}}\n'
 
   for language in LANGS:
-    output += f'== {{{{lang info|{language}}}}} ==\n'
-    for page in page_keys:
-      if page.endswith(language):
-        output += page_data[page]
-      elif language == 'en':
-        output += page_data[page]
+    if len(translation_data[language]) > 0:
+      output += '== {{#language:%s}} ==\n' % language
+      for data in translation_data[language]:
+        output += data
 
   return output
 
