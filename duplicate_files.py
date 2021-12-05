@@ -1,6 +1,6 @@
+from time import gmtime, strftime
 from wikitools import wiki
 from wikitools.page import Page
-from time import gmtime, strftime
 
 def main():
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')

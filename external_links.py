@@ -97,7 +97,7 @@ def linkchecker(link_q, done, linkData):
       linkData.append(('Redirect loop', link))
     except requests.exceptions.HTTPError as e:
       code = e.response.status_code
-      if code == 301 or code == 302 or code == 303:
+      if code in (301, 302, 303):
         linkData.append(('Redirect Loop', link))
       else:
         linkData.append((e.response.reason, link))
@@ -130,7 +130,7 @@ def main():
     print('All pages scraped, entering stage 2')
   # Stage 2: All pages scraped. Linkscrapers are allowed to exit if Link Queue is empty.
   _linkData = []
-  for i in range(LINKCHECKERS): # Number of threads
+  for _ in range(LINKCHECKERS): # Number of threads
     thread = Thread(target=linkchecker, args=(link_q, done, _linkData))
     threads.append(thread)
     thread.start()

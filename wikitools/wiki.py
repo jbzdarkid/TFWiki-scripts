@@ -1,4 +1,5 @@
 from json.decoder import JSONDecodeError
+from requests.exceptions import RequestException
 import requests
 
 # List of namespaces: https://wiki.teamfortress.com/w/api.php?action=query&meta=siteinfo&siprop=namespaces
@@ -25,7 +26,7 @@ class Wiki:
     while 1:
       try:
         data = self.get(action, **kwargs)
-      except HTTPError:
+      except RequestException:
         return # Unable to load more info for this query
       if data == {'batchcomplete': ''}:
         return # No entries for this query
@@ -58,9 +59,20 @@ class Wiki:
     r = self.session.post(self.api_url, data=kwargs)
     return r.json()
 
-  def get_csrf_token(self):
-    # On any login request, maybe?
-    return self.get('query', meta='tokens')['query']['tokens']['csrftoken']
+  def post_with_csrf(self, action, **kwargs):
+    # We absolutely need a CSRF token to make a POST request here, and we would rather not lose all our hard work.
+    # So, we try 5 times and disregard all errors
+    i = 0
+    while True:
+      try:
+        kwargs['csrf_token'] = self.get('query', meta='tokens')['query']['tokens']['csrftoken']
+        return self.post_with_login(action, **kwargs)
+      except RequestException as e:
+        if i < 5:
+          i += 1
+          sleep(4**i)
+        else:
+          raise
 
   def get_all_templates(self):
     return self.get_with_continue('query', 'allpages',

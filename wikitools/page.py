@@ -1,4 +1,4 @@
-import requests
+from requests.exceptions import RequestException
 
 class Page:
   def __init__(self, wiki, title):
@@ -11,13 +11,13 @@ class Page:
   def get_wiki_text(self):
     try:
       return self.wiki.get('parse', page=self.title, prop='wikitext')['parse']['wikitext']['*']
-    except HTTPError:
+    except RequestException:
       return '' # Unable to fetch page contents, pretend it's empty
 
-  def exists(self):
-    raise # Do not use this. Just iterate all pages instead.
-    r = requests.head(self.wiki.wiki_url, allow_redirects=True, params={'title': self.title})
-    return r.status_code == 200
+  # Do not use this. Just iterate all pages instead.
+  # def exists(self):
+  #   r = requests.head(self.wiki.wiki_url, allow_redirects=True, params={'title': self.title})
+  #   return r.status_code == 200
 
   def get_edit_url(self):
     return f'{self.wiki.wiki_url}?title={self.title}&action=edit'
@@ -32,7 +32,7 @@ class Page:
         eititle=self.title,
       )
       return sum(1 for _ in transclusions)
-    except HTTPError:
+    except RequestException:
       return 0
 
   def get_link_count(self):
@@ -45,20 +45,16 @@ class Page:
         titles=self.title,
       )
       return sum(1 for _ in links)
-    except HTTPError:
+    except RequestException:
       return 0
 
   def edit(self, text, summary, bot=True):
-    try:
-      data = self.wiki.post_with_login('edit',
-        title=self.title,
-        text=text,
-        summary=summary,
-        bot=bot,
-        token=self.wiki.get_csrf_token(),
-      )
-    except HTTPError as e:
-      return f'Failed to edit {self.title}:\n' + e
+    data = self.wiki.post_with_csrf('edit',
+      title=self.title,
+      text=text,
+      summary=summary,
+      bot=bot,
+    )
     if data['edit']['result'] != 'Success':
       return f'Failed to edit {self.title}:\n' + data['edit']
     elif 'new' in data['edit']:
