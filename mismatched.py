@@ -16,9 +16,12 @@ pairs = [
 
 # Some pages are expected to have mismatched parenthesis (as they are part of the update history, item description, etc)
 exemptions = {
-  'Advanced_Weaponiser': pairs[5],  # Includes example console commands
-  'Bots': pairs[5],                 # Includes example console commands 
-  'Uber Update': pairs[0],          # The update notes include 1) 2)
+  'Advanced_Weaponiser': pairs[5],      # Includes example console commands
+  'Bots': pairs[5],                     # Includes example console commands 
+  'Linux dedicated server': pairs[0],   # Includes a bash script with case
+  'List_of_default_keys': pairs[2],     # Includes {{Key|]}}
+  'List_of_useful_console_commands': pairs[5], # Includes placeholder <>
+  'Uber Update': pairs[0],              # The update notes include 1) 2)
 }
 
 verbose = False
@@ -59,7 +62,10 @@ def pagescraper(pages, done, translation_data):
         locations.append([m.start(), +1, match_info])
 
       for m in finditer(pair[1], text):
-        locations.append([m.start(), -1, get_match_info(m)])
+        match_info = get_match_info(m)
+        if match_info == 'br':
+          continue # The </br> tag is self-contained, and does not need a matching <br>
+        locations.append([m.start(), -1, match_info])
 
       locations.sort()
 
@@ -81,7 +87,7 @@ def pagescraper(pages, done, translation_data):
     if len(errors) > 0:
       if verbose:
         print(f'Found {len(errors)} errors for page {page.title}')
-      data = f'=== [{page.get_edit_url()} {page.title}] ===\n'
+      data = f'<h3> [{page.get_edit_url()} {page.title}] </h3>\n'
       errors.sort()
       for error in errors:
         # For display purposes, we want to highlight the mismatched symbol. To do so, we replicate the symbol on the line below, at the same horizontal offset.
@@ -102,11 +108,11 @@ def pagescraper(pages, done, translation_data):
         widths = [width(char) for char in text[start:error]]
         extra_width = widths.count('W') # + widths.count('F')
 
-        data += '<pre>\n'
+        data += '<div class="mw-code"><nowiki>\n'
         data += text[start:end] + '\n'
         extra_width = int(widths.count('W') * 0.8) # ... a guess
         data += ' '*(error-start+extra_width) + text[error] + '\n'
-        data += '</pre>\n'
+        data += '</nowiki></div>\n'
       if page.lang in LANGS:
         translation_data[page.lang].append(data)
       else:
