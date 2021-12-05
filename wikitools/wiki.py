@@ -18,19 +18,15 @@ class Wiki:
       'format': 'json',
     })
     r = self.session.get(self.api_url, params=kwargs)
-    if r.status_code >= 400 and r.status_code <= 499:
-      print(kwargs)
-      raise ValueError(f'Request to "{r.url}" failed with code {r.status_code}:\n{r.text}')
-    try:
-      return r.json()
-    except JSONDecodeError:
-      print(r.status_code, r.url)
-      print(r.text)
-      return ''
+    r.raise_for_status()
+    return r.json()
 
   def get_with_continue(self, action, entry_key, **kwargs):
     while 1:
-      data = self.get(action, **kwargs)
+      try:
+        data = self.get(action, **kwargs)
+      except HTTPError:
+        return # Unable to load more info for this query
       if data == {'batchcomplete': ''}:
         return # No entries for this query
       try:
