@@ -1,5 +1,5 @@
-import requests
 from json.decoder import JSONDecodeError
+import requests
 
 # List of namespaces: https://wiki.teamfortress.com/w/api.php?action=query&meta=siteinfo&siprop=namespaces
 

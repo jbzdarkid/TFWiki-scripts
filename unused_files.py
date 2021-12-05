@@ -1,7 +1,9 @@
-import requests
 from re import finditer, search
-from urllib.parse import unquote
 from time import strftime, gmtime
+from urllib.parse import unquote
+import requests
+
+# TODO: Use LANGS and a template for full_languages
 languages = 'en, ar, cs, es, da, de, fi, fr, hu, it, ja, ko, nl, no, pl, pt, pt-br, ro, ru, sv, tr, zh-hans, zh-hant'.split(', ')
 full_languages = 'English, Arabic, Czech, Spanish, Danish, German, Finnish, French, Hungarian, Italian, Japanese, Korean, Dutch, Norwegian, Polish, Portuguese, Portuguese (Brazil), Romanian, Russian, Swedish, Turkish, Chinese (Simplified), Chinese (Traditinal)'.split(', ')
 exts = 'png, jpg, jpeg, mp3, wav, txt, gif'.split(', ')
@@ -10,7 +12,7 @@ def main():
   step = 500
   unused_files = []
   i = 0
-  while (True):
+  while True:
     data = requests.get("https://wiki.teamfortress.com/wiki/Special:UnusedFiles?limit=%d&offset=%d" % (step, i)).text
     m = search('There are no results for this report\.', data)
     if m is not None:

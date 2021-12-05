@@ -1,21 +1,17 @@
-# -*- coding: utf-8 -*-
+from __future__ import division
 from datetime import date, datetime
 from operator import itemgetter
 from time import strftime, strptime, gmtime
-from urllib.parse import quote
 from wikitools import wiki
 
 verbose = False
-global NUMYEARS
 NUMYEARS = date.today().year-2010 + 1 # 2014 - 2010 + 1 = 5 (years)
-
-wikiAddress = r'http://wiki.teamfortress.com/w/api.php?action=query&list=allusers&auprop=editcount|registration&auwitheditsonly&aulimit=500&format=json'
 
 def userEditCount(sortedList, nlower, nupper=None):
   count = 0
   for user in sortedList:
     if nlower <= user['editcount']:
-      if nupper == None or user['editcount'] <= nupper:
+      if nupper is None or user['editcount'] <= nupper:
         count += 1
   return count
 
@@ -124,7 +120,7 @@ def addTopUsers(sortedList, count):
 def main():
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   usersList = list(w.get_all_users())
-  
+
   sortedList = sorted(usersList, key=itemgetter('editcount'), reverse=True)
   timeSortedList = sorted(usersList, key=itemgetter('registration'))
 

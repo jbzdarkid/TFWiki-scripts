@@ -1,6 +1,5 @@
-from wikitools import wiki
-from wikitools.page import Page
 from time import gmtime, strftime
+from wikitools import wiki
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']

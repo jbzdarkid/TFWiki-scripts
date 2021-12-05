@@ -1,11 +1,9 @@
-from json import loads
 from queue import Queue, Empty
 from re import compile, DOTALL
 from threading import Thread, Event
-import requests
-from time import sleep
 from wikitools import wiki
 from wikitools.page import Page
+import requests
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
@@ -124,7 +122,7 @@ def main():
   # Stage 1: All pages generated. Pagescrapers are allowed to exit if Page Queue is empty.
   links = {}
   link_q = Queue()
-  for i in range(PAGESCRAPERS): # Number of threads
+  for _ in range(PAGESCRAPERS): # Number of threads
     thread = Thread(target=pagescraper, args=(page_q, done, link_q, links))
     threads.append(thread)
     thread.start()

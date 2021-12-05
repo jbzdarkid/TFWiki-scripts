@@ -1,8 +1,6 @@
-from json import loads
 from queue import Queue, Empty
 from threading import Thread, Event
 from unicodedata import east_asian_width as width
-from urllib.parse import quote
 from wikitools import wiki
 from wikitools.page import Page
 
@@ -96,7 +94,7 @@ def main():
   pages, done = Queue(), Event()
   page_data = {}
   threads = []
-  for i in range(PAGESCRAPERS): # Number of threads
+  for _ in range(PAGESCRAPERS): # Number of threads
     thread = Thread(target=pagescraper, args=(pages, done, page_data))
     threads.append(thread)
     thread.start()
@@ -111,7 +109,7 @@ def main():
     done.set()
     for thread in threads:
       thread.join()
-  
+
   page_keys = sorted(page_data.keys())
 
   output = ''

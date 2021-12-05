@@ -1,8 +1,8 @@
 from queue import Queue, Empty
+from re import search, sub
 from threading import Thread, Event
 from wikitools import wiki
 from wikitools.page import Page
-from re import search, sub
 
 verbose = False
 PAGESCRAPERS = 10
@@ -37,7 +37,7 @@ def main():
   page_q, done = Queue(), Event()
   badpages = []
   threads = []
-  for i in range(PAGESCRAPERS): # Number of threads
+  for _ in range(PAGESCRAPERS): # Number of threads
     thread = Thread(target=pagescraper, args=(page_q, done, badpages))
     threads.append(thread)
     thread.start()

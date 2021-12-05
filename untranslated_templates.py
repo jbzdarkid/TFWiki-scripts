@@ -1,9 +1,9 @@
 from queue import Empty, Queue
 from threading import Thread, Event
-from wikitools import wiki
-from wikitools.page import Page
 from re import finditer, DOTALL
 from time import gmtime, strftime
+from wikitools import wiki
+from wikitools.page import Page
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
@@ -85,7 +85,7 @@ def main():
   pages, done = Queue(), Event()
   translations = {lang: set() for lang in LANGS}
   threads = []
-  for i in range(PAGESCRAPERS): # Number of threads
+  for _ in range(PAGESCRAPERS): # Number of threads
     thread = Thread(target=pagescraper, args=(pages, done, translations))
     threads.append(thread)
     thread.start()
