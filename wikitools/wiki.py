@@ -65,7 +65,7 @@ class Wiki:
     i = 0
     while True:
       try:
-        kwargs['csrf_token'] = self.get('query', meta='tokens')['query']['tokens']['csrftoken']
+        kwargs['token'] = self.get('query', meta='tokens')['query']['tokens']['csrftoken']
         return self.post_with_login(action, **kwargs)
       except RequestException:
         if i < 5:
