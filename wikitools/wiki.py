@@ -21,7 +21,10 @@ class Wiki:
     })
     r = self.session.get(self.api_url, params=kwargs)
     r.raise_for_status()
-    return r.json()
+    j = r.json()
+    if 'warnings' in j:
+      print(r.url + '\tWarning: ' + j['warnings']['main']['*'])
+    return j
 
   def get_with_continue(self, action, entry_key, **kwargs):
     while 1:
