@@ -71,7 +71,8 @@ class Wiki:
       try:
         kwargs['token'] = self.get('query', meta='tokens')['query']['tokens']['csrftoken']
         return self.post_with_login(action, **kwargs)
-      except RequestException:
+      except RequestException as e:
+        print(f'Attempt {i} failed:\n{e}')
         if i < 5:
           i += 1
           sleep(4**i)

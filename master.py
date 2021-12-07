@@ -56,11 +56,11 @@ if is_daily or is_weekly or is_monthly:
   from unused_files import main
   print(Page(w, f'{root}/Unused files').edit(text=main(), bot=True, summary=summary))
 
-  from mismatched import main
-  print(Page(w, f'{root}/Mismatched parenthesis').edit(text=main(), bot=True, summary=summary))
-
   from duplicate_files import main
   print(Page(w, f'{root}/Duplicate files').edit(text=main(), bot=True, summary=summary))
 
   from external_links import main
   print(Page(w, f'{root}/External links').edit(text=main(), bot=True, summary=summary))
+
+  from mismatched import main
+  print(Page(w, f'{root}/Mismatched parenthesis').edit(text=main(), bot=True, summary=summary))

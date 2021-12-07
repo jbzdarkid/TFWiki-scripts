@@ -10,7 +10,7 @@ def main():
   unused_files = {}
   count = 0
   for file in w.get_all_unused_files():
-    if file.startswith('User '):
+    if file.startswith('User'):
       continue # Users may upload files and not use them.
     # if file.startswith('Backpack '):
     #   continue
@@ -18,6 +18,8 @@ def main():
     #   continue
     # if file.startswith('Item icon '):
     #   continue
+    if file.startswith('Tf') and file.endswith('.txt'):
+      continue # Externally linked as part of Template:PatchDiff
     if file.endswith(' 3D.png'):
       p = Page(w, file)
       if p.get_transclusion_count() > 0:
@@ -50,7 +52,7 @@ Unused files, parsed from [[Special:UnusedFiles]]. Data as of {date}.
     for language in LANGS:
       language_files = unused_files[ext][language]
       if len(language_files) > 0:
-        output += '=== {{#language:%s}} ===\n' % language
+        output += '=== {{lang name|name|%s}} ===\n' % language
         for file in sorted(language_files):
           output += f'* [[:File:{file}]]\n'
 

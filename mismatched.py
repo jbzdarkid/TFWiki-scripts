@@ -1,6 +1,7 @@
 from re import finditer
 from queue import Queue, Empty
 from threading import Thread, Event
+from time import gmtime, strftime
 from unicodedata import east_asian_width as width
 from wikitools import wiki
 from wikitools.page import Page
@@ -136,13 +137,18 @@ def main():
     for thread in threads:
       thread.join()
 
-  count = sum(len(lang_pages) for lang_pages in translation_data.values())
-  output = '{{DISPLAYTITLE: %d pages with mismatched parenthesis}}\n' % count
-  output += '{{TOC limit|2}}\n'
+  output = """\
+{{{{DISPLAYTITLE: {count} pages with mismatched parenthesis}}}}
+Pages with mismatched <nowiki>(), [], and {}</nowiki>. Data as of {date}.
+{{{{TOC limit|2}}}}
+
+""".format(
+    count=sum(len(lang_pages) for lang_pages in translation_data.values()),
+    date=strftime(r'%H:%M, %d %B %Y', gmtime()))
 
   for language in LANGS:
     if len(translation_data[language]) > 0:
-      output += '== {{#language:%s}} ==\n' % language
+      output += '== {{lang name|name|%s}} ==\n' % language
       for data in translation_data[language]:
         output += data
 
