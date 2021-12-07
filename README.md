@@ -1,33 +1,19 @@
-A collection of scripts used on the TF Wiki
+A collection of scripts used to generate reports for the [TF2 Wiki](https://wiki.teamfortress.com/wiki/Team_Fortress_Wiki:Reports)
 
-Some scripts require a modified version of [Wikitools](http://upload.gaiatools.com/files/wikitools_mod_5.7z).
+This version of the scripts has been updated to python3, which unfortunately broke wikitools.  A stripped-down, python3-compatible version is checked in to this repo.
 
-## TF2diff.py
-Script to diff TF2 updates, commit to SVN repo, generate diff and submit pretty diff to the wiki.
+## Daily reports
+- `untranslated_templates.py`: Parses templates for {{lang}} usage, and reports whether or not they are fully translated.
+- `missing_translations.py`: Generates the list of missing translations for each language compared to english, which is used by the translator's noticeboard
+- `all_articles.py`: Generates the complete list of translated articles for each language, which is used by the translator's noticeboard
 
-## TF2betadiff.py
-Same as TF2diff.py for TF2 Beta, but with several minor changes to the workflow.
+## Weekly reports
+(none so far)
 
-## equipregions.py
-Script to generate the equip regions table found on [Template:Equip region table](http://wiki.teamfortress.com/wiki/Template:Equip_region_table) on the wiki.
-
-## prettydiff.py
-Script to parse a diff file and submit a pretty diff to the wiki.
-* Requires Wikitools
-
-## upload_item_icons.py
-Script to crop, crush and upload item icons to the wiki.
-* Requires Wikitools
-
-## upload_loc_files.py
-Script to upload updated tf_*.txt files after a patch to the wiki.
-* Requires Wikitools
-
-## vdfparser.py
-Script for parsing TF2 vdf files.
-
-## wiki_edit_stats.py
-Script to generate the user [edit stats article](http://wiki.teamfortress.com/wiki/Team_Fortress_Wiki:Reports/Users_by_edit_count) found on the wiki.
-
-## LODTables.py
-Script to generate the tables for [Model Optimization](https://wiki.teamfortress.com/wiki/Model_Optimization). Requires Crowbar to decompile models.
+## Monthly reports
+- `edit_stats.py`: Provides some statistics about user editing habits on the wiki, along with a list of the top 100 editors by edit count
+- `undocumented_templates.py`: Parses all templates to see if they have sufficient text in <noinclude> or {{documentation}}
+- `unused_files.py`: Reparses Special:UnusedFiles, and re-sorts the data, along with removing some known exceptions.
+- `duplicate_files.py`: Finds all identical files, and sorts them by usage count.
+- `external_links.py`: Searches all articles for links outside the tf2 wiki, and checks to see if those links are still valid (HTTP 200)
+- `mismatched.py`: Searches all articles for incorrect pairs of parenthesis, to help catch broken links, tags, and templates.
