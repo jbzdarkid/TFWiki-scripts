@@ -29,19 +29,23 @@ else:
 w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
 if not w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD']):
   exit(1)
+print(datetime.now())
 
 if is_daily:
   from untranslated_templates import main
   for lang, output in main():
     print(Page(w, f'{root}/Untranslated templates/{lang}').edit(output, bot=True, summary=summary))
+  print(datetime.now())
 
   from missing_translations import main
   for lang, output in main():
     print(Page(w, f'{root}/Missing translations/{lang}').edit(output, bot=True, summary=summary))
+  print(datetime.now())
 
   from all_articles import main
   for lang, output in main():
     print(Page(w, f'{root}/All articles/{lang}').edit(output, bot=True, summary=summary))
+  print(datetime.now())
 
 if is_daily or is_weekly:
   pass
@@ -49,18 +53,24 @@ if is_daily or is_weekly:
 if is_daily or is_weekly or is_monthly:
   from edit_stats import main
   print(Page(w, f'{root}/Users by edit count').edit(text=main(), bot=True, summary=summary))
+  print(datetime.now())
 
   from undocumented_templates import main
   print(Page(w, f'{root}/Undocumented templates').edit(text=main(), bot=True, summary=summary))
+  print(datetime.now())
 
   from unused_files import main
   print(Page(w, f'{root}/Unused files').edit(text=main(), bot=True, summary=summary))
+  print(datetime.now())
 
   from duplicate_files import main
   print(Page(w, f'{root}/Duplicate files').edit(text=main(), bot=True, summary=summary))
+  print(datetime.now())
 
   from external_links import main
   print(Page(w, f'{root}/External links').edit(text=main(), bot=True, summary=summary))
+  print(datetime.now())
 
   from mismatched import main
   print(Page(w, f'{root}/Mismatched parenthesis').edit(text=main(), bot=True, summary=summary))
+  print(datetime.now())
