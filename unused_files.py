@@ -1,61 +1,64 @@
-from re import finditer, search
 from time import strftime, gmtime
-from urllib.parse import unquote
-import requests
+from wikitools import wiki
+from wikitools.page import Page
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
-exts = 'png, jpg, jpeg, mp3, wav, txt, gif'.split(', ')
 
 def main():
-  step = 500
-  unused_files = []
-  i = 0
-  while True:
-    data = requests.get("https://wiki.teamfortress.com/wiki/Special:UnusedFiles?limit=%d&offset=%d" % (step, i)).text
-    m = search('There are no results for this report\.', data)
-    if m is not None:
-      break
-    for m in finditer('src="/w/images/(.*?)"', data):
-      file = search('(.*)/(120px-|)(.*)\.(.*)', m.group(1))
-      lang = file.group(3).split('_')[-1]
-      if lang in languages:
-        lang = languages.index(lang)
-      else:
-        lang = 0
-      unused_files.append([file.group(3), unquote(file.group(4)).lower(), lang])
-    i += step
-  unused_files.sort(key=lambda s: (exts.index(s[1]), s[2], s[0]))
-  output = '''{{DISPLAYTITLE:%d unused files}}
-Unused files, parsed from [[Special:UnusedFiles]]. Data accurate as of %s.
-''' % (len(unused_files), strftime(r'%H:%M, %d %B %Y', gmtime()))
-  type = ''
-  lang = -1
-  for file in unused_files:
-    if file[0][:5] == 'User_':
-      unused_files.remove(file)
-      continue
-    if file[0][:9] == 'Backpack_':
-      unused_files.remove(file)
-      continue
-    if file[0][:4] == 'BLU_':
-      unused_files.remove(file)
-      continue
-    if file[0][:10] == 'Item_icon_':
-      unused_files.remove(file)
-      continue
-    if type != file[1].upper():
-      type = file[1].upper()
-      output += '== %s ==\n' % type
-      lang = -1
-    if lang != file[2]:
-      lang = file[2]
-      output += '=== {{#language:%s}} ===\n' % lang
-    output += '*[[Special:WhatLinksHere/File:%s|%s]]\n' % (file[0]+'.'+file[1], unquote(file[0])+'.'+file[1])
-  return output.encode('utf-8')
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  unused_files = {}
+  count = 0
+  for file in w.get_all_unused_files():
+    if file.startswith('User '):
+      continue # Users may upload files and not use them.
+    # if file.startswith('Backpack '):
+    #   continue
+    # if file.startswith('BLU '):
+    #   continue
+    # if file.startswith('Item icon '):
+    #   continue
+    if file.endswith(' 3D.png'):
+      p = Page(w, file)
+      if p.get_transclusion_count() > 0:
+        continue # The 3D viewer template transcludes files, instead of linking them.
+
+    name, _, ext = file.rpartition('.')
+    ext = ext.upper()
+    if ext not in unused_files:
+      unused_files[ext] = {language: set() for language in LANGS}
+      if verbose:
+        print('Found new file extension:', ext)
+
+    for language in LANGS:
+      if name.endswith(f' {language}'):
+        unused_files[ext][language].add(file)
+        count += 1
+        break
+    else:
+      unused_files[ext]['en'].add(file)
+
+  output = """\
+{{{{DISPLAYTITLE:{count} unused files}}}}
+Unused files, parsed from [[Special:UnusedFiles]]. Data as of {date}.
+
+""".format(
+  count=count,
+  date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+  for ext in sorted(unused_files.keys()):
+    output += f'== {ext} ==\n'
+    for language in LANGS:
+      language_files = unused_files[ext][language]
+      if len(language_files) > 0:
+        output += '=== {{#language:%s}} ===\n' % language
+        for file in sorted(language_files):
+          output += f'* [[:File:{file}]]\n'
+
+  return output
 
 if __name__ == '__main__':
-  f = open('wiki_unused_files.txt', 'wb')
+  verbose = True
+  f = open('wiki_unused_files.txt', 'w')
   f.write(main())
   print('Article written to wiki_unused_files.txt')
   f.close()

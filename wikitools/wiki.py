@@ -1,3 +1,4 @@
+from re import finditer
 from requests.exceptions import RequestException
 from time import sleep
 import requests
@@ -110,6 +111,23 @@ class Wiki:
       gailimit='500',
       prop='duplicatefiles', # Include info about duplicates
     )
+
+  def get_all_unused_files(self):
+    params = {
+      'title': 'Special:UnusedFiles',
+      'limit': 500,
+      'offset': 0,
+    }
+    while True:
+      r = self.session.get(self.wiki_url, params=params)
+      if not r.ok:
+        return # Unable to load more info for this query
+      if 'There are no results for this report.' in r.text:
+        return
+
+      for m in finditer('<img alt="(.*?)"', r.text):
+        yield m.group(1)
+      params['offset'] += params['limit']
 
   def login(self, username, password=None):
     print(f'Logging in as {username}...')

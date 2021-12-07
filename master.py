@@ -6,7 +6,6 @@ from wikitools.page import Page
 
 # I need to decide what to do about some of the reports on TFW:Reports which seem useless. (Done?)
 # I would like to write a script which scrapes Special:WantedTemplates to check for Templates which are used in (Main).
-# Some cleanup is needed for unused_files.py
 # I would like to write a script which identifies miscategorized pages (lang pages in non-eng categories and vice-versa)
 # I need to touch-up the readme. Or scrap it.
 
