@@ -55,6 +55,7 @@ if __name__ == '__main__':
     exit(1)
   print(datetime.now())
   failures = 0
+  print(f'Daily: {is_daily} Weekly: {is_weekly} Monthly: {is_monthly}')
 
   if is_daily:
     failures += publish_lang_report(w, 'untranslated_templates', 'Untranslated templates')
