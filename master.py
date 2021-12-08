@@ -8,7 +8,6 @@ from traceback import print_exc
 
 # I need to extend the translation list to include categories (and the missing list)
 # I should add a report for 'over-translations', i.e. language pages which have no english version. Might not be actionable.
-# Bug: Duplicate files is not counting uses correctly (probably because it's ignoring file links)
 
 def publish_single_report(w, module, report_name):
   try:

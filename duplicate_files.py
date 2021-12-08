@@ -48,7 +48,7 @@ List of all duplicate files; {unique} unique files, {count} duplicated files in 
 
     output += f'[[{dupe_list[0]}|200px]]\n'
     for count, title in counts:
-      output += '* [[:%s|]] ([{{fullurl:Special:WhatLinksHere/%s|limit=%d|namespace=0|hideredirs=1}} %d use%s])\n' % (title, title, count, count, '' if count == 1 else 's')
+      output += '* [[:%s|]] ([{{fullurl:Special:WhatLinksHere/%s|limit=%d&namespace=0&hideredirs=1}} %d use%s])\n' % (title, title, min(50, count), count, '' if count == 1 else 's')
     output += '\n'
   return output
 

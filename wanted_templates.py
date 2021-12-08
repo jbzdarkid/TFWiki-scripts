@@ -23,7 +23,7 @@ List of all {count} broken template transclusions (usually due to typos or missi
     date = strftime(r'%H:%M, %d %B %Y', gmtime()))
 
   for count, title in sorted(wanted_templates, reverse=True):
-    output += '* [{{fullurl:Special:WhatLinksHere/%s|limit=%d|namespace=0|hideredirs=1}} %s has %d use%s]\n' % (title, count, title, count, '' if count == 1 else 's')
+    output += '* [{{fullurl:Special:WhatLinksHere/%s|limit=%d&namespace=0&hideredirs=1}} %s has %d use%s]\n' % (title, min(50, count), title, count, '' if count == 1 else 's')
   return output
 
 if __name__ == '__main__':

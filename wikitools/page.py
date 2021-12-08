@@ -36,17 +36,11 @@ class Page:
       return 0
 
   def get_link_count(self):
-    try:
-      links = self.wiki.get_with_continue('query', 'pages',
-        generator='linkshere',
-        glhshow='!redirect', # Filter out redirects
-        glhnamespace='0', # Links from the Main namespace only
-        glhlimit='500',
-        titles=self.title,
-      )
-      return sum(1 for _ in links)
-    except RequestException:
-      return 0
+    # All links, from the main namespace only
+    # Unfortunately, the mediawiki APIs don't include file links, which is the main reason I use this right now.
+    html = next(self.wiki.get_html_with_continue('Special:WhatLinksHere', namespace=0))
+    # This report uses page IDs for iteration which is just unfortunate.
+    return html.count('mw-whatlinkshere-tools') # Class for (<-- links | edit)
 
   def edit(self, text, summary, bot=True):
     data = self.wiki.post_with_csrf('edit',

@@ -14,12 +14,12 @@ class Wiki:
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
 
-  def get(self, action, **kwargs):
-    kwargs.update({
+  def get(self, action, **params):
+    params.update({
       'action': action,
       'format': 'json',
     })
-    r = self.session.get(self.api_url, params=kwargs)
+    r = self.session.get(self.api_url, params=params)
     r.raise_for_status()
     j = r.json()
     if 'warnings' in j:
@@ -56,12 +56,12 @@ class Wiki:
       else:
         break
 
-  def get_html_with_continue(self, title):
-    params = {
+  def get_html_with_continue(self, title, **params):
+    params.update({
       'title': title,
       'limit': 500,
       'offset': 0,
-    }
+    })
     while True:
       r = self.session.get(self.wiki_url, params=params)
       if not r.ok:
