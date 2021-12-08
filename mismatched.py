@@ -63,8 +63,8 @@ def pagescraper(pages, done, translation_data):
 
       for m in finditer(pair[0], text):
         match_info = get_match_info(m)
-        if match_info == 'br':
-          continue # The <br> tag is self-contained, and does not need a matching </br>
+        if match_info in ['br', 'references']:
+          continue # The <br> and <references /> tags are self-contained, and do not need a closing match.
         locations.append([m.start(), +1, match_info])
 
       for m in finditer(pair[1], text):
@@ -92,8 +92,8 @@ def pagescraper(pages, done, translation_data):
 
     if len(errors) > 0:
       if verbose:
-        print(f'Found {len(errors)} errors for page {page.title}')
-      data = f'<h3> [{page.get_edit_url()} {page.title}] </h3>\n'
+        print(f'Found {len(errors)} errors for page {page}')
+      data = f'<h3> [{Page(w, page).get_edit_url()} {page}] </h3>\n'
       errors.sort()
       for error in errors:
         # For display purposes, we want to highlight the mismatched symbol. To do so, we replicate the symbol on the line below, at the same horizontal offset.

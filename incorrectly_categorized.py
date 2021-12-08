@@ -106,11 +106,11 @@ def main():
     date=strftime(r'%H:%M, %d %B %Y', gmtime()))
 
   for language in LANGS:
-    if len(category_keys[lang]) == 0:
+    if len(category_keys[language]) == 0:
       continue
 
     output += '== {{lang name|name|%s}} ==\n' % language
-    for _, category in sorted(category_keys[lang], reverse=True):
+    for _, category in sorted(category_keys[language], reverse=True):
       output += f'=== [[:{category}]] ===\n'
       for page in sorted(miscategorized[category]):
         output += f'* [[{page}]]\n'
