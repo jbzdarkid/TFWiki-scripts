@@ -20,11 +20,13 @@ def pagescraper(page_q, done, badpages):
 
     page_text = Page(w, page).get_wiki_text()
     page_visible = sub('<includeonly>.*?</includeonly>', '', page_text)
-    if float(len(page_visible)) / len(page_text) > .80:
+    if len(page_text) == 0:
+      continue # Empty templates (usually due to HTTP failures)
+    elif float(len(page_visible)) / len(page_text) > .80:
       continue # Pages that show >80% of their information, e.g. nav templates
-    else:
-      if verbose:
-        print(page, 'shows', float(len(page_visible)) / len(page_text) * 100, '%')
+
+    if verbose:
+      print(page, 'shows', float(len(page_visible)) / len(page_text) * 100, '%')
 
     match = search('{{([Dd]oc begin|[Tt]emplate doc|[Dd]ocumentation|[Ww]ikipedia doc|[dD]ictionary/wrapper)}}', page_text)
     if not match:

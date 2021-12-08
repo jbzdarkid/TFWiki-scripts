@@ -4,6 +4,7 @@ from os import environ
 from sys import argv
 from wikitools import wiki
 from wikitools.page import Page
+from traceback import print_exc
 
 # I would like to write a script which scrapes Special:WantedTemplates to check for Templates which are used in (Main).
 # I would like to write a script which identifies miscategorized pages (lang pages in non-eng categories and vice-versa)
@@ -14,8 +15,9 @@ def publish_single_report(w, module, report_name):
     print(Page(w, f'{root}/{report_name}').edit(main(), bot=True, summary=summary))
     print(datetime.now())
     return 0
-  except Exception as e:
-    print(f'Failed to update {report_name}:\n{e}')
+  except Exception:
+    print(f'Failed to update {report_name}')
+    print_exc()
     return 1
 
 def publish_lang_report(w, module, report_name):
@@ -25,8 +27,9 @@ def publish_lang_report(w, module, report_name):
       print(Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary))
     print(datetime.now())
     return 0
-  except Exception as e:
-    print(f'Failed to update {report_name}:\n{e}')
+  except Exception:
+    print(f'Failed to update {report_name}')
+    print_exc()
     return 1
 
 if __name__ == '__main__':

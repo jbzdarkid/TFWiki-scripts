@@ -139,7 +139,7 @@ def main():
 
   output = """\
 {{{{DISPLAYTITLE: {count} pages with mismatched parenthesis}}}}
-Pages with mismatched <nowiki>(), [], and {}</nowiki>. Data as of {date}.
+Pages with mismatched <nowiki>(), [], and {{}}</nowiki>. Data as of {date}.
 {{{{TOC limit|2}}}}
 
 """.format(
