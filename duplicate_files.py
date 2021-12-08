@@ -36,7 +36,7 @@ List of all duplicate files; {unique} unique files, {count} duplicated files in 
 == List ==\n""".format(
     unique = len(all_duplicates),
     count = sum(len(dupe_list) for dupe_list in all_duplicates),
-    date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+    date = strftime(r'%H:%M, %d %B %Y', gmtime()))
 
   for dupe_list in all_duplicates:
     counts = []

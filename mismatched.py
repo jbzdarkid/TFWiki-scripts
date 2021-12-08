@@ -42,18 +42,23 @@ def pagescraper(pages, done, translation_data):
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   while True:
     try:
-      page = Page(w, pages.get(True, 1)['title'])
+      page = pages.get(True, 1)['title']
     except Empty:
       if done.is_set():
         return
       else:
         continue
 
-    text = page.get_wiki_text()
+    text = Page(w, page).get_wiki_text()
+    base, _, lang = page.rpartition('/')
+    if lang not in LANGS:
+      lang = 'en'
+      base = page
+
     errors = []
     for i, pair in enumerate(pairs):
       locations = []
-      if pair in exemptions.get(page.base, []):
+      if pair in exemptions.get(base, []):
         continue
 
       for m in finditer(pair[0], text):
@@ -114,10 +119,8 @@ def pagescraper(pages, done, translation_data):
         extra_width = int(widths.count('W') * 0.8) # ... a guess
         data += ' '*(error-start+extra_width) + text[error] + '\n'
         data += '</nowiki></div>\n'
-      if page.lang in LANGS:
-        translation_data[page.lang].append(data)
-      else:
-        translation_data['en'].append(data)
+
+      translation_data[lang].append(data)
 
 def main():
   pages, done = Queue(), Event()

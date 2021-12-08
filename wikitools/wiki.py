@@ -34,10 +34,14 @@ class Wiki:
         return # Unable to load more info for this query
       if data == {'batchcomplete': ''}:
         return # No entries for this query
+
       try:
         entries = data[action][entry_key]
       except KeyError:
-        print(f'Entry key "{entry_key}" was not found in data. Did you mean one of these keys: {data[action].keys()}')
+        if action not in data:
+          print(f'Entry key "{entry_key}" was not found in data. Did you mean one of these keys: {", ".join(data.keys())}')
+        else:
+          print(f'Entry key "{entry_key}" was not found in data[{action}]. Did you mean one of these keys: {", ".join(data[action].keys())}')
         break
 
       if 'list' in kwargs:
@@ -52,6 +56,22 @@ class Wiki:
       else:
         break
 
+  def get_html_with_continue(self, title):
+    params = {
+      'title': title,
+      'limit': 500,
+      'offset': 0,
+    }
+    while True:
+      r = self.session.get(self.wiki_url, params=params)
+      if not r.ok:
+        return # Unable to load more info for this query
+      if 'There are no results for this report.' in r.text:
+        return
+
+      yield r.text
+      params['offset'] += params['limit']
+
   def post_with_login(self, action, **kwargs):
     if not self.lgtoken:
       raise ValueError('Error: Not logged in')
@@ -64,8 +84,7 @@ class Wiki:
     return r.json()
 
   def post_with_csrf(self, action, **kwargs):
-    # We absolutely need a CSRF token to make a POST request here, and we would rather not lose all our hard work.
-    # So, we try 5 times and disregard all errors
+    # We would rather not lose all our hard work, so we try pretty hard to make the edit succeed.
     i = 0
     while True:
       try:
@@ -82,15 +101,15 @@ class Wiki:
   def get_all_templates(self):
     return self.get_with_continue('query', 'allpages',
       list='allpages',
-      aplimit='500',
+      aplimit=500,
       apfilterredir='nonredirects', # Filter out redirects
-      apnamespace='10',
+      apnamespace='10', # Template namespace
     )
 
   def get_all_users(self):
     return self.get_with_continue('query', 'allusers',
       list='allusers',
-      aulimit='500',
+      aulimit=500,
       auprop='editcount|registration',
       auwitheditsonly='true',
     )
@@ -98,40 +117,48 @@ class Wiki:
   def get_all_bots(self):
     return self.get_with_continue('query', 'allusers',
       list='allusers',
-      aulimit='500',
+      aulimit=500,
       aurights='bot', # Only return bots
     )
 
   def get_all_pages(self):
     return self.get_with_continue('query', 'allpages',
       list='allpages',
-      aplimit='500',
+      aplimit=500,
       apfilterredir='nonredirects', # Filter out redirects
+    )
+
+  def get_all_categories(self):
+    return self.get_with_continue('query', 'allcategories',
+      list='allcategories',
+      aclimit=500,
+    )
+
+  def get_all_category_pages(self, category):
+    return self.get_with_continue('query', 'categorymembers',
+      list='categorymembers',
+      cmlimit=500,
+      cmtitle='Category:' + category,
+      cmprop='title', # Only return page titles, not page IDs
+      cmnamespace='0', # Links from the Main namespace only
     )
 
   def get_all_files(self):
     return self.get_with_continue('query', 'pages',
       generator='allimages',
-      gailimit='500',
+      gailimit=500,
       prop='duplicatefiles', # Include info about duplicates
     )
 
-  def get_all_unused_files(self):
-    params = {
-      'title': 'Special:UnusedFiles',
-      'limit': 500,
-      'offset': 0,
-    }
-    while True:
-      r = self.session.get(self.wiki_url, params=params)
-      if not r.ok:
-        return # Unable to load more info for this query
-      if 'There are no results for this report.' in r.text:
-        return
-
-      for m in finditer('<img alt="(.*?)"', r.text):
+  def get_all_wanted_templates(self):
+    for html in self.get_html_with_continue('Special:UnusedFiles'):
+      for m in finditer('<img alt="(.*?)"', html):
         yield m.group(1)
-      params['offset'] += params['limit']
+
+  def get_all_wanted_templates(self):
+    for html in self.get_html_with_continue('Special:WantedTemplates'):
+      for m in finditer('<a .*? class="new" .*?>(.*?)</a>', html):
+        yield m.group(1)
 
   def login(self, username, password=None):
     print(f'Logging in as {username}...')

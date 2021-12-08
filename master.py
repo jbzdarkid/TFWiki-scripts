@@ -6,8 +6,9 @@ from wikitools import wiki
 from wikitools.page import Page
 from traceback import print_exc
 
-# I would like to write a script which scrapes Special:WantedTemplates to check for Templates which are used in (Main).
-# I would like to write a script which identifies miscategorized pages (lang pages in non-eng categories and vice-versa)
+# I need to extend the translation list to include categories (and the missing list)
+# I should add a report for 'over-translations', i.e. language pages which have no english version. Might not be actionable.
+# Bug: Duplicate files is not counting uses correctly (probably because it's ignoring file links)
 
 def publish_single_report(w, module, report_name):
   try:
@@ -60,7 +61,7 @@ if __name__ == '__main__':
   if is_daily:
     failures += publish_lang_report(w, 'untranslated_templates', 'Untranslated templates')
     failures += publish_lang_report(w, 'missing_translations', 'Missing translations')
-    failures += publish_lang_report(w, 'all_articles', 'All Articles')
+    failures += publish_lang_report(w, 'all_articles', 'All articles')
 
   if is_daily or is_weekly:
     pass
@@ -71,6 +72,8 @@ if __name__ == '__main__':
     failures += publish_single_report(w, 'unused_files', 'Unused files')
     failures += publish_single_report(w, 'duplicate_files', 'Duplicate files')
     failures += publish_single_report(w, 'external_links', 'External links')
-    failures += publish_single_report(w, 'mismatched', 'Mismatched parenthesis')
+    failures += publish_single_report(w, 'wanted_templates', 'Wanted templates')
+    failures += publish_single_report(w, 'incorrectly_categorized', 'Pages with incorrect categorization')
+    failures += publish_single_report(w, 'mismatched', 'Mismatched parenthesis') # This report is very slow, so it goes last.
 
   exit(failures)
