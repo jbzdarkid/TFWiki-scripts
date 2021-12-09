@@ -150,7 +150,7 @@ class Wiki:
       prop='duplicatefiles', # Include info about duplicates
     )
 
-  def get_all_wanted_templates(self):
+  def get_all_unused_files(self):
     for html in self.get_html_with_continue('Special:UnusedFiles'):
       for m in finditer('<img alt="(.*?)"', html):
         yield m.group(1)

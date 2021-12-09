@@ -1,13 +1,16 @@
 from datetime import datetime
 import importlib
 from os import environ
-from sys import argv
+from sys import argv, stdout
 from wikitools import wiki
 from wikitools.page import Page
 from traceback import print_exc
 
 # I need to extend the translation list to include categories (and the missing list)
 # I should add a report for 'over-translations', i.e. language pages which have no english version. Might not be actionable.
+#  This should catch casing typos, so it needs to be aware of redirects.
+# A report for 'missing navbox usage', i.e. navboxes which link to pages which don't include said navboxes.
+#   Might need a list of navboxes, though.
 
 def publish_single_report(w, module, report_name):
   try:
@@ -17,7 +20,7 @@ def publish_single_report(w, module, report_name):
     return 0
   except Exception:
     print(f'Failed to update {report_name}')
-    print_exc()
+    print_exc(file=stdout)
     return 1
 
 def publish_lang_report(w, module, report_name):
@@ -29,7 +32,7 @@ def publish_lang_report(w, module, report_name):
     return 0
   except Exception:
     print(f'Failed to update {report_name}')
-    print_exc()
+    print_exc(file=stdout)
     return 1
 
 if __name__ == '__main__':

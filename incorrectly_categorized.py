@@ -17,6 +17,7 @@ def main():
     'Articles needing images',
     'Community strategy stubs/lang',
     'Custom maps unreleased stubs/lang',
+    'ERROR',
     'Featured articles/lang',
     'Featured articles (Classic)/lang',
     'GFDL images',
@@ -24,6 +25,7 @@ def main():
     'Item infobox usage',
     "Item infobox using 'loadout-name'",
     "Item infobox using 'loadout-prefix'",
+    'Language redirects',
     'Level ERROR',
     'Lists to be expanded',
     'Map infobox outdated parameters',
@@ -40,6 +42,7 @@ def main():
     'Pages with broken file links',
     'Pages with reference errors',
     'Pages with too many expensive parser function calls',
+    'Protected pages',
     'Quotations needing translating',
     'Strange rank name ERROR',
     'Stubs/lang',
@@ -64,6 +67,7 @@ def main():
     'Translating into Spanish',
     'Translating into Swedish',
     'Translating into Turkish',
+    'Translations needing updating',
     'Templates that use translation switching',
     'Uses Full Moon templates/lang',
   ]
@@ -111,9 +115,9 @@ def main():
 
     output += '== {{lang name|name|%s}} ==\n' % language
     for _, category in sorted(category_keys[language], reverse=True):
-      output += f'=== [[:{category}]] ===\n'
+      output += f'=== [[:Category:{category}]] ===\n'
       for page in sorted(miscategorized[category]):
-        output += f'* [[{page}]]\n'
+        output += '* [{{fullurl:%s|action=edit}} %s]\n' % (page, page)
     
   return output
 
