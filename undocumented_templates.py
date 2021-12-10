@@ -23,17 +23,16 @@ def pagescraper(page_q, done, badpages):
     if len(page_text) == 0:
       continue # Empty templates (usually due to HTTP failures)
     elif float(len(page_visible)) / len(page_text) > .80:
-      continue # Pages that show >80% of their information, e.g. nav templates
+      continue # Template is self-documenting, as it shows the majority of its contents.
+    elif '{{tlx|' in page_visible or '{{tl|' in page_visible:
+      continue # Page has example usages
+    elif search('{{([Dd]oc begin|[Tt]emplate doc|[Dd]ocumentation|[Ww]ikipedia doc|[dD]ictionary/wrapper)}}', page_visible):
+      continue # Page uses a documentation template
 
+    count = Page(w, page).get_transclusion_count()
     if verbose:
-      print(page, 'shows', float(len(page_visible)) / len(page_text) * 100, '%')
-
-    match = search('{{([Dd]oc begin|[Tt]emplate doc|[Dd]ocumentation|[Ww]ikipedia doc|[dD]ictionary/wrapper)}}', page_text)
-    if not match:
-      count = Page(w, page).get_transclusion_count()
-      if verbose:
-        print('Page %s does not transclude a documentation template and has %d backlinks' % (page, count))
-      badpages.append([count, page])
+      print(f'Page {page} does not transclude a documentation template and has {count} backlinks')
+    badpages.append([count, page])
 
 def main():
   page_q, done = Queue(), Event()

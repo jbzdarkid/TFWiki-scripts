@@ -7,10 +7,15 @@ from wikitools.page import Page
 from traceback import print_exc
 
 # I need to extend the translation list to include categories (and the missing list)
+#   Add this as a separate report, then link between them
 # I should add a report for 'over-translations', i.e. language pages which have no english version. Might not be actionable.
 #  This should catch casing typos, so it needs to be aware of redirects.
 # A report for 'missing navbox usage', i.e. navboxes which link to pages which don't include said navboxes.
 #   Might need a list of navboxes, though.
+# Write a replacement script for broken external links
+#   forums.tfmaps.net?t=# -> tf2maps.net/threads/#
+# Sort external links by domain (with sub-headers)
+# External links is a mess. It needs a modern eye.
 
 def publish_single_report(w, module, report_name):
   try:
@@ -43,8 +48,7 @@ if __name__ == '__main__':
     is_monthly = True
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
   elif argv[1] == 'schedule':
-    # root = 'Team Fortress Wiki:Reports'
-    root = 'User:Darkid/Reports'
+    root = 'Team Fortress Wiki:Reports'
     is_daily = True
     is_weekly = datetime.now().weekday() == 0 # Monday
     is_monthly = datetime.now().day == 1 # 1st of every month
@@ -65,16 +69,15 @@ if __name__ == '__main__':
     failures += publish_lang_report(w, 'missing_translations', 'Missing translations')
     failures += publish_lang_report(w, 'all_articles', 'All articles')
 
-  if is_daily or is_weekly:
-    pass
-
-  if is_daily or is_weekly or is_monthly:
-    failures += publish_single_report(w, 'edit_stats', 'Users by edit count')
-    failures += publish_single_report(w, 'undocumented_templates', 'Undocumented templates')
+  if is_weekly:
     failures += publish_single_report(w, 'unused_files', 'Unused files')
     failures += publish_single_report(w, 'duplicate_files', 'Duplicate files')
-    failures += publish_single_report(w, 'external_links', 'External links')
     failures += publish_single_report(w, 'wanted_templates', 'Wanted templates')
+
+  if is_monthly:
+    failures += publish_single_report(w, 'edit_stats', 'Users by edit count')
+    failures += publish_single_report(w, 'undocumented_templates', 'Undocumented templates')
+    failures += publish_single_report(w, 'external_links', 'External links')
     failures += publish_single_report(w, 'incorrectly_categorized', 'Pages with incorrect categorization')
     failures += publish_single_report(w, 'mismatched', 'Mismatched parenthesis') # This report is very slow, so it goes last.
 
