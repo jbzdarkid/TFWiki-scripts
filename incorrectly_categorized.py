@@ -118,7 +118,7 @@ def main():
       output += f'=== [[:Category:{category}]] ===\n'
       for page in sorted(miscategorized[category]):
         output += '* [{{fullurl:%s|action=edit}} %s]\n' % (page, page)
-    
+
   return output
 
 if __name__ == '__main__':

@@ -2,9 +2,9 @@ from datetime import datetime
 import importlib
 from os import environ
 from sys import argv, stdout
+from traceback import print_exc
 from wikitools import wiki
 from wikitools.page import Page
-from traceback import print_exc
 
 # I need to extend the translation list to include categories (and the missing list)
 #   Add this as a separate report, then link between them
@@ -14,6 +14,7 @@ from traceback import print_exc
 #   forums.tfmaps.net?t=# -> tf2maps.net/threads/#
 # Sort external links by domain (with sub-headers)
 # External links is a mess. It needs a modern eye.
+# update readme (again)
 
 def publish_single_report(w, module, report_name):
   start = datetime.now()
@@ -34,6 +35,7 @@ def publish_lang_report(w, module, report_name):
     main = importlib.import_module(module).main
     for lang, output in main():
       print(Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary))
+    end = datetime.now()
     print(f'Report {report_name} took {end - start}')
     return 0
   except Exception:
@@ -71,16 +73,17 @@ if __name__ == '__main__':
     failures += publish_lang_report(w, 'all_articles', 'All articles')
 
   if is_weekly:
-    failures += publish_single_report(w, 'unused_files', 'Unused files')
-    failures += publish_single_report(w, 'duplicate_files', 'Duplicate files')
     failures += publish_single_report(w, 'wanted_templates', 'Wanted templates')
+    failures += publish_single_report(w, 'navboxes', 'Pages which are missing navboxes')
+    failures += publish_single_report(w, 'overtranslated', 'Pages with no english equivalent')
+    failures += publish_single_report(w, 'incorrectly_categorized', 'Pages with incorrect categorization')
 
   if is_monthly:
+    failures += publish_single_report(w, 'duplicate_files', 'Duplicate files')
+    failures += publish_single_report(w, 'unused_files', 'Unused files')
     failures += publish_single_report(w, 'edit_stats', 'Users by edit count')
     failures += publish_single_report(w, 'undocumented_templates', 'Undocumented templates')
     failures += publish_single_report(w, 'external_links', 'External links')
-    failures += publish_single_report(w, 'overtranslated', 'Pages with no english equivalent')
-    failures += publish_single_report(w, 'incorrectly_categorized', 'Pages with incorrect categorization')
     failures += publish_single_report(w, 'mismatched', 'Mismatched parenthesis') # This report is very slow, so it goes last.
 
   exit(failures)

@@ -1,3 +1,5 @@
+[![TFWiki Stats](https://github.com/jbzdarkid/TFWiki-scripts/actions/workflows/tfwiki_stats.yml/badge.svg)](https://github.com/jbzdarkid/TFWiki-scripts/actions/workflows/tfwiki_stats.yml)
+
 A collection of scripts used to generate reports for the [TF2 Wiki](https://wiki.teamfortress.com/wiki/Team_Fortress_Wiki:Reports)
 
 This version of the scripts has been updated to python3, which unfortunately broke wikitools.  A stripped-down, python3-compatible version is checked in to this repo.

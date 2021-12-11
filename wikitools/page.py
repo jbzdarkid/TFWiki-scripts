@@ -22,19 +22,29 @@ class Page:
   def get_edit_url(self):
     return f'{self.wiki.wiki_url}?title={self.title}&action=edit'
 
+  # TODO: Deprecate
   def get_transclusion_count(self):
-    try:
-      transclusions = self.wiki.get_with_continue('query', 'embeddedin',
-        list='embeddedin',
-        eifilterredir='nonredirects', # Filter out redirects
-        einamespace='0', # Links from the Main namespace only
-        eilimit='500',
-        eititle=self.title,
-      )
-      return sum(1 for _ in transclusions)
-    except RequestException:
-      return 0
+    return sum(1 for _ in self.get_transclusions())
 
+  def get_transclusions(self):
+    return self.wiki.get_with_continue('query', 'embeddedin',
+      list='embeddedin',
+      eifilterredir='nonredirects', # Filter out redirects
+      einamespace=0, # Links from the Main namespace only
+      eilimit=500,
+      eititle=self.title,
+    )
+
+  # This should probably be on page.py though
+  def get_links(self):
+    return self.wiki.get_with_continue('query', 'pages',
+      generator='links',
+      gplnamespace=0, # Main
+      gpllimit=500,
+      titles=self.title,
+    )
+
+  # TODO: Rename, ambiguous
   def get_link_count(self):
     # All links, from the main namespace only
     # Unfortunately, the mediawiki APIs don't include file links, which is the main reason I use this right now.
