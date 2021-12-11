@@ -65,7 +65,8 @@ class Wiki:
     while True:
       r = self.session.get(self.wiki_url, params=params)
       if not r.ok:
-        return # Unable to load more info for this query
+        yield '' # Not sure this is the best approach, but some reports return a 404 when there is no more data
+        return
       if 'There are no results for this report.' in r.text:
         return
 

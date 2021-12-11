@@ -12,10 +12,8 @@ def main():
   for file in w.get_all_unused_files():
     if file.startswith('User'):
       continue # Users may upload files and not use them.
-    # if file.startswith('Backpack '):
-    #   continue
-    # if file.startswith('BLU '):
-    #   continue
+    if file.startswith('Backpack '):
+      continue # These are provided in bulk to support {{Backpack item}}, but they may not specifically be used.
     # if file.startswith('Item icon '):
     #   continue
     if file.startswith('Tf') and file.endswith('.txt'):

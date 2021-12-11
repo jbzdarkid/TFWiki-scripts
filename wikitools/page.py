@@ -38,7 +38,7 @@ class Page:
   def get_link_count(self):
     # All links, from the main namespace only
     # Unfortunately, the mediawiki APIs don't include file links, which is the main reason I use this right now.
-    html = next(self.wiki.get_html_with_continue('Special:WhatLinksHere', namespace=0))
+    html = next(self.wiki.get_html_with_continue('Special:WhatLinksHere', target=self.title, namespace=0))
     # This report uses page IDs for iteration which is just unfortunate.
     return html.count('mw-whatlinkshere-tools') # Class for (<-- links | edit)
 
