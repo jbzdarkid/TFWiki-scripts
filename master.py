@@ -8,8 +8,6 @@ from traceback import print_exc
 
 # I need to extend the translation list to include categories (and the missing list)
 #   Add this as a separate report, then link between them
-# I should add a report for 'over-translations', i.e. language pages which have no english version. Might not be actionable.
-#  This should catch casing typos, so it needs to be aware of redirects.
 # A report for 'missing navbox usage', i.e. navboxes which link to pages which don't include said navboxes.
 #   Might need a list of navboxes, though.
 # Write a replacement script for broken external links
@@ -18,10 +16,12 @@ from traceback import print_exc
 # External links is a mess. It needs a modern eye.
 
 def publish_single_report(w, module, report_name):
+  start = datetime.now()
   try:
     main = importlib.import_module(module).main
     print(Page(w, f'{root}/{report_name}').edit(main(), bot=True, summary=summary))
-    print(datetime.now())
+    end = datetime.now()
+    print(f'Report {report_name} took {end - start}')
     return 0
   except Exception:
     print(f'Failed to update {report_name}')
@@ -29,11 +29,12 @@ def publish_single_report(w, module, report_name):
     return 1
 
 def publish_lang_report(w, module, report_name):
+  start = datetime.now()
   try:
     main = importlib.import_module(module).main
     for lang, output in main():
       print(Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary))
-    print(datetime.now())
+    print(f'Report {report_name} took {end - start}')
     return 0
   except Exception:
     print(f'Failed to update {report_name}')
@@ -62,11 +63,11 @@ if __name__ == '__main__':
     exit(1)
   print(datetime.now())
   failures = 0
-  print(f'Daily: {is_daily} Weekly: {is_weekly} Monthly: {is_monthly}')
 
   if is_daily:
     failures += publish_lang_report(w, 'untranslated_templates', 'Untranslated templates')
     failures += publish_lang_report(w, 'missing_translations', 'Missing translations')
+    failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
     failures += publish_lang_report(w, 'all_articles', 'All articles')
 
   if is_weekly:
@@ -78,6 +79,7 @@ if __name__ == '__main__':
     failures += publish_single_report(w, 'edit_stats', 'Users by edit count')
     failures += publish_single_report(w, 'undocumented_templates', 'Undocumented templates')
     failures += publish_single_report(w, 'external_links', 'External links')
+    failures += publish_single_report(w, 'overtranslated', 'Pages with no english equivalent')
     failures += publish_single_report(w, 'incorrectly_categorized', 'Pages with incorrect categorization')
     failures += publish_single_report(w, 'mismatched', 'Mismatched parenthesis') # This report is very slow, so it goes last.
 
