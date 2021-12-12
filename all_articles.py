@@ -24,6 +24,7 @@ All articles in {{{{lang info|{lang}}}}}; '''<onlyinclude>{count}</onlyinclude>'
 
 ; See also
 * [[Project:Reports/Missing translations/{lang}|Missing translations in {{{{lang name|name|{lang}}}}}]]
+* [[Project:Reports/Missing categories/{lang}|Missing categories in {{{{lang name|name|{lang}}}}}]]
 * [[Special:RecentChangesLinked/Project:Reports/All articles/{lang}|Recent changes to articles in {{{{lang name|name|{lang}}}}}]]
 
 == List ==""".format(
