@@ -1,7 +1,7 @@
 from requests.exceptions import RequestException
 
 class Page:
-  def __init__(self, wiki, title, raw={}):
+  def __init__(self, wiki, title, raw=None):
     self.wiki = wiki
     self.title = title.replace(' ', '_')
     self.raw = raw
