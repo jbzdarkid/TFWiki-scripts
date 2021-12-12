@@ -12,14 +12,14 @@ PAGESCRAPERS = 50
 def pagescraper(w, pages, done, translations):
   while True:
     try:
-      page = pages.get(True, 1)['title']
+      page = pages.get(True, 1)
     except Empty:
       if done.is_set():
         return
       else:
         continue
 
-    page_text = Page(w, page).get_wiki_text()
+    page_text = page.get_wiki_text()
     # First, find the matching pairs
     def get_indices(char, string):
       index = -1
@@ -60,7 +60,7 @@ def pagescraper(w, pages, done, translations):
       lastIndex = index + 1
 
     if verbose:
-      print(page, 'contains', len(buffer), 'pairs of braces')
+      print(page.title, 'contains', len(buffer), 'pairs of braces')
 
     missing_languages = set()
     # Finally, search through for lang templates via positive lookahead
@@ -74,11 +74,11 @@ def pagescraper(w, pages, done, translations):
           languages.append(match2.group(1).strip().lower())
         for language in translations:
           if language not in languages: # Add missing translations
-            translations[language].add(page)
+            translations[language].add(page.title)
             missing_languages.add(language)
     if len(missing_languages) > 0:
       if verbose:
-        print(page, 'is not translated into', len(missing_languages), 'languages:', ', '.join(missing_languages))
+        print(page.title, 'is not translated into', len(missing_languages), 'languages:', ', '.join(missing_languages))
 
 def main(w):
   pages, done = Queue(), Event()
@@ -90,14 +90,10 @@ def main(w):
     thread.start()
   try:
     for page in w.get_all_templates():
-      #if '/' in page['title']: # FIXME: Necessary?
-      #  continue # Don't include subpages
-      if page['title'].partition('/')[0] == 'Template:Dictionary':
-        continue # Don't include dictionary subpages
-      if page['title'].partition('/')[0] == 'Template:PatchDiff':
-        continue # Don't include patch diffs.
-      if page['title'][:13] == 'Template:User':
-        continue # Don't include userboxes.
+      if '/' in page.title:
+        continue # Don't include subpage templates like Template:Dictionary and Template:PatchDiff
+      if page.title[:13] == 'Template:User':
+        continue # Don't include userboxes
       pages.put(page)
 
   finally:

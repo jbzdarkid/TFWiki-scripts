@@ -10,14 +10,14 @@ PAGESCRAPERS = 10
 def pagescraper(w, page_q, done, badpages):
   while True:
     try:
-      page = page_q.get(True, 1)['title']
+      page = page_q.get(True, 1)
     except Empty:
       if done.is_set(): # Pages are done being generated
         return
       else:
         continue
 
-    page_text = Page(w, page).get_wiki_text()
+    page_text = page.get_wiki_text()
     page_visible = sub('<includeonly>.*?</includeonly>', '', page_text)
     if len(page_text) == 0:
       continue # Empty templates (usually due to HTTP failures)
@@ -28,10 +28,10 @@ def pagescraper(w, page_q, done, badpages):
     elif search('{{([Dd]oc begin|[Tt]emplate doc|[Dd]ocumentation|[Ww]ikipedia doc|[dD]ictionary/wrapper)}}', page_visible):
       continue # Page uses a documentation template
 
-    count = Page(w, page).get_transclusion_count()
+    count = page.get_transclusion_count()
     if verbose:
-      print(f'Page {page} does not transclude a documentation template and has {count} backlinks')
-    badpages.append([count, page])
+      print(f'Page {page.title} does not transclude a documentation template and has {count} backlinks')
+    badpages.append([count, page.title])
 
 def main(w):
   page_q, done = Queue(), Event()
@@ -44,13 +44,9 @@ def main(w):
 
   try:
     for page in w.get_all_templates():
-      if '/' in page['title']: # FIXME: Necessary?
-        continue # Don't include subpages
-      elif page['title'].partition('/')[0] == 'Template:Dictionary':
-        continue # Don't include dictionary subpages
-      elif page['title'].partition('/')[0] == 'Template:PatchDiff':
-        continue # Don't include patch diffs.
-      elif page['title'][:13] == 'Template:User':
+      if '/' in page.title:
+        continue # Don't include subpage templates like Template:Dictionary or Template:PatchDiff
+      elif page.title[:13] == 'Template:User':
         continue # Don't include userboxes.
       page_q.put(page)
 

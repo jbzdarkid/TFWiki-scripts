@@ -46,10 +46,10 @@ class Wiki:
 
       if 'list' in kwargs:
         for entry in entries:
-          yield entry
+          yield Page(self, entry['title'], entry)
       elif 'generator' in kwargs:
         for value in entries.values():
-          yield value
+          yield Page(self, value['*'], value)
 
       if 'continue' in data:
         kwargs.update(data['continue'])

@@ -18,20 +18,19 @@ def get_navbox_templates(w):
 def main(w):
   navbox_templates = {}
   for page in get_navbox_templates(w):
-    p = Page(w, page['title']) 
-    if p.title.lower().startswith('template:navbox'):
+    if page.title.lower().startswith('template:navbox'):
       continue # Exclude alternative navbox templates
-    if p.title.lower().endswith('sandbox'):
+    if page.title.lower().endswith('sandbox'):
       continue # Sandboxes link to pages but shouldn't be used
-    if 'navbox' not in p.get_wiki_text().lower():
+    if 'navbox' not in page.get_wiki_text().lower():
       continue # Some template pages actually *use* other navboxes, but are not one themselves.
 
-    navbox_templates[p.title] = [
-      set(link['title'] for link in p.get_links()),
-      set(link['title'] for link in p.get_transclusions()),
+    navbox_templates[page.title] = [
+      set(link.title for link in page.get_links()),
+      set(trans.title for trans in page.get_transclusions()),
     ]
     if verbose:
-      print(f'Navbox {p.title} links to {len(navbox_templates[p.title][0])} pages and is transcluded by {len(navbox_templates[p.title][1])} pages')
+      print(f'Navbox {page.title} links to {len(navbox_templates[page.title][0])} pages and is transcluded by {len(navbox_templates[page.title][1])} pages')
 
   if verbose:
     print(f'Found {len(navbox_templates)} navbox templates')
@@ -42,16 +41,16 @@ def main(w):
     for template in navbox_templates:
       links, transclusions = navbox_templates[template]
 
-      basename, _, lang = page['title'].rpartition('/')
+      basename, _, lang = page.title.rpartition('/')
       if lang not in LANGS:
         lang = 'en'
-        basename = page['title']
+        basename = page.title
 
-      if basename in links and page['title'] not in transclusions:
+      if basename in links and page.title not in transclusions:
         if verbose:
-          print('Page', page['title'], 'is linked by', template, 'but does not transclude it')
+          print('Page', page.title, 'is linked by', template, 'but does not transclude it')
 
-        missing_navbox[template].append(page['title'])
+        missing_navbox[template].append(page.title)
         count += 1
 
   output = """\

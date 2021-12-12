@@ -8,13 +8,13 @@ LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko',
 def main(w):
   all_pages = {language: set() for language in LANGS}
   for page in w.get_all_pages():
-    basename, _, lang = page['title'].rpartition('/')
+    basename, _, lang = page.title.rpartition('/')
     if lang in LANGS:
       all_pages[lang].add(basename)
-    elif 'OTFWH' in page['title']: # ETF2L Highlander Community Challenge/OTFWH
+    elif 'OTFWH' in page.title: # ETF2L Highlander Community Challenge/OTFWH
       pass # Do not translate
     else:
-      all_pages['en'].add(page['title'])
+      all_pages['en'].add(page.title)
 
   outputs = []
   for language in LANGS:

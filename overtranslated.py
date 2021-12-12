@@ -2,26 +2,24 @@ from time import gmtime, strftime
 from wikitools import wiki
 
 verbose = False
-LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
+LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 def main(w):
   all_pages = {language: set() for language in LANGS}
+  all_english_pages = set()
   for page in w.get_all_pages():
-    basename, _, lang = page['title'].rpartition('/')
+    basename, _, lang = page.title.rpartition('/')
     if lang in LANGS:
       all_pages[lang].add(basename)
     else:
-      all_pages['en'].add(page['title'])
+      all_english_pages.add(page.title])
 
   overtranslated = {language: set() for language in LANGS}
   count = 0
 
   for language in LANGS:
-    if language == 'en':
-      continue
-
     for page in sorted(all_pages[language]):
-      if page not in all_pages['en']:
+      if page not in all_english_pages:
         if verbose:
           print(f'Page {page}/{language} has no english equivalent')
         overtranslated[language].add(page)

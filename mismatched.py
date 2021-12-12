@@ -41,18 +41,18 @@ def get_match_info(m):
 def pagescraper(w, pages, done, translation_data):
   while True:
     try:
-      page = pages.get(True, 1)['title']
+      page = pages.get(True, 1)
     except Empty:
       if done.is_set():
         return
       else:
         continue
 
-    text = Page(w, page).get_wiki_text()
-    base, _, lang = page.rpartition('/')
+    text = page.get_wiki_text()
+    base, _, lang = page.title.rpartition('/')
     if lang not in LANGS:
       lang = 'en'
-      base = page
+      base = page.title
 
     errors = []
     for i, pair in enumerate(pairs):
@@ -91,8 +91,8 @@ def pagescraper(w, pages, done, translation_data):
 
     if len(errors) > 0:
       if verbose:
-        print(f'Found {len(errors)} errors for page {page}')
-      data = f'<h3> [{Page(w, page).get_edit_url()} {page}] </h3>\n'
+        print(f'Found {len(errors)} errors for page {page.title}')
+      data = f'<h3> [page.get_edit_url()} {page.title}] </h3>\n'
       errors.sort()
       for error in errors:
         # For display purposes, we want to highlight the mismatched symbol. To do so, we replicate the symbol on the line below, at the same horizontal offset.
