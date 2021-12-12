@@ -1,8 +1,9 @@
-from page import Page
 from re import finditer
 from requests.exceptions import RequestException
 from time import sleep
 import requests
+
+from .page import Page
 
 # List of namespaces: https://wiki.teamfortress.com/w/api.php?action=query&meta=siteinfo&siprop=namespaces
 
