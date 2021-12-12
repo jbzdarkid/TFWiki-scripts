@@ -77,7 +77,7 @@ def main(w):
   category_keys = {language: [] for language in LANGS}
   unique_pages = set()
   for category in w.get_all_categories():
-    category = category['*']
+    category = category['title']
     if category in maintanence_categories:
       continue
 
