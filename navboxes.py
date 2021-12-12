@@ -15,9 +15,7 @@ def get_navbox_templates(w):
     gtilimit=500,
   )
 
-def main():
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
-
+def main(w):
   navbox_templates = {}
   for page in get_navbox_templates(w):
     p = Page(w, page['title']) 
@@ -76,7 +74,7 @@ Pages which a part of a navbox but do not include said navbox. Data as of {date}
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_navboxes.txt', 'w')
-  f.write(main())
-  print('Article written to wiki_navboxes.txt')
-  f.close()
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  with open('wiki_navboxes.txt', 'w') as f:
+    f.write(main(w))
+  print(f'Article written to {f.name}')

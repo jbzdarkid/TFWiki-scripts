@@ -9,8 +9,7 @@ verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 PAGESCRAPERS = 50
 
-def pagescraper(pages, done, translations):
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+def pagescraper(w, pages, done, translations):
   while True:
     try:
       page = pages.get(True, 1)['title']
@@ -81,16 +80,15 @@ def pagescraper(pages, done, translations):
       if verbose:
         print(page, 'is not translated into', len(missing_languages), 'languages:', ', '.join(missing_languages))
 
-def main():
+def main(w):
   pages, done = Queue(), Event()
   translations = {lang: set() for lang in LANGS}
   threads = []
   for _ in range(PAGESCRAPERS): # Number of threads
-    thread = Thread(target=pagescraper, args=(pages, done, translations))
+    thread = Thread(target=pagescraper, args=(w, pages, done, translations))
     threads.append(thread)
     thread.start()
   try:
-    w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
     for page in w.get_all_templates():
       #if '/' in page['title']: # FIXME: Necessary?
       #  continue # Don't include subpages
@@ -129,9 +127,9 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_untranslated_templates.txt', 'w')
-  for lang, output in main():
-    f.write('\n===== %s =====\n' % lang)
-    f.write(output)
-  print('Article written to wiki_untranslated_templates.txt')
-  f.close()
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  with open('wiki_untranslated_templates.txt', 'w') as f:
+    for lang, output in main():
+      f.write('\n===== %s =====\n' % lang)
+      f.write(output)
+  print(f'Article written to {f.name}')

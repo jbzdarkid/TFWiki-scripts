@@ -5,8 +5,7 @@ from wikitools.page import Page
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
-def main():
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+def main(w):
   unused_files = {}
   count = 0
   for file in w.get_all_unused_files():
@@ -58,7 +57,7 @@ Unused files, parsed from [[Special:UnusedFiles]]. Data as of {date}.
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_unused_files.txt', 'w')
-  f.write(main())
-  print('Article written to wiki_unused_files.txt')
-  f.close()
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  with open('wiki_unused_files.txt', 'w') as f:
+    f.write(main(w))
+  print(f'Article written to {f.name}')

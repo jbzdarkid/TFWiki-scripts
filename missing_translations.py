@@ -4,8 +4,7 @@ from wikitools import wiki
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
-def main():
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+def main(w):
   all_pages = set()
   english_pages = set()
   for page in w.get_all_pages():
@@ -43,9 +42,9 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_missing_translations.txt', 'w')
-  for lang, output in main():
-    f.write('\n===== %s =====\n' % lang)
-    f.write(output)
-  print('Article written to wiki_missing_translations.txt')
-  f.close()
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  with open('wiki_missing_translations.txt', 'w') as f:
+    for lang, output in main():
+      f.write('\n===== %s =====\n' % lang)
+      f.write(output)
+  print('Article written to {f.name}')

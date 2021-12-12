@@ -4,9 +4,7 @@ from wikitools.page import Page
 
 verbose = False
 
-def main():
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
-
+def main(w):
   seen = set()
   all_duplicates = []
   for page in w.get_all_files():
@@ -54,7 +52,7 @@ List of all duplicate files; {unique} unique files, {count} duplicated files in 
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_duplicate_files.txt', 'w')
-  f.write(main())
-  print('Article written to wiki_duplicate_files.txt')
-  f.close()
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  with open('wiki_duplicate_files.txt', 'w') as f:
+    f.write(main(w))
+  print(f'Article written to {f.name}')

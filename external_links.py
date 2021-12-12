@@ -55,8 +55,7 @@ def get_links(regex, text):
 
 # End of stuff I shamelessly copied.
 
-def pagescraper(page_q, done, link_q, links):
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+def pagescraper(w, page_q, done, link_q, links):
   while True:
     try:
       page = page_q.get(True, 1)['title']
@@ -105,13 +104,12 @@ def linkchecker(link_q, done, linkData):
     if verbose:
       print(f'Found an error for {link}')
 
-def main():
+def main(w):
   threads = []
   # Stage 0: Generate list of pages
   if verbose:
     print('Generating page list')
   page_q, done = Queue(), Event()
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   for page in w.get_all_pages():
     if page['title'].rpartition('/')[2] in LANGS:
       continue # Filter out non-english pages
@@ -123,7 +121,7 @@ def main():
   links = {}
   link_q = Queue()
   for _ in range(PAGESCRAPERS): # Number of threads
-    thread = Thread(target=pagescraper, args=(page_q, done, link_q, links))
+    thread = Thread(target=pagescraper, args=(w, page_q, done, link_q, links))
     threads.append(thread)
     thread.start()
   if verbose:
@@ -166,7 +164,7 @@ def main():
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_external_links.txt', 'w')
-  f.write(main())
-  print('Article written to wiki_external_links.txt')
-  f.close()
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  with open('wiki_external_links.txt', 'w') as f:
+    f.write(main(w))
+  print(f'Article written to {f.name}')

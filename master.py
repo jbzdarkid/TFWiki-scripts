@@ -20,7 +20,7 @@ def publish_single_report(w, module, report_name):
   start = datetime.now()
   try:
     main = importlib.import_module(module).main
-    print(Page(w, f'{root}/{report_name}').edit(main(), bot=True, summary=summary))
+    print(Page(w, f'{root}/{report_name}').edit(main(w), bot=True, summary=summary))
     end = datetime.now()
     print(f'Report {report_name} took {end - start}')
     return 0
@@ -33,7 +33,7 @@ def publish_lang_report(w, module, report_name):
   start = datetime.now()
   try:
     main = importlib.import_module(module).main
-    for lang, output in main():
+    for lang, output in main(w):
       print(Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary))
     end = datetime.now()
     print(f'Report {report_name} took {end - start}')
@@ -44,18 +44,24 @@ def publish_lang_report(w, module, report_name):
     return 1
 
 if __name__ == '__main__':
-  if argv[1] == 'workflow_dispatch':
-    root = 'User:Darkid/Reports'
-    is_daily = True
-    is_weekly = True
-    is_monthly = True
-    summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
-  elif argv[1] == 'schedule':
+  if argv[1] == 'schedule':
     root = 'Team Fortress Wiki:Reports'
     is_daily = True
     is_weekly = datetime.now().weekday() == 0 # Monday
     is_monthly = datetime.now().day == 1 # 1st of every month
     summary = 'Automatic update via https://github.com/jbzdarkid/TFWiki-scripts'
+  elif argv[1] == 'workflow_dispatch':
+    root = 'User:Darkid/Reports'
+    is_daily = True
+    is_weekly = True
+    is_monthly = True
+    summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
+  elif argv[1] == 'pull_request':
+    root = 'User:Darkid/Reports'
+    is_daily = True
+    is_weekly = True
+    is_monthly = False
+    summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
   else:
     print(f'Not sure what to run in response to {argv[1]}')
     exit(1)
@@ -69,7 +75,7 @@ if __name__ == '__main__':
   if is_daily:
     failures += publish_lang_report(w, 'untranslated_templates', 'Untranslated templates')
     failures += publish_lang_report(w, 'missing_translations', 'Missing translations')
-    failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
+    # failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
     failures += publish_lang_report(w, 'all_articles', 'All articles')
 
   if is_weekly:

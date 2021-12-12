@@ -7,8 +7,7 @@ from wikitools.page import Page
 verbose = False
 PAGESCRAPERS = 10
 
-def pagescraper(page_q, done, badpages):
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+def pagescraper(w, page_q, done, badpages):
   while True:
     try:
       page = page_q.get(True, 1)['title']
@@ -34,17 +33,16 @@ def pagescraper(page_q, done, badpages):
       print(f'Page {page} does not transclude a documentation template and has {count} backlinks')
     badpages.append([count, page])
 
-def main():
+def main(w):
   page_q, done = Queue(), Event()
   badpages = []
   threads = []
   for _ in range(PAGESCRAPERS): # Number of threads
-    thread = Thread(target=pagescraper, args=(page_q, done, badpages))
+    thread = Thread(target=pagescraper, args=(w, page_q, done, badpages))
     threads.append(thread)
     thread.start()
 
   try:
-    w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
     for page in w.get_all_templates():
       if '/' in page['title']: # FIXME: Necessary?
         continue # Don't include subpages
@@ -69,7 +67,7 @@ def main():
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_undocumented_templates.txt', 'w')
-  f.write(main())
-  print('Article written to wiki_undocumented_templates.txt')
-  f.close()
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  with open('wiki_undocumented_templates.txt', 'w') as f:
+    f.write(main(w))
+  print(f'Article written to {f.name}')

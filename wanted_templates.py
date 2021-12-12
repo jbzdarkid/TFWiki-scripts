@@ -4,8 +4,7 @@ from wikitools.page import Page
 
 verbose = False
 
-def main():
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+def main(w):
   wanted_templates = []
   for template in w.get_all_wanted_templates():
     use_count = Page(w, template).get_transclusion_count()
@@ -28,7 +27,7 @@ List of all {count} broken template transclusions (usually due to typos or missi
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_wanted_templates.txt', 'w')
-  f.write(main())
-  print('Article written to wiki_wanted_templates.txt')
-  f.close()
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  with open('wiki_wanted_templates.txt', 'w') as f:
+    f.write(main(w))
+  print(f'Article written to {f.name}')

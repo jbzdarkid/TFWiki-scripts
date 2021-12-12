@@ -38,8 +38,7 @@ def get_match_info(m):
   else:
     return groups[0].lower()
 
-def pagescraper(pages, done, translation_data):
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+def pagescraper(w, pages, done, translation_data):
   while True:
     try:
       page = pages.get(True, 1)['title']
@@ -122,7 +121,7 @@ def pagescraper(pages, done, translation_data):
 
       translation_data[lang].append(data)
 
-def main():
+def main(w):
   pages, done = Queue(), Event()
   translation_data = {lang: [] for lang in LANGS}
   threads = []
@@ -131,7 +130,6 @@ def main():
     threads.append(thread)
     thread.start()
   try:
-    w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
     for page in w.get_all_pages():
       pages.put(page)
 
@@ -159,7 +157,7 @@ Pages with mismatched <nowiki>(), [], and {{}}</nowiki>. Data as of {date}.
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_mismatched_parenthesis.txt', 'w', encoding='utf-8')
-  f.write(main())
-  print('Article written to wiki_mismatched_parenthesis.txt')
-  f.close()
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  with open('wiki_mismatched_parenthesis.txt', 'w', encoding='utf-8') as f:
+    f.write(main(w))
+  print(f'Article written to {f.name}')
