@@ -76,8 +76,8 @@ def main(w):
   miscategorized = {}
   category_keys = {language: [] for language in LANGS}
   unique_pages = set()
-  for category in w.get_all_categories():
-    category = category['*']
+  for category in w.get_all_categories(filter_redirects=False):
+    category = category['title']
     if category in maintanence_categories:
       continue
 
