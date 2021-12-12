@@ -4,8 +4,7 @@ from wikitools import wiki
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
-def main():
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+def main(w):
   # TODO: Filter based on Category:Maintenance?
   # https://wiki.teamfortress.com/w/api.php?action=query&list=categorymembers&cmtitle=Category:Maintenance&cmnamespace=14
   maintanence_categories = [
@@ -123,7 +122,7 @@ def main():
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_incorrectly_categorized.txt', 'w')
-  f.write(main())
-  print('Article written to wiki_incorrectly_categorized.txt')
-  f.close()
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  with open('wiki_incorrectly_categorized.txt', 'w') as f:
+    f.write(main(w))
+  print(f'Article written to {f.name}')

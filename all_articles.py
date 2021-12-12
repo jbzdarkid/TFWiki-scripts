@@ -5,8 +5,7 @@ from wikitools import wiki
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
-def main():
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+def main(w):
   all_pages = {language: set() for language in LANGS}
   for page in w.get_all_pages():
     basename, _, lang = page['title'].rpartition('/')
@@ -42,9 +41,9 @@ All articles in {{{{lang info|{lang}}}}}; '''<onlyinclude>{count}</onlyinclude>'
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_all_articles.txt', 'w')
-  for lang, output in main():
-    f.write(f'\n===== {lang} =====\n')
-    f.write(output)
-  print('Article written to wiki_all_articles.txt')
-  f.close()
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  with open('wiki_all_articles.txt', 'w') as f:
+    for lang, output in main(w):
+      f.write(f'\n===== {lang} =====\n')
+      f.write(output)
+  print(f'Article written to {f.name}')

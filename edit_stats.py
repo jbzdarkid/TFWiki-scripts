@@ -117,8 +117,7 @@ def addTopUsers(sortedList, count):
     i += 1
   return output
 
-def main():
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+def main(w):
   usersList = list(w.get_all_users())
 
   sortedList = sorted(usersList, key=itemgetter('editcount'), reverse=True)
@@ -161,7 +160,7 @@ def main():
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_edit_stats.txt', 'wb')
-  f.write(main().encode('utf-8'))
-  print("Article written to wiki_edit_stats.txt")
-  f.close()
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  with open('wiki_edit_stats.txt', 'w', encoding='utf-8') as f:
+    f.write(main(w))
+  print(f'Article written to {f.name}')

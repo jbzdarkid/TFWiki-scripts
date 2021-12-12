@@ -4,8 +4,7 @@ from wikitools import wiki
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
-def main():
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+def main(w):
   all_pages = {language: set() for language in LANGS}
   for page in w.get_all_pages():
     basename, _, lang = page['title'].rpartition('/')
@@ -49,7 +48,7 @@ Translated articles which do not have a corresponding article in english (ignori
 
 if __name__ == '__main__':
   verbose = True
-  f = open('wiki_overtranslated.txt', 'w')
-  f.write(main())
-  print('Article written to wiki_overtranslated.txt')
-  f.close()
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  with open('wiki_overtranslated.txt', 'w') as f:
+    f.write(main(w))
+  print(f'Article written to {f.name}')

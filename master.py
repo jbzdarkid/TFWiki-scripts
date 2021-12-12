@@ -20,7 +20,7 @@ def publish_single_report(w, module, report_name):
   start = datetime.now()
   try:
     main = importlib.import_module(module).main
-    print(Page(w, f'{root}/{report_name}').edit(main(), bot=True, summary=summary))
+    print(Page(w, f'{root}/{report_name}').edit(main(w), bot=True, summary=summary))
     end = datetime.now()
     print(f'Report {report_name} took {end - start}')
     return 0
@@ -33,7 +33,7 @@ def publish_lang_report(w, module, report_name):
   start = datetime.now()
   try:
     main = importlib.import_module(module).main
-    for lang, output in main():
+    for lang, output in main(w):
       print(Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary))
     end = datetime.now()
     print(f'Report {report_name} took {end - start}')
@@ -69,7 +69,7 @@ if __name__ == '__main__':
   if is_daily:
     failures += publish_lang_report(w, 'untranslated_templates', 'Untranslated templates')
     failures += publish_lang_report(w, 'missing_translations', 'Missing translations')
-    failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
+    # failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
     failures += publish_lang_report(w, 'all_articles', 'All articles')
 
   if is_weekly:
