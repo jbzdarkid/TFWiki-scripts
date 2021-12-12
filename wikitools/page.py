@@ -64,9 +64,9 @@ class Page:
       print(data['edit'])
     elif 'new' in data['edit']:
       print(f'Successfully created {self.title}.')
-      return 'https://wiki.tf/d/' + data['edit']['newrevid']
+      return 'https://wiki.tf/d/' + str(data['edit']['newrevid'])
     elif 'nochange' in data['edit']:
       print(f'No change to {self.title}')
     else:
       print(f'Successfully edited {self.title}')
-      return 'https://wiki.tf/d/' + data['edit']['newrevid']
+      return 'https://wiki.tf/d/' + str(data['edit']['newrevid'])
