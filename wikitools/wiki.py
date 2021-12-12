@@ -1,3 +1,4 @@
+from page import Page
 from re import finditer
 from requests.exceptions import RequestException
 from time import sleep
