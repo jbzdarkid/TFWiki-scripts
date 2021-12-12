@@ -8,7 +8,7 @@ def main(w):
   all_pages = set()
   english_pages = set()
   for page in w.get_all_pages():
-    all_pages.add(page.title])
+    all_pages.add(page.title)
     if page.title.rpartition('/')[2] in LANGS:
       pass # Not english
     elif 'OTFWH' in page.title: # ETF2L Highlander Community Challenge/OTFWH
