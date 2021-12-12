@@ -29,7 +29,7 @@ def main(w):
 
   output = """\
 {{{{DISPLAYTITLE: {count} pages with no english equivalent}}}}
-Translated articles which do not have a corresponding article in english (ignoring redirects). Data as of {date}.
+'''<onlyinclude>{count}</onlyinclude>''' translated articles which do not have a corresponding article in english (ignoring redirects). Data as of {date}.
 
 """.format(
       count=count,
