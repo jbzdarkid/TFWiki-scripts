@@ -60,16 +60,13 @@ class Page:
       bot=bot,
     )
     if data['edit']['result'] != 'Success':
-      message = 'Failed to edit'
-      extra = data['edit']
+      print(f'Failed to edit {self.title}:')
+      print(data['edit'])
     elif 'new' in data['edit']:
-      message = 'Successfully created'
-      extra = f'https://wiki.tf/d/' + data['edit']['newrevid']
+      print(f'Successfully created {self.title}.')
+      return 'https://wiki.tf/d/' + data['edit']['newrevid']
     elif 'nochange' in data['edit']:
-      message = 'No change to'
-      extra = ''
+      print(f'No change to {self.title}')
     else:
-      message = 'Successfully edited'
-      extra = f'https://wiki.tf/d/' + data['edit']['newrevid']
-
-    return f'{message} {self.title}:\n{extra}'
+      print(f'Successfully edited {self.title}')
+      return 'https://wiki.tf/d/' + data['edit']['newrevid']
