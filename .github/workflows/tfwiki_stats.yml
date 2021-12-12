@@ -1,8 +1,9 @@
 name: TFWiki Stats
 on:
   schedule:
-    - cron: '0 1 * * *' # Daily
+    - cron: '0 1 * * *' # Daily, master.py has more fine-grained timing
   workflow_dispatch:
+  pull_request:
 
 jobs:
   run:
