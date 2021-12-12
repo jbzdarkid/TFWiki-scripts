@@ -29,7 +29,9 @@ def main(w):
     'Lists to be expanded',
     'Map infobox outdated parameters',
     'Maps without a screenshot',
+    'Marked for deletion',
     'Needs Template Translation',
+    'Out of date pages', # I wish I didn't have to do this but it's misreporting.
     'Out of date pages/lang',
     'Outdated Backpack item parameters',
     'Pages needing citations',
@@ -100,7 +102,7 @@ def main(w):
 
   output = """\
 {{{{DISPLAYTITLE: {page_count} miscategorized pages}}}}
-{category_count} categories have pages from other languages ({page_count} total pages). Data as of {date}.
+{category_count} categories have pages from other languages ('''<onlyinclude>{page_count}</onlyinclude>''' total pages). Data as of {date}.
 
 {{{{TOC limit|2}}}}
 """.format(
