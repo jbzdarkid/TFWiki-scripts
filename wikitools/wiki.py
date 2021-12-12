@@ -125,16 +125,19 @@ class Wiki:
     )
 
   def get_all_pages(self):
+    # Wait, does allpages have a namespace restriction? hmmm....
     return self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
       apfilterredir='nonredirects', # Filter out redirects
     )
 
-  def get_all_categories(self):
-    return self.get_with_continue('query', 'allcategories',
-      list='allcategories',
-      aclimit=500,
+  def get_all_categories(self, filter_redirects=True):
+    return self.get_with_continue('query', 'allpages',
+      list='allpages',
+      aplimit=500,
+      apnamespace=14, # Categories
+      apfilterredir='nonredirects' if filter_redirects else '',
     )
 
   def get_all_category_pages(self, category):

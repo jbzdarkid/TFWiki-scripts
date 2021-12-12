@@ -6,15 +6,12 @@ from traceback import print_exc
 from wikitools import wiki
 from wikitools.page import Page
 
-# I need to extend the translation list to include categories (and the missing list)
-#   Add this as a separate report, then link between them
-# A report for 'missing navbox usage', i.e. navboxes which link to pages which don't include said navboxes.
-#   Might need a list of navboxes, though.
 # Write a replacement script for broken external links
 #   forums.tfmaps.net?t=# -> tf2maps.net/threads/#
 # Sort external links by domain (with sub-headers)
 # External links is a mess. It needs a modern eye.
 # update readme (again)
+# Improve the wikitools/wiki get_with_continue to actually yield the pagenames, not just the json objects.
 
 def publish_single_report(w, module, report_name):
   start = datetime.now()
@@ -75,7 +72,7 @@ if __name__ == '__main__':
   if is_daily:
     failures += publish_lang_report(w, 'untranslated_templates', 'Untranslated templates')
     failures += publish_lang_report(w, 'missing_translations', 'Missing translations')
-    # failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
+    failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
     failures += publish_lang_report(w, 'all_articles', 'All articles')
 
   if is_weekly:

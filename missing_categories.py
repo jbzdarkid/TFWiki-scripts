@@ -5,39 +5,37 @@ verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 def main(w):
-  all_pages = set()
-  english_pages = set()
-  for page in w.get_all_pages():
-    all_pages.add(page.title)
-    if page.title.rpartition('/')[2] in LANGS:
+  all_cats = set()
+  english_cats = set()
+  for page in w.get_all_categories():
+    all_cats.add(page['title'])
+    if page['title'].rpartition('/')[2] in LANGS:
       pass # Not english
-    elif 'OTFWH' in page.title: # ETF2L Highlander Community Challenge/OTFWH
-      pass # Do not translate
     else:
-      english_pages.add(page.title)
+      english_cats.add(page['title'])
 
   outputs = []
   for language in LANGS:
-    missing_pages = set()
-    for page in english_pages:
-      if f'{page}/{language}' not in all_pages:
-        missing_pages.add(page)
+    missing_cats = set()
+    for page in english_cats:
+      if f'{page}/{language}' not in all_cats:
+        missing_cats.add(page)
 
     output = """\
-{{{{DISPLAYTITLE: {count} pages missing {{{{lang name|name|{lang}}}}} translation}}}}
-Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.
+{{{{DISPLAYTITLE: {count} categories missing {{{{lang name|name|{lang}}}}} translation}}}}
+Categories missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.
 
 ; See also
 * [[Project:Reports/All articles/{lang}|All articles in {{{{lang name|name|{lang}}}}}]]
-* [[Project:Reports/Missing categories/{lang}|Missing categories in {{{{lang name|name|{lang}}}}}]]
+* [[Project:Reports/Missing translations/{lang}|Missing translations in {{{{lang name|name|{lang}}}}}]]
 * [[Special:RecentChangesLinked/Project:Reports/All articles/{lang}|Recent changes to articles in {{{{lang name|name|{lang}}}}}]]
 
 == List ==""".format(
       lang=language,
-      count=len(missing_pages),
+      count=len(missing_cats),
       date=strftime(r'%H:%M, %d %B %Y', gmtime()))
-    for page in sorted(missing_pages):
-      output += f'\n* [[{page}]] ([[{page}/{language}|create]])'
+    for page in sorted(missing_cats):
+      output += f'\n* [[:{page}]] ([[:{page}/{language}|create]])'
     outputs.append([language, output])
   return outputs
 

@@ -125,7 +125,7 @@ if __name__ == '__main__':
   verbose = True
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   with open('wiki_untranslated_templates.txt', 'w') as f:
-    for lang, output in main():
+    for lang, output in main(w):
       f.write('\n===== %s =====\n' % lang)
       f.write(output)
   print(f'Article written to {f.name}')
