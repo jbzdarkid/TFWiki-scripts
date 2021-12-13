@@ -49,6 +49,9 @@ class Wiki:
       if 'list' in kwargs:
         for entry in entries:
           yield Page(self, entry['title'], entry)
+      elif kwargs.get('generator') in ['transcludedin', 'links']:
+        for value in entries.values():
+          yield Page(self, value['title'], value)
       elif 'generator' in kwargs:
         for value in entries.values():
           yield Page(self, value['*'], value)

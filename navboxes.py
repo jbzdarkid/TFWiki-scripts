@@ -47,9 +47,6 @@ def main(w):
         basename = page.title
 
       if basename in links and page.title not in transclusions:
-        if verbose:
-          print('Page', page.title, 'is linked by', template, 'but does not transclude it')
-
         missing_navbox[template].append(page.title)
         count += 1
 
@@ -69,7 +66,7 @@ Pages which a part of a navbox but do not include said navbox. Data as of {date}
     for page in sorted(missing_navbox[template]):
       output += f'* [[{page}]] does not transclude {template}\n'
 
-    return output
+  return output
 
 if __name__ == '__main__':
   verbose = True
