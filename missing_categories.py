@@ -8,11 +8,11 @@ def main(w):
   all_cats = set()
   english_cats = set()
   for page in w.get_all_categories():
-    all_cats.add(page['title'])
-    if page['title'].rpartition('/')[2] in LANGS:
+    all_cats.add(page.title)
+    if page.title.rpartition('/')[2] in LANGS:
       pass # Not english
     else:
-      english_cats.add(page['title'])
+      english_cats.add(page.title)
 
   outputs = []
   for language in LANGS:
