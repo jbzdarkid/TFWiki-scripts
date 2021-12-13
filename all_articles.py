@@ -42,7 +42,7 @@ All articles in {{{{lang info|{lang}}}}}; '''<onlyinclude>{count}</onlyinclude>'
     outputs.append([language, output])
 
   english_output = """\
-{{{{DISPLAYTITLE: {count} pages in {{{{lang name|name|en}}}}}}}
+{{{{DISPLAYTITLE: {count} pages in {{{{lang name|name|en}}}}}}}}
 List of all English articles; <onlyinclude>{count}</onlyinclude> in total. Data as of {date}.
 
 * ''See also:'' [[Special:RecentChangesLinked/Team Fortress Wiki:Reports/All articles/en|Recent changes to English articles]]
@@ -53,7 +53,7 @@ List of all English articles; <onlyinclude>{count}</onlyinclude> in total. Data 
   for page in sorted(all_english_pages):
     english_output += f'\n# [[{page}]]'
 
-  outputs['en'] = english_output
+  outputs.append(['en', english_output])
 
   return outputs
 
