@@ -55,14 +55,20 @@ class Page:
     return html.count('mw-whatlinkshere-tools') # Class for (<-- links | edit)
 
   def edit(self, text, summary, bot=True):
+    if len(text) > 4000 * 1000: # 4 KB
+      text = text[:4000 * 1000]
+      print('Warning: Truncated text to 4 KB (max page length)')
+
     data = self.wiki.post_with_csrf('edit',
       title=self.url_title,
       text=text,
       summary=summary,
       bot=bot,
     )
-    print(data)
-    if data['edit']['result'] != 'Success':
+    if 'error' in data:
+      print(f'Failed to edit {self.title}:')
+      print(data['error'])
+    elif data['edit']['result'] != 'Success':
       print(f'Failed to edit {self.title}:')
       print(data['edit'])
     elif 'new' in data['edit']:
