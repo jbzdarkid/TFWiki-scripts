@@ -61,6 +61,7 @@ class Page:
       summary=summary,
       bot=bot,
     )
+    print(data)
     if data['edit']['result'] != 'Success':
       print(f'Failed to edit {self.title}:')
       print(data['edit'])
