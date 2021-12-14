@@ -29,24 +29,24 @@ class Page:
     return sum(1 for _ in self.get_transclusions())
 
   def get_transclusions(self):
-    return self.wiki.get_with_continue('query', 'embeddedin',
+    return [Page(self.wiki, entry['title'], entry) for entry in self.wiki.get_with_continue('query', 'embeddedin',
       list='embeddedin',
       eifilterredir='nonredirects', # Filter out redirects
       einamespace=0, # Links from the Main namespace only
       eilimit=500,
       eititle=self.url_title,
-    )
+    )]
 
   # This should probably be on page.py though
   def get_links(self):
-    return self.wiki.get_with_continue('query', 'pages',
+    return [Page(self.wiki, entry['title'], entry) for entry in self.wiki.get_with_continue('query', 'pages',
       generator='links',
       gplnamespace=0, # Main
       gpllimit=500,
       titles=self.url_title,
-    )
+    )]
 
-  # TODO: Rename, ambiguous
+  # TODO: Rename, ambiguous (file links only)
   def get_link_count(self):
     # All links, from the main namespace only
     # Unfortunately, the mediawiki APIs don't include file links, which is the main reason I use this right now.

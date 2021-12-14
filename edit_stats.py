@@ -83,9 +83,11 @@ def addTimeData(timeSortedList):
        total = runningTotal)
   return output
 
-def addTopUsers(sortedList, count):
+def addTopUsers(w, sortedList, count):
   if verbose:
     print("Adding top", count, "users")
+
+  bots = list(w.get_all_bots())
   output = ""
   i = 0
   while i < count:
@@ -95,8 +97,7 @@ def addTopUsers(sortedList, count):
     userregistration = user['registration']
     userlink = 'User:'+username
     place = i+1 # List is indexed 0-99, editors are indexed 1-100
-    # TODO: wiki.get_all_bots
-    if 'BOT' in username or username in ['Pillownet', 'PhoneWave']:
+    if username in bots:
       place = "<small>''BOT''</small>"
       del sortedList[i]
       i -= 1
@@ -153,7 +154,7 @@ def main(w):
 ! class="header" | Edit count
 ! class="header" | Edits per day
 ! class="header" | Registration date
-""" + addTopUsers(sortedList, 100) + """
+""" + addTopUsers(w, sortedList, 100) + """
 |}"""
 
   return output

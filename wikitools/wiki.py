@@ -46,15 +46,8 @@ class Wiki:
           print(f'Entry key "{entry_key}" was not found in data[{action}]. Did you mean one of these keys: {", ".join(data[action].keys())}')
         break
 
-      if 'list' in kwargs:
-        for entry in entries:
-          yield Page(self, entry['title'], entry)
-      elif kwargs.get('generator') in ['transcludedin', 'links']:
-        for value in entries.values():
-          yield Page(self, value['title'], value)
-      elif 'generator' in kwargs:
-        for value in entries.values():
-          yield Page(self, value['*'], value)
+      for entry in entries:
+        yield entry
 
       if 'continue' in data:
         kwargs.update(data['continue'])
@@ -105,12 +98,12 @@ class Wiki:
           raise
 
   def get_all_templates(self):
-    return self.get_with_continue('query', 'allpages',
+    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
       apfilterredir='nonredirects', # Filter out redirects
       apnamespace='10', # Template namespace
-    )
+    )]
 
   def get_all_users(self):
     return self.get_with_continue('query', 'allusers',
@@ -121,36 +114,36 @@ class Wiki:
     )
 
   def get_all_bots(self):
-    return self.get_with_continue('query', 'allusers',
+    return [user['name'] for user in self.get_with_continue('query', 'allusers',
       list='allusers',
       aulimit=500,
       aurights='bot', # Only return bots
-    )
+    )]
 
   def get_all_pages(self):
-    # Wait, does allpages have a namespace restriction? hmmm....
-    return self.get_with_continue('query', 'allpages',
+    # TODO: Wait, does allpages have a namespace restriction? hmmm....
+    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
       apfilterredir='nonredirects', # Filter out redirects
-    )
+    )]
 
   def get_all_categories(self, filter_redirects=True):
-    return self.get_with_continue('query', 'allpages',
+    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
       apnamespace=14, # Categories
       apfilterredir='nonredirects' if filter_redirects else '',
-    )
+    )]
 
   def get_all_category_pages(self, category):
-    return self.get_with_continue('query', 'categorymembers',
+    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'categorymembers',
       list='categorymembers',
       cmlimit=500,
       cmtitle='Category:' + category,
       cmprop='title', # Only return page titles, not page IDs
       cmnamespace='0', # Links from the Main namespace only
-    )
+    )]
 
   def get_all_files(self):
     return self.get_with_continue('query', 'pages',
