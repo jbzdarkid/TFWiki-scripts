@@ -80,6 +80,9 @@ def main(w):
     category = category.title
     if category in maintanence_categories:
       continue
+      
+    if verbose:
+      print(f'Processing {category}')
 
     cat_lang = category.rpartition('/')[2]
     if cat_lang not in LANGS:

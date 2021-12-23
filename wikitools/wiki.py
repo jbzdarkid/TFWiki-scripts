@@ -36,6 +36,9 @@ class Wiki:
         return # Unable to load more info for this query
       if data == {'batchcomplete': ''}:
         return # No entries for this query
+      if 'error' in data:
+        print('Error: ' + str(data['error']))
+        break
 
       try:
         entries = data[action][entry_key]
@@ -46,8 +49,12 @@ class Wiki:
           print(f'Entry key "{entry_key}" was not found in data[{action}]. Did you mean one of these keys: {", ".join(data[action].keys())}')
         break
 
-      for entry in entries:
-        yield entry
+      if isinstance(entries, list):
+        for entry in entries:
+          yield entry
+      elif isinstance(entries, dict):
+        for entry in entries.values():
+          yield entry
 
       if 'continue' in data:
         kwargs.update(data['continue'])
@@ -133,7 +140,7 @@ class Wiki:
       list='allpages',
       aplimit=500,
       apnamespace=14, # Categories
-      apfilterredir='nonredirects' if filter_redirects else '',
+      apfilterredir='nonredirects' if filter_redirects else None,
     )]
 
   def get_all_category_pages(self, category):
