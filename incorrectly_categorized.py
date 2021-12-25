@@ -80,7 +80,7 @@ def main(w):
     category = category.title
     if category in maintanence_categories:
       continue
-      
+
     if verbose:
       print(f'Processing {category}')
 

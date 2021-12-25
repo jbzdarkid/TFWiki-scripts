@@ -128,8 +128,8 @@ class Wiki:
     )]
 
   def get_all_pages(self):
-    def skip(page): # Should we filter out a given page?
-      title = page['title']
+    def skip(entry): # Should we filter out a given page?
+      title = entry['title']
       if title.endswith('.js') or title.endswith('.css'):
         return True
       return False
@@ -139,7 +139,7 @@ class Wiki:
       list='allpages',
       aplimit=500,
       apfilterredir='nonredirects', # Filter out redirects
-    ) if not skip(page)]
+    ) if not skip(entry)]
 
   def get_all_categories(self, filter_redirects=True):
     return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'allpages',
