@@ -92,7 +92,7 @@ def pagescraper(w, pages, done, translation_data):
     if len(errors) > 0:
       if verbose:
         print(f'Found {len(errors)} errors for page {page.title}')
-      data = f'<h3> [page.get_edit_url()} {page.title}] </h3>\n'
+      data = f'<h3> [{page.get_edit_url()} {page.title}] </h3>\n'
       errors.sort()
       for error in errors:
         # For display purposes, we want to highlight the mismatched symbol. To do so, we replicate the symbol on the line below, at the same horizontal offset.
@@ -126,7 +126,7 @@ def main(w):
   translation_data = {lang: [] for lang in LANGS}
   threads = []
   for _ in range(PAGESCRAPERS): # Number of threads
-    thread = Thread(target=pagescraper, args=(pages, done, translation_data))
+    thread = Thread(target=pagescraper, args=(w, pages, done, translation_data))
     threads.append(thread)
     thread.start()
   try:

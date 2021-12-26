@@ -7,7 +7,6 @@ verbose = False
 def main(w):
   seen = set()
   all_duplicates = []
-  # TODO: Now returning raw
   for page in w.get_all_files():
     duplicates = page.raw.get('duplicatefiles', [])
     duplicates = [ 'File:' + dupe['name'].replace('_', ' ') for dupe in duplicates ]

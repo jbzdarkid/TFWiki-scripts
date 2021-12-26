@@ -159,11 +159,11 @@ class Wiki:
     )]
 
   def get_all_files(self):
-    return self.get_with_continue('query', 'pages',
+    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'pages',
       generator='allimages',
       gailimit=500,
       prop='duplicatefiles', # Include info about duplicates
-    )
+    )]
 
   def get_all_unused_files(self):
     for html in self.get_html_with_continue('Special:UnusedFiles'):
