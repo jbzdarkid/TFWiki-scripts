@@ -8,16 +8,15 @@ def main(w):
   seen = set()
   all_duplicates = []
   for page in w.get_all_files():
-    duplicates = page.get('duplicatefiles', [])
+    duplicates = page.raw.get('duplicatefiles', [])
     duplicates = [ 'File:' + dupe['name'].replace('_', ' ') for dupe in duplicates ]
-    title = page['title']
 
-    if not duplicates or title in seen:
+    if not duplicates or page.title in seen:
       continue
-    duplicates.append(title) # The duplicate list does not include ourselves, obviously
+    duplicates.append(page.title) # The duplicate list does not include ourselves, obviously
 
     if verbose:
-      print(f'Found duplicate image: {title}')
+      print(f'Found duplicate image: {page.title}')
 
     seen.update(duplicates)
     all_duplicates.append(duplicates)

@@ -77,24 +77,26 @@ def main(w):
   category_keys = {language: [] for language in LANGS}
   unique_pages = set()
   for category in w.get_all_categories(filter_redirects=False):
-    category = category['title']
+    category = category.title
     if category in maintanence_categories:
       continue
+
+    if verbose:
+      print(f'Processing {category}')
 
     cat_lang = category.rpartition('/')[2]
     if cat_lang not in LANGS:
       cat_lang = 'en'
     for page in w.get_all_category_pages(category):
-      page = page['title']
-      page_lang = page.rpartition('/')[2]
+      page_lang = page.title.rpartition('/')[2]
       if page_lang not in LANGS:
         page_lang = 'en'
       if page_lang != cat_lang:
         if category not in miscategorized:
-          miscategorized[category] = [page]
+          miscategorized[category] = [page.title]
         else:
-          miscategorized[category].append(page)
-        unique_pages.add(page)
+          miscategorized[category].append(page.title)
+        unique_pages.add(page.title)
     if category in miscategorized: # We actually found pages
       category_keys[cat_lang].append([len(miscategorized[category]), category])
       if verbose:

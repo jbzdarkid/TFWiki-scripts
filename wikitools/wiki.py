@@ -3,6 +3,8 @@ from requests.exceptions import RequestException
 from time import sleep
 import requests
 
+from .page import Page
+
 # List of namespaces: https://wiki.teamfortress.com/w/api.php?action=query&meta=siteinfo&siprop=namespaces
 
 class Wiki:
@@ -34,6 +36,9 @@ class Wiki:
         return # Unable to load more info for this query
       if data == {'batchcomplete': ''}:
         return # No entries for this query
+      if 'error' in data:
+        print('Error: ' + str(data['error']))
+        break
 
       try:
         entries = data[action][entry_key]
@@ -44,12 +49,12 @@ class Wiki:
           print(f'Entry key "{entry_key}" was not found in data[{action}]. Did you mean one of these keys: {", ".join(data[action].keys())}')
         break
 
-      if 'list' in kwargs:
+      if isinstance(entries, list):
         for entry in entries:
           yield entry
-      elif 'generator' in kwargs:
-        for value in entries.values():
-          yield value
+      elif isinstance(entries, dict):
+        for entry in entries.values():
+          yield entry
 
       if 'continue' in data:
         kwargs.update(data['continue'])
@@ -100,12 +105,12 @@ class Wiki:
           raise
 
   def get_all_templates(self):
-    return self.get_with_continue('query', 'allpages',
+    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
       apfilterredir='nonredirects', # Filter out redirects
       apnamespace='10', # Template namespace
-    )
+    )]
 
   def get_all_users(self):
     return self.get_with_continue('query', 'allusers',
@@ -116,49 +121,49 @@ class Wiki:
     )
 
   def get_all_bots(self):
-    return self.get_with_continue('query', 'allusers',
+    return [user['name'] for user in self.get_with_continue('query', 'allusers',
       list='allusers',
       aulimit=500,
       aurights='bot', # Only return bots
-    )
+    )]
 
   def get_all_pages(self):
-    def skip(page): # Should we filter out a given page?
-      title = page['title']
+    def skip(entry): # Should we filter out a given page?
+      title = entry['title']
       if title.endswith('.js') or title.endswith('.css'):
         return True
       return False
 
-    # Wait, does allpages have a namespace restriction? hmmm....
-    return [page for page in self.get_with_continue('query', 'allpages',
+    # TODO: Wait, does allpages have a namespace restriction? hmmm....
+    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
       apfilterredir='nonredirects', # Filter out redirects
-    ) if not skip(page)]
+    ) if not skip(entry)]
 
   def get_all_categories(self, filter_redirects=True):
-    return self.get_with_continue('query', 'allpages',
+    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
       apnamespace=14, # Categories
-      apfilterredir='nonredirects' if filter_redirects else '',
-    )
+      apfilterredir='nonredirects' if filter_redirects else None,
+    )]
 
   def get_all_category_pages(self, category):
-    return self.get_with_continue('query', 'categorymembers',
+    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'categorymembers',
       list='categorymembers',
       cmlimit=500,
       cmtitle='Category:' + category,
       cmprop='title', # Only return page titles, not page IDs
       cmnamespace='0', # Links from the Main namespace only
-    )
+    )]
 
   def get_all_files(self):
-    return self.get_with_continue('query', 'pages',
+    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'pages',
       generator='allimages',
       gailimit=500,
       prop='duplicatefiles', # Include info about duplicates
-    )
+    )]
 
   def get_all_unused_files(self):
     for html in self.get_html_with_continue('Special:UnusedFiles'):

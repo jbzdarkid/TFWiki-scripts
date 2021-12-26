@@ -8,30 +8,29 @@ LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko',
 
 # This wants something very specific so I'm not putting it into wikitools.
 def get_navbox_templates(w):
-  return w.get_with_continue('query', 'pages',
+  return [Page(w, entry['title'], entry) for entry in w.get_with_continue('query', 'pages',
     generator='transcludedin',
     titles='Template:Navbox',
     gtinamespace=10, # Template:
     gtilimit=500,
-  )
+  )]
 
 def main(w):
   navbox_templates = {}
   for page in get_navbox_templates(w):
-    p = Page(w, page['title']) 
-    if p.title.lower().startswith('template:navbox'):
+    if page.title.lower().startswith('template:navbox'):
       continue # Exclude alternative navbox templates
-    if p.title.lower().endswith('sandbox'):
+    if page.title.lower().endswith('sandbox'):
       continue # Sandboxes link to pages but shouldn't be used
-    if 'navbox' not in p.get_wiki_text().lower():
+    if 'navbox' not in page.get_wiki_text().lower():
       continue # Some template pages actually *use* other navboxes, but are not one themselves.
 
-    navbox_templates[p.title] = [
-      set(link['title'] for link in p.get_links()),
-      set(link['title'] for link in p.get_transclusions()),
+    navbox_templates[page.title] = [
+      set(link.title for link in page.get_links()),
+      set(trans.title for trans in page.get_transclusions()),
     ]
     if verbose:
-      print(f'Navbox {p.title} links to {len(navbox_templates[p.title][0])} pages and is transcluded by {len(navbox_templates[p.title][1])} pages')
+      print(f'Navbox {page.title} links to {len(navbox_templates[page.title][0])} pages and is transcluded by {len(navbox_templates[page.title][1])} pages')
 
   if verbose:
     print(f'Found {len(navbox_templates)} navbox templates')
@@ -42,16 +41,13 @@ def main(w):
     for template in navbox_templates:
       links, transclusions = navbox_templates[template]
 
-      basename, _, lang = page['title'].rpartition('/')
+      basename, _, lang = page.title.rpartition('/')
       if lang not in LANGS:
         lang = 'en'
-        basename = page['title']
+        basename = page.title
 
-      if basename in links and page['title'] not in transclusions:
-        if verbose:
-          print('Page', page['title'], 'is linked by', template, 'but does not transclude it')
-
-        missing_navbox[template].append(page['title'])
+      if basename in links and page.title not in transclusions:
+        missing_navbox[template].append(page.title)
         count += 1
 
   output = """\
@@ -70,7 +66,7 @@ Pages which a part of a navbox but do not include said navbox. Data as of {date}
     for page in sorted(missing_navbox[template]):
       output += f'* [[{page}]] does not transclude {template}\n'
 
-    return output
+  return output
 
 if __name__ == '__main__':
   verbose = True

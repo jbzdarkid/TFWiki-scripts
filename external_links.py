@@ -58,21 +58,21 @@ def get_links(regex, text):
 def pagescraper(w, page_q, done, link_q, links):
   while True:
     try:
-      page = page_q.get(True, 1)['title']
+      page = page_q.get(True, 1)
     except Empty:
       if done.is_set():
         return
       else:
         continue
 
-    content = Page(w, page).get_wiki_text()
+    content = page.get_wiki_text()
     linkRegex = return_link_regex()
     for url in get_links(linkRegex, content):
       if url not in links:
         links[url] = []
         link_q.put(url)
-      if page not in links[url]:
-        links[url].append(page)
+      if page.title not in links[url]:
+        links[url].append(page.title)
 
 def linkchecker(link_q, done, linkData):
   while True:
@@ -111,7 +111,7 @@ def main(w):
     print('Generating page list')
   page_q, done = Queue(), Event()
   for page in w.get_all_pages():
-    if page['title'].rpartition('/')[2] in LANGS:
+    if page.title.rpartition('/')[2] in LANGS:
       continue # Filter out non-english pages
     page_q.put(page)
   done.set()
