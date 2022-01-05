@@ -42,6 +42,7 @@ def main(w):
     'Template:Information',
     'Template:Main Page (Classic) layout',
     'Template:Main Page layout',
+    'Template:Mann Vs Machine Nav/no category',
   ]
 
   excluded_pages = {
@@ -104,10 +105,10 @@ def main(w):
       if basename in excluded_pages.get(template, []): # Some additional manual removals
         continue
 
-      expected_navboxes += 1
-
-      if basename in links and page.title not in transclusions:
-        page_missing_navboxes.append(template)
+      if basename in links:
+        expected_navboxes += 1
+        if page.title not in transclusions:
+          page_missing_navboxes.append(template)
 
     if expected_navboxes < 5: # Some pages are too generic to have a meaningful list of navboxes
       count += 1
