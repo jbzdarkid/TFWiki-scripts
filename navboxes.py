@@ -48,10 +48,12 @@ def main(w):
     # Links for clarification reasons, which aren't really part of the navbox
     'Template:ClassicSniperNav': ['Team Fortress'],
     'Template:Haunted Halloween Special Nav': ['Non-player characters'],
+    'Template:Scream Fortress Nav': ['Non-player characters'],
 
     # Just because there *were* arena maps in this update doesn't mean we should link it from [[Arena]]
     'Template:Halloween Map Nav': ['Arena', 'King of the Hill', 'Payload', 'Player Destruction', 'Special Delivery (game mode)'],
-    'Template:Two Cities Update Nav': ['Control Point (game mode)'],
+    'Template:Two Cities Update Nav': ['Control Point (game mode)', 'Items'],
+    'Template:Smissmas Map Nav': ['Capture the Flag', 'Control Point (game mode)', 'King of the Hill', 'Payload', 'Player Destruction'],
 
     # The major updates which introduced certain classes' achievements aren't really topical.
     'Template:Scout Update Nav': ['Scout achievements', 'Obtaining Scout achievements'],
@@ -85,9 +87,10 @@ def main(w):
   if verbose:
     print(f'Found {len(navbox_templates)} navbox templates')
 
-  missing_navbox = {template: [] for template in navbox_templates}
+  missing_navboxes = {template: [] for template in navbox_templates}
   count = 0
   for page in w.get_all_pages():
+    expected_navboxes = 0
     page_missing_navboxes = []
 
     for template in navbox_templates:
@@ -101,13 +104,15 @@ def main(w):
       if basename in excluded_pages.get(template, []): # Some additional manual removals
         continue
 
+      expected_navboxes += 1
+
       if basename in links and page.title not in transclusions:
         page_missing_navboxes.append(template)
 
-    if len(page_missing_navboxes) < 5: # Some pages are too generic to have a meaningful list of navboxes
+    if expected_navboxes < 5: # Some pages are too generic to have a meaningful list of navboxes
       count += 1
       for template in page_missing_navboxes:
-        missing_navbox[template].append(page.title)
+        missing_navboxes[template].append(page.title)
 
   output = """\
 {{{{DISPLAYTITLE:{count} pages missing navbox templates}}}}
@@ -117,12 +122,12 @@ There are <onlyinclude>{count}</onlyinclude> pages which are part of a navbox bu
       count=count,
       date=strftime(r'%H:%M, %d %B %Y', gmtime()))
 
-  for template in missing_navbox:
-    if len(missing_navbox[template]) == 0:
+  for template in missing_navboxes:
+    if len(missing_navboxes[template]) == 0:
       continue
 
     output += f'== [[{template}]] ==\n'
-    for page in sorted(missing_navbox[template]):
+    for page in sorted(missing_navboxes[template]):
       output += f'* [[{page}]] does not transclude {template}\n'
 
   return output
