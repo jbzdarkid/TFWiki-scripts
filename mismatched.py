@@ -4,7 +4,6 @@ from threading import Thread, Event
 from time import gmtime, strftime
 from unicodedata import east_asian_width as width
 from wikitools import wiki
-from wikitools.page import Page
 
 pairs = [
   ['\\(', '\\)'],
@@ -18,7 +17,7 @@ pairs = [
 # Some pages are expected to have mismatched parenthesis (as they are part of the update history, item description, etc)
 exemptions = {
   'Advanced_Weaponiser': pairs[5],      # Includes example console commands
-  'Bots': pairs[5],                     # Includes example console commands 
+  'Bots': pairs[5],                     # Includes example console commands
   'Linux dedicated server': pairs[0],   # Includes a bash script with case
   'List_of_default_keys': pairs[2],     # Includes {{Key|]}}
   'List_of_useful_console_commands': pairs[5], # Includes placeholder <>
@@ -38,7 +37,7 @@ def get_match_info(m):
   else:
     return groups[0].lower()
 
-def pagescraper(w, pages, done, translation_data):
+def pagescraper(pages, done, translation_data):
   while True:
     try:
       page = pages.get(True, 1)
@@ -55,7 +54,7 @@ def pagescraper(w, pages, done, translation_data):
       base = page.title
 
     errors = []
-    for i, pair in enumerate(pairs):
+    for pair in pairs:
       locations = []
       if pair in exemptions.get(base, []):
         continue
@@ -126,7 +125,7 @@ def main(w):
   translation_data = {lang: [] for lang in LANGS}
   threads = []
   for _ in range(PAGESCRAPERS): # Number of threads
-    thread = Thread(target=pagescraper, args=(w, pages, done, translation_data))
+    thread = Thread(target=pagescraper, args=(pages, done, translation_data))
     threads.append(thread)
     thread.start()
   try:

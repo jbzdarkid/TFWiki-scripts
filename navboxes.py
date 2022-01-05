@@ -89,7 +89,7 @@ def main(w):
   count = 0
   for page in w.get_all_pages():
     page_missing_navboxes = []
-    
+
     for template in navbox_templates:
       links, transclusions = navbox_templates[template]
 
