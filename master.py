@@ -72,17 +72,17 @@ if __name__ == '__main__':
   failures = 0
 
   if is_daily: # Multi-language reports need frequent updates since we have many translators
-    failures += publish_lang_report(w, 'untranslated_templates', 'Untranslated templates')
-    failures += publish_lang_report(w, 'missing_translations', 'Missing translations')
-    failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
+    #failures += publish_lang_report(w, 'untranslated_templates', 'Untranslated templates')
+    #failures += publish_lang_report(w, 'missing_translations', 'Missing translations')
+    #failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
     failures += publish_lang_report(w, 'all_articles', 'All articles')
 
   if is_weekly: # English (or cross-language) reports which are not too costly to run
     failures += publish_single_report(w, 'wanted_templates', 'Wanted templates')
-    failures += publish_single_report(w, 'navboxes', 'Pages which are missing navboxes')
-    failures += publish_single_report(w, 'overtranslated', 'Pages with no english equivalent')
-    failures += publish_single_report(w, 'incorrectly_categorized', 'Pages with incorrect categorization')
-    failures += publish_single_report(w, 'undocumented_templates', 'Undocumented templates')
+    #failures += publish_single_report(w, 'navboxes', 'Pages which are missing navboxes')
+    #failures += publish_single_report(w, 'overtranslated', 'Pages with no english equivalent')
+    #failures += publish_single_report(w, 'incorrectly_categorized', 'Pages with incorrect categorization')
+    #failures += publish_single_report(w, 'undocumented_templates', 'Undocumented templates')
 
   if is_monthly: # Expensive or otherwise infrequently-changing reports
     failures += publish_single_report(w, 'duplicate_files', 'Duplicate files')
@@ -106,6 +106,8 @@ if __name__ == '__main__':
 
   # Pass this as output to github-actions, so it can be used in later steps
   with open(environ['GITHUB_ENV'], 'a') as f:
-    f.write(f'comment<<EOF{comment}EOF')
+    f.write(f'comment<<EOF')
+    f.write(comment)
+    f.write('EOF')
 
   exit(failures)
