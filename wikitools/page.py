@@ -27,7 +27,7 @@ class Page:
   #   return r.status_code == 200
 
   def get_edit_url(self):
-    return f'{self.wiki.wiki_url}?title={self.title}&action=edit'
+    return f'{self.wiki.wiki_url}?title={self.url_title}&action=edit'
 
   # TODO: Deprecate
   def get_transclusion_count(self):
