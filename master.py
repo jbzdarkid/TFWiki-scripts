@@ -99,9 +99,9 @@ if __name__ == '__main__':
   comment = 'Please verify the following diffs:\n'
   for report_name, duration, link_map in diff_links:
     comment += f'- [ ] {report_name} ran in {duration}:'
-    languages = sorted(diff_links.keys(), key=lambda lang: (lang != 'en', lang)) # Sort languages, keeping english first
+    languages = sorted(link_map.keys(), key=lambda lang: (lang != 'en', lang)) # Sort languages, keeping english first
     for language in languages:
-      comment += f' [{language}]({diff_links[language]})'
+      comment += f' [{language}]({link_map[language]})'
     comment += '\n'
 
   # Pass this as output to github-actions, so it can be used in the next step
