@@ -6,12 +6,14 @@ from traceback import print_exc
 from wikitools import wiki
 from wikitools.page import Page
 
-# Write a replacement script for broken external links
+# Write a replacement script for broken external links -> WindBOT filter
 #   forums.tfmaps.net?t=# -> tf2maps.net/threads/#
 # Sort external links by domain (with sub-headers)
 # External links is a mess. It needs a modern eye.
 # update readme (again)
 # Improve the wikitools/wiki get_with_continue to actually yield the pagenames, not just the json objects.
+
+def write_output_variable(name, value):
 
 diff_links = []
 
@@ -104,7 +106,8 @@ if __name__ == '__main__':
       comment += f' [{language}]({link_map[language]})'
     comment += '\n'
 
-  # Pass this as output to github-actions, so it can be used in the next step
-  print(f'::set-output name=comment::{comment}')
+  # Pass this as output to github-actions, so it can be used in later steps
+  with open(environ['GITHUB_ENV'], 'a') as f:
+    f.write(f'comment<<EOF{comment}EOF')
 
   exit(failures)

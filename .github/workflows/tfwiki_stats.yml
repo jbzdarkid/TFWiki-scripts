@@ -20,7 +20,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run wiki scripts
-      id: run_scripts
       run: python master.py ${{ github.event_name }}
       env:
         WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
@@ -39,5 +38,5 @@ jobs:
       with:
         comment-id: ${{ steps.find_comment.outputs.comment-id }}
         issue-number: ${{ github.event.pull_request.number }}
-        body: ${{ steps.run_scripts.outputs.comment }} 
+        body: ${{ env.comment }} 
         edit-mode: replace
