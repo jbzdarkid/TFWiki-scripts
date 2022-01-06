@@ -113,7 +113,7 @@ def main(w):
     if page_missing_navboxes and expected_navboxes < 5: # Some pages are too generic to have a meaningful list of navboxes
       count += 1
       for template in page_missing_navboxes:
-        missing_navboxes[template].append(page.title)
+        missing_navboxes[template].append(page)
 
   output = """\
 {{{{DISPLAYTITLE:{count} pages missing navbox templates}}}}
