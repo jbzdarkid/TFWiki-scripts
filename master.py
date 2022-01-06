@@ -13,8 +13,6 @@ from wikitools.page import Page
 # update readme (again)
 # Improve the wikitools/wiki get_with_continue to actually yield the pagenames, not just the json objects.
 
-def write_output_variable(name, value):
-
 diff_links = []
 
 def publish_single_report(w, module, report_name):
