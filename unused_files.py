@@ -39,7 +39,7 @@ def main(w):
 
   output = """\
 {{{{DISPLAYTITLE:{count} unused files}}}}
-Unused files, parsed from [[Special:UnusedFiles]]. Data as of {date}.
+<onlyinclude>{count}</onlyinclude> unused files, parsed from [[Special:UnusedFiles]]. Data as of {date}.
 
 """.format(
   count=count,

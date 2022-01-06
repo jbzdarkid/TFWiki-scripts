@@ -15,7 +15,7 @@ def main(w):
 
   output = """\
 {{{{DISPLAYTITLE: {count} wanted templates}}}}
-List of all {count} broken template transclusions (usually due to typos or missing dictionary entries). Data as of {date}.
+List of all <onlyinclude>{count}</onlyinclude> broken template transclusions (usually due to typos or missing dictionary entries). Data as of {date}.
 
 == List ==\n""".format(
     count = sum(i[0] for i in wanted_templates),

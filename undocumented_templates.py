@@ -1,6 +1,7 @@
 from queue import Queue, Empty
 from re import search, sub
 from threading import Thread, Event
+from time import gmtime, strftime
 from wikitools import wiki
 from wikitools.page import Page
 
@@ -29,9 +30,10 @@ def pagescraper(w, page_q, done, badpages):
       continue # Page uses a documentation template
 
     count = page.get_transclusion_count()
-    if verbose:
-      print(f'Page {page.title} does not transclude a documentation template and has {count} backlinks')
-    badpages.append([count, page.title])
+    if count > 0:
+      if verbose:
+        print(f'Page {page.title} does not transclude a documentation template and has {count} backlinks')
+      badpages.append([count, page.title])
 
 def main(w):
   page_q, done = Queue(), Event()
@@ -56,7 +58,14 @@ def main(w):
       thread.join()
 
   badpages.sort(key=lambda s: (-s[0], s[1]))
-  output = '{{DISPLAYTITLE:%d templates without documentation}}\n' % len(badpages)
+  output = """\
+{{{{DISPLAYTITLE:{count} templates without documentation}}}}
+There are <onlyinclude>{count}</onlyinclude> templates which are in use but are undocumented. Please either add a <nowiki><noinclude></nowiki> section with a usage guide, or make use of {{{{tl|Documentation}}}}. Data as of {date}.
+
+""".format(
+      count=len(badpages),
+      date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+
   for count, title in badpages:
     output += '* [[%s|]] ([{{fullurl:Special:WhatLinksHere/%s|limit=%d&namespace=0&hideredirs=1&hidelinks=1}} %d use%s])\n' % (title, title, min(50, count), count, '' if count == 1 else 's')
   return output

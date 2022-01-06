@@ -28,7 +28,7 @@ def main(w):
 
   output = """\
 {{{{DISPLAYTITLE: {count} duplicate files}}}}
-List of all duplicate files; {unique} unique files, {count} duplicated files in total. Data as of {date}.
+List of all duplicate files; <onlyinclude>{unique}</onlyinclude> unique files, {count} duplicated files in total. Data as of {date}.
 
 == List ==\n""".format(
     unique = len(all_duplicates),
