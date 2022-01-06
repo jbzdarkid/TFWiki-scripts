@@ -106,6 +106,24 @@ if __name__ == '__main__':
 
   # Pass this as output to github-actions, so it can be used in later steps
   with open(environ['GITHUB_ENV'], 'a') as f:
+    subcomment = """\
+[a](foo)
+[b](bar)"""
+    f.write('GITHUB_COMMENT<<EOF')
+    f.write(subcomment)
+    f.write('EOF')
+    subcomment = """\
+[a](https://wiki.tf/d/12345)
+[b](https://wiki.tf/d/12345)"""
+    f.write('GITHUB_COMMENT<<EOF')
+    f.write(subcomment)
+    f.write('EOF')
+    subcomment = """\
+- [ ] [a](https://wiki.tf/d/12345)
+- [ ] [b](https://wiki.tf/d/12345)"""
+    f.write('GITHUB_COMMENT<<EOF')
+    f.write(subcomment)
+    f.write('EOF')
     for i in range(len(comment)):
       subcomment = comment[:i]
       print(f'\n{i}:\n{subcomment}\n')
