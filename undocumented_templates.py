@@ -1,6 +1,7 @@
 from queue import Queue, Empty
 from re import search, sub
 from threading import Thread, Event
+from time import gmtime, strftime
 from wikitools import wiki
 from wikitools.page import Page
 

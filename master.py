@@ -69,24 +69,24 @@ if __name__ == '__main__':
   print(datetime.now())
   failures = 0
 
-  if is_daily:
+  if is_daily: # Multi-language reports need frequent updates since we have many translators
     failures += publish_lang_report(w, 'untranslated_templates', 'Untranslated templates')
     failures += publish_lang_report(w, 'missing_translations', 'Missing translations')
     failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
     failures += publish_lang_report(w, 'all_articles', 'All articles')
 
-  if is_weekly:
+  if is_weekly: # English (or cross-language) reports which are not too costly to run
     failures += publish_single_report(w, 'wanted_templates', 'Wanted templates')
     failures += publish_single_report(w, 'navboxes', 'Pages which are missing navboxes')
     failures += publish_single_report(w, 'overtranslated', 'Pages with no english equivalent')
     failures += publish_single_report(w, 'incorrectly_categorized', 'Pages with incorrect categorization')
+    failures += publish_single_report(w, 'undocumented_templates', 'Undocumented templates')
 
-  if is_monthly:
+  if is_monthly: # Expensive or otherwise infrequently-changing reports
     failures += publish_single_report(w, 'duplicate_files', 'Duplicate files')
     failures += publish_single_report(w, 'unused_files', 'Unused files')
     failures += publish_single_report(w, 'edit_stats', 'Users by edit count')
-    failures += publish_single_report(w, 'undocumented_templates', 'Undocumented templates')
     failures += publish_single_report(w, 'external_links', 'External links')
-    failures += publish_single_report(w, 'mismatched', 'Mismatched parenthesis') # This report is very slow, so it goes last.
+    failures += publish_single_report(w, 'mismatched', 'Mismatched parenthesis')
 
   exit(failures)
