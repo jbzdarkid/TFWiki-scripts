@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
   comment = 'Please verify the following diffs:\n'
   for report_name, duration, link_map in diff_links:
-    comment += f'- [ ] {report_name}:'
+    comment += f'- [ ] {report_name} ran in {duration}:'
     languages = sorted(diff_links.keys(), key=lambda lang: (lang != 'en', lang)) # Sort languages, keeping english first
     for language in languages:
       comment += f' [{language}]({diff_links[language]})'
