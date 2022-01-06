@@ -83,17 +83,17 @@ if __name__ == '__main__':
   failures = 0
 
   if is_daily: # Multi-language reports need frequent updates since we have many translators
-    #failures += publish_lang_report(w, 'untranslated_templates', 'Untranslated templates')
-    #failures += publish_lang_report(w, 'missing_translations', 'Missing translations')
-    #failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
+    failures += publish_lang_report(w, 'untranslated_templates', 'Untranslated templates')
+    failures += publish_lang_report(w, 'missing_translations', 'Missing translations')
+    failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
     failures += publish_lang_report(w, 'all_articles', 'All articles')
 
   if is_weekly: # English (or cross-language) reports which are not too costly to run
     failures += publish_single_report(w, 'wanted_templates', 'Wanted templates')
-    #failures += publish_single_report(w, 'navboxes', 'Pages which are missing navboxes')
-    #failures += publish_single_report(w, 'overtranslated', 'Pages with no english equivalent')
-    #failures += publish_single_report(w, 'incorrectly_categorized', 'Pages with incorrect categorization')
-    #failures += publish_single_report(w, 'undocumented_templates', 'Undocumented templates')
+    failures += publish_single_report(w, 'navboxes', 'Pages which are missing navboxes')
+    failures += publish_single_report(w, 'overtranslated', 'Pages with no english equivalent')
+    failures += publish_single_report(w, 'incorrectly_categorized', 'Pages with incorrect categorization')
+    failures += publish_single_report(w, 'undocumented_templates', 'Undocumented templates')
 
   if is_monthly: # Expensive or otherwise infrequently-changing reports
     failures += publish_single_report(w, 'duplicate_files', 'Duplicate files')
@@ -101,11 +101,6 @@ if __name__ == '__main__':
     failures += publish_single_report(w, 'edit_stats', 'Users by edit count')
     failures += publish_single_report(w, 'external_links', 'External links')
     failures += publish_single_report(w, 'mismatched', 'Mismatched parenthesis')
-
-  def add_diff_link(report, language, link):
-    if report not in diff_links:
-      diff_links[report] = f'- [ ] {report}:'
-    diff_links[report][language] = link
 
   comment = 'Please verify the following diffs:\n'
   for report_name, duration, link_map in diff_links:
@@ -117,29 +112,6 @@ if __name__ == '__main__':
 
   # Pass this as output to github-actions, so it can be used in later steps
   with open(environ['GITHUB_ENV'], 'a') as f:
-    subcomment = """\
-[a](foo)
-[b](bar)"""
-    f.write('GITHUB_COMMENT<<EOF')
-    f.write(subcomment)
-    f.write('EOF')
-    subcomment = """\
-[a](https://wiki.tf/d/12345)
-[b](https://wiki.tf/d/12345)"""
-    f.write('GITHUB_COMMENT<<EOF')
-    f.write(subcomment)
-    f.write('EOF')
-    subcomment = """\
-- [ ] [a](https://wiki.tf/d/12345)
-- [ ] [b](https://wiki.tf/d/12345)"""
-    f.write('GITHUB_COMMENT<<EOF')
-    f.write(subcomment)
-    f.write('EOF')
-    for i in range(len(comment)):
-      subcomment = comment[:i]
-      print(f'\n{i}:\n{subcomment}\n')
-      f.write('GITHUB_COMMENT<<EOF')
-      f.write(subcomment)
-      f.write('EOF')
+    f.write('GITHUB_COMMENT<<EOF{comment}EOF')
 
   exit(failures)
