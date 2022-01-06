@@ -13,13 +13,14 @@ from wikitools.page import Page
 # update readme (again)
 # Improve the wikitools/wiki get_with_continue to actually yield the pagenames, not just the json objects.
 
+diff_links = []
+
 def publish_single_report(w, module, report_name):
   start = datetime.now()
   try:
     main = importlib.import_module(module).main
-    print(Page(w, f'{root}/{report_name}').edit(main(w), bot=True, summary=summary))
-    end = datetime.now()
-    print(f'Report {report_name} took {end - start}')
+    diff_link = Page(w, f'{root}/{report_name}').edit(main(w), bot=True, summary=summary)
+    diff_links.append((report_name, datetime.now() - start, {'en': diff_link})
     return 0
   except Exception:
     print(f'Failed to update {report_name}')
@@ -30,10 +31,11 @@ def publish_lang_report(w, module, report_name):
   start = datetime.now()
   try:
     main = importlib.import_module(module).main
+    diff_link_map = {}
     for lang, output in main(w):
-      print(Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary))
-    end = datetime.now()
-    print(f'Report {report_name} took {end - start}')
+      diff_link = Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary)
+      diff_link_map[lang] = diff_link
+    diff_links.append((report_name, datetime.now() - start, diff_link_map))
     return 0
   except Exception:
     print(f'Failed to update {report_name}')
@@ -88,5 +90,21 @@ if __name__ == '__main__':
     failures += publish_single_report(w, 'undocumented_templates', 'Undocumented templates')
     failures += publish_single_report(w, 'external_links', 'External links')
     failures += publish_single_report(w, 'mismatched', 'Mismatched parenthesis') # This report is very slow, so it goes last.
+
+  def add_diff_link(report, language, link):
+    if report not in diff_links:
+      diff_links[report] = f'- [ ] {report}:'
+    diff_links[report][language] = link
+
+  comment = 'Please verify the following diffs:\n'
+  for report_name, duration, link_map in diff_links:
+    comment += f'- [ ] {report_name}:'
+    languages = sorted(diff_links.keys(), key=lambda lang: (lang != 'en', lang)) # Sort languages, keeping english first
+    for language in languages:
+      comment += f' [{language}]({diff_links[language]})'
+    comment += '\n'
+
+  # Pass this as output to github-actions, so it can be used in the next step
+  print(f'::set-output name=comment::{comment}')
 
   exit(failures)
