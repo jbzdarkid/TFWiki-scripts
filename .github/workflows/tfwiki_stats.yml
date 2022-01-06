@@ -38,5 +38,5 @@ jobs:
       with:
         comment-id: ${{ steps.find_comment.outputs.comment-id }}
         issue-number: ${{ github.event.pull_request.number }}
-        body: ${{ env.comment }} 
+        body: ${{ env.github_comment }} 
         edit-mode: replace
