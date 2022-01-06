@@ -55,7 +55,7 @@ if __name__ == '__main__':
     is_weekly = True
     is_monthly = True
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
-  elif argv[1] in ['pull_request', 'pull_request_target']:
+  elif argv[1] == 'pull_request':
     root = 'User:Darkid/Reports'
     is_daily = True
     is_weekly = True
