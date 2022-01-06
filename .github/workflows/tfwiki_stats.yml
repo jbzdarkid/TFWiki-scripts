@@ -1,7 +1,7 @@
 name: TFWiki Stats
 on:
   schedule:
-    - cron: '0 1 * * *' # Daily, master.py has more fine-grained timing
+    - cron: '0 1 * * *' # Run the script daily, the script itself controls which reports are run
   workflow_dispatch:
   pull_request:
 
@@ -24,4 +24,19 @@ jobs:
       env:
         WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
         WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
+    - name: Find an existing PR comment
+      if: false
+      uses: peter-evans/find-comment@v1
+      id: find_comment
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
 
+    - name: Edit or create a PR comment
+      if: false
+      uses: peter-evans/create-or-update-comment@v1
+      with:
+        comment-id: ${{ steps.find_comment.outputs.comment-id }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: ${{ env.GITHUB_COMMENT }}
+        edit-mode: replace

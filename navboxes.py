@@ -113,7 +113,7 @@ def main(w):
     if page_missing_navboxes and expected_navboxes < 5: # Some pages are too generic to have a meaningful list of navboxes
       count += 1
       for template in page_missing_navboxes:
-        missing_navboxes[template].append(page.title)
+        missing_navboxes[template].append(page)
 
   output = """\
 {{{{DISPLAYTITLE:{count} pages missing navbox templates}}}}
@@ -127,9 +127,9 @@ There are <onlyinclude>{count}</onlyinclude> pages which are part of a navbox bu
     if len(missing_navboxes[template]) == 0:
       continue
 
-    output += f'== [[{template}]] ==\n'
+    output += '== {{tl|%s}} ==\n' % template.replace('Template:', '')
     for page in sorted(missing_navboxes[template]):
-      output += f'* [[{page}]] does not transclude {template}\n'
+      output += f'* [{page.get_edit_url()} {page.title}] does not transclude {template}\n'
 
   return output
 

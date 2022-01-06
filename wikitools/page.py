@@ -1,5 +1,7 @@
+import functools
 from requests.exceptions import RequestException
 
+@functools.total_ordering
 class Page:
   def __init__(self, wiki, title, raw=None):
     self.wiki = wiki
@@ -9,6 +11,9 @@ class Page:
 
   def __str__(self):
     return self.title
+
+  def __le__(self, other):
+    return self.url_title < other.url_title
 
   def get_wiki_text(self):
     try:
@@ -22,7 +27,7 @@ class Page:
   #   return r.status_code == 200
 
   def get_edit_url(self):
-    return f'{self.wiki.wiki_url}?title={self.title}&action=edit'
+    return f'{self.wiki.wiki_url}?title={self.url_title}&action=edit'
 
   # TODO: Deprecate
   def get_transclusion_count(self):
