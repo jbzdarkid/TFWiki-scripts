@@ -20,7 +20,7 @@ def publish_single_report(w, module, report_name):
   try:
     main = importlib.import_module(module).main
     diff_link = Page(w, f'{root}/{report_name}').edit(main(w), bot=True, summary=summary)
-    diff_links.append((report_name, datetime.now() - start, {'en': diff_link})
+    diff_links.append((report_name, datetime.now() - start, {'en': diff_link}))
     return 0
   except Exception:
     print(f'Failed to update {report_name}')
