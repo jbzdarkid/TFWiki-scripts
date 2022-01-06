@@ -20,6 +20,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run wiki scripts
+      id: run_scripts
       run: python master.py ${{ github.event_name }}
       env:
         WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
@@ -27,7 +28,7 @@ jobs:
     - name: Find an existing PR comment
       if: always()
       uses: peter-evans/find-comment@v1
-      id: fc
+      id: find_comment
       with:
         issue-number: ${{ github.event.pull_request.number }}
         comment-author: 'github-actions[bot]'
@@ -36,7 +37,7 @@ jobs:
       if: always()
       uses: peter-evans/create-or-update-comment@v1
       with:
-        comment-id: ${{ steps.fc.outputs.comment-id }}
+        comment-id: ${{ steps.find_comment.outputs.comment-id }}
         issue-number: ${{ github.event.pull_request.number }}
-        body: ${{ steps.build.outputs.comment }} 
+        body: ${{ steps.run_scripts.outputs.comment }} 
         edit-mode: replace
