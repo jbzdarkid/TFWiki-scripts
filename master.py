@@ -106,6 +106,14 @@ if __name__ == '__main__':
 
   # Pass this as output to github-actions, so it can be used in later steps
   with open(environ['GITHUB_ENV'], 'a') as f:
+    f.write('FOO<<EOF')
+    f.write('foobar\nbaz')
+    f.write('EOF')
+    print('foo')
+    f.write('BAR<<EOF')
+    f.write('- [ ] report_name ran in duration:')
+    f.write('EOF')
+    print('bar')
     f.write('GITHUB_COMMENT<<EOF')
     f.write(comment)
     f.write('EOF')
