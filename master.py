@@ -13,6 +13,26 @@ from wikitools.page import Page
 # update readme (again)
 # Improve the wikitools/wiki get_with_continue to actually yield the pagenames, not just the json objects.
 
+with open(environ['GITHUB_ENV'], 'a') as f:
+  subcomment = """\
+[a](foo)
+[b](bar)"""
+  f.write('GITHUB_COMMENT<<EOF')
+  f.write(subcomment)
+  f.write('EOF')
+  subcomment = """\
+[a](https://wiki.tf/d/12345)
+[b](https://wiki.tf/d/12345)"""
+  f.write('GITHUB_COMMENT<<EOF')
+  f.write(subcomment)
+  f.write('EOF')
+  subcomment = """\
+- [ ] [a](https://wiki.tf/d/12345)
+- [ ] [b](https://wiki.tf/d/12345)"""
+  f.write('GITHUB_COMMENT<<EOF')
+  f.write(subcomment)
+  f.write('EOF')
+
 diff_links = []
 
 def publish_single_report(w, module, report_name):
