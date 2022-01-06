@@ -127,9 +127,9 @@ There are <onlyinclude>{count}</onlyinclude> pages which are part of a navbox bu
     if len(missing_navboxes[template]) == 0:
       continue
 
-    output += '== {{tl|%s}} ==\n' % template
+    output += '== {{tl|%s}} ==\n' % template.replace('Template:', '')
     for page in sorted(missing_navboxes[template]):
-      output += f'* [{page.get_edit_url()} {page.title[9:]}] does not transclude {template}\n'
+      output += f'* [{page.get_edit_url()} {page.title}] does not transclude {template}\n'
 
   return output
 
