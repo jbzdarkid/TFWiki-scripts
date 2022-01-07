@@ -104,6 +104,6 @@ if __name__ == '__main__':
 
   # Pass this as output to github-actions, so it can be used in later steps
   with open(environ['GITHUB_ENV'], 'a') as f:
-    f.write('GITHUB_COMMENT<<EOF\n{comment}\nEOF\n')
+    f.write(f'GITHUB_COMMENT<<EOF\n{comment}\nEOF\n')
 
   exit(failures)
