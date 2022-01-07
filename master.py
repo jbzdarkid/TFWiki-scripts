@@ -74,6 +74,7 @@ if __name__ == '__main__':
 
   if is_daily: # Multi-language reports need frequent updates since we have many translators
     failures += publish_lang_report(w, 'untranslated_templates', 'Untranslated templates')
+  """
     failures += publish_lang_report(w, 'missing_translations', 'Missing translations')
     failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
     failures += publish_lang_report(w, 'all_articles', 'All articles')
@@ -84,6 +85,7 @@ if __name__ == '__main__':
     failures += publish_single_report(w, 'overtranslated', 'Pages with no english equivalent')
     failures += publish_single_report(w, 'incorrectly_categorized', 'Pages with incorrect categorization')
     failures += publish_single_report(w, 'undocumented_templates', 'Undocumented templates')
+  """
 
   if is_monthly: # Expensive or otherwise infrequently-changing reports
     failures += publish_single_report(w, 'duplicate_files', 'Duplicate files')
