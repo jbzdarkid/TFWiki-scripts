@@ -81,15 +81,16 @@ if __name__ == '__main__':
     failures += publish_single_report(w, 'wanted_templates', 'Wanted templates')
     failures += publish_single_report(w, 'navboxes', 'Pages which are missing navboxes')
     failures += publish_single_report(w, 'overtranslated', 'Pages with no english equivalent')
-    failures += publish_single_report(w, 'incorrectly_categorized', 'Pages with incorrect categorization')
-    failures += publish_single_report(w, 'undocumented_templates', 'Undocumented templates')
 
   if is_monthly: # Expensive or otherwise infrequently-changing reports
+    failures += publish_single_report(w, 'incorrectly_categorized', 'Pages with incorrect categorization')
     failures += publish_single_report(w, 'duplicate_files', 'Duplicate files')
     failures += publish_single_report(w, 'unused_files', 'Unused files')
+    failures += publish_single_report(w, 'undocumented_templates', 'Undocumented templates')
     failures += publish_single_report(w, 'edit_stats', 'Users by edit count')
     failures += publish_single_report(w, 'external_links', 'External links')
     failures += publish_single_report(w, 'mismatched', 'Mismatched parenthesis')
+    failures += publish_single_report(w, 'displaytitles', 'Duplicate displaytitles')
 
   comment = 'Please verify the following diffs:\n'
   for report_name, duration, link_map in diff_links:
