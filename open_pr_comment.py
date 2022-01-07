@@ -32,7 +32,8 @@ if __name__ == '__main__':
   if environ['GITHUB_EVENT_NAME'] == 'pull_request':
     comment_body = environ['GITHUB_COMMENT']
 
-    existing_comments = get_pr_comments(environ['PULL_REQUEST_ID'], 'github-actions[bot]')
+    pr = environ['PULL_REQUEST_ID']
+    existing_comments = get_pr_comments(pr, 'github-actions[bot]')
     if existing_comments:
       edit_pr_comment(existing_comments[0]['id'], comment_body)
     else:
