@@ -24,8 +24,8 @@ def edit_pr_comment(comment_id, new_body):
 def create_pr_comment(pr, body):
   return make_request('POST', f'issues/{pr}/comments', json={'body': body})
 
-def create_issue(body):
-  return make_request('POST', 'issues', json={'body': body})
+def create_issue(title, body=''):
+  return make_request('POST', 'issues', json={'title': title, 'body': body})
 
 if __name__ == '__main__':
   comment_body = environ['GITHUB_COMMENT']
@@ -38,6 +38,6 @@ if __name__ == '__main__':
     else:
       create_pr_comment(pr, comment_body)
   elif environ['GITHUB_EVENT_NAME'] == 'workflow_dispatch':
-    create_issue(comment_body)
+    create_issue('Action workflow finished', comment_body)
   elif environ['GITHUB_EVENT_NAME'] == 'schedule':
     print(comment_body)
