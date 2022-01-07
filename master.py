@@ -69,7 +69,6 @@ if __name__ == '__main__':
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   if not w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD']):
     exit(1)
-  print(datetime.now())
   failures = 0
 
   if is_daily: # Multi-language reports need frequent updates since we have many translators

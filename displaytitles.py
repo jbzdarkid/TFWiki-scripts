@@ -32,7 +32,7 @@ def pagescraper(pages, done, errors, overflow):
     if 'Display title' in m.group(0):
       errors.append(page)
     else:
-      overflow[m.group(0)] = page
+      overflow[m.group(1)] = page
 
 def main(w):
   pages, done = Queue(), Event()
@@ -71,13 +71,13 @@ def main(w):
   if len(overflow) > 0:
     output += '== Other errors ==\n'
     for error, page in overflow.items():
-      output += f'=== [[page.title]] ===\n{error}\n'
+      output += f'=== [[{page.title}]] ===\n{error}\n'
 
   for language in LANGS:
     if len(duplicate_errors[language]) > 0:
       output += '== {{lang name|name|%s}} ==\n' % language
       for page in duplicate_errors[language]:
-        output += f'* [page.get_edit_url() page.title]\n'
+        output += f'* [{page.get_edit_url()} {page.title}]\n'
   return output
 
 if __name__ == '__main__':
