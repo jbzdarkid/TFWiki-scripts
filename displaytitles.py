@@ -18,7 +18,7 @@ def pagescraper(pages, done, errors, overflow):
       else:
         continue
 
-    if __name__ != '__main__': 
+    if __name__ != '__main__':
       # When running as part of automation, wiki text will be cached, so it is faster to query the wikitext
       # before making another network call to get the page source.
       wikitext = page.get_wiki_text()
