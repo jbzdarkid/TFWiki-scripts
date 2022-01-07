@@ -21,11 +21,11 @@ def get_pr_comments(pr, author):
 
 
 def edit_pr_comment(comment_id, new_body):
-  return make_request('PATCH', f'issues/comments/{comment_id}', body=new_body)
+  return make_request('PATCH', f'issues/comments/{comment_id}', json={'body': new_body})
 
 
 def create_pr_comment(pr, body):
-  return make_request('POST', f'issues/{pr}/comments', body=body)
+  return make_request('POST', f'issues/{pr}/comments', json={'body': body})
 
 
 if __name__ == '__main__':
