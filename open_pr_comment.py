@@ -36,4 +36,4 @@ if __name__ == '__main__':
     if existing_comments:
       edit_pr_comment(existing_comments[0]['id'], comment_body)
     else:
-      post_pr_comment(pr, comment_body)
+      create_pr_comment(pr, comment_body)
