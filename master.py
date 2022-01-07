@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import importlib
 from os import environ
 from sys import argv, stdout
@@ -43,26 +43,27 @@ def publish_lang_report(w, module, report_name):
     return 1
 
 if __name__ == '__main__':
-  if argv[1] == 'schedule':
+  event = environ['GITHUB_EVENT_NAME']
+  if event == 'schedule':
     root = 'Team Fortress Wiki:Reports'
     is_daily = True
     is_weekly = datetime.now().weekday() == 0 # Monday
     is_monthly = datetime.now().day == 1 # 1st of every month
     summary = 'Automatic update via https://github.com/jbzdarkid/TFWiki-scripts'
-  elif argv[1] == 'workflow_dispatch':
+  elif event == 'workflow_dispatch':
     root = 'User:Darkid/Reports'
     is_daily = True
     is_weekly = True
     is_monthly = True
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
-  elif argv[1] == 'pull_request':
+  elif event == 'pull_request':
     root = 'User:Darkid/Reports'
     is_daily = True
     is_weekly = True
     is_monthly = False
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
   else:
-    print(f'Not sure what to run in response to {argv[1]}')
+    print(f'Not sure what to run in response to {event}')
     exit(1)
 
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
@@ -94,6 +95,7 @@ if __name__ == '__main__':
 
   comment = 'Please verify the following diffs:\n'
   for report_name, duration, link_map in diff_links:
+    duration -= timedelta(microseconds=duration.microseconds) # Strip microseconds
     comment += f'- [ ] {report_name} ran in {duration}:'
     languages = sorted(link_map.keys(), key=lambda lang: (lang != 'en', lang)) # Sort languages, keeping english first
     for language in languages:
@@ -102,6 +104,6 @@ if __name__ == '__main__':
 
   # Pass this as output to github-actions, so it can be used in later steps
   with open(environ['GITHUB_ENV'], 'a') as f:
-    f.write('GITHUB_COMMENT<<EOF\n{comment}\nEOF\n')
+    f.write(f'GITHUB_COMMENT<<EOF\n{comment}\nEOF\n')
 
   exit(failures)
