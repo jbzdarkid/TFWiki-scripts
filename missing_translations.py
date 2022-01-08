@@ -13,12 +13,6 @@ def main(w):
       pass # Not english
     elif 'OTFWH' in page.title: # ETF2L Highlander Community Challenge/OTFWH
       pass # Do not translate
-    # TODO: What about tracking categories?
-    elif 'Ecuadorians' in page.title:
-      raise
-    # TODO: Image-only cateogires?
-    elif 'Bombinomicon images' in page.title:
-      raise
     else:
       english_pages.add(page.title)
 

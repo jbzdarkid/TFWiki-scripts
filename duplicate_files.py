@@ -3,6 +3,7 @@ from wikitools import wiki
 from wikitools.page import Page
 
 verbose = False
+LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 def main(w):
   seen = set()
@@ -11,16 +12,17 @@ def main(w):
     duplicates = page.raw.get('duplicatefiles', [])
     duplicates = [ 'File:' + dupe['name'].replace('_', ' ') for dupe in duplicates ]
 
-    if not duplicates or page.title in seen:
+    # Normalize language titles, this means we treat 'Theshowdown05' and 'Theshowdown05 ru' as the same file.
+    title = page.title.rpartition('.')[0]
+    for lang in LANGS:
+      if title.endswith(f' {lang}'):
+        title = title[:-len(lang)-1]
+        break
+
+    if not duplicates or title in seen:
       continue
-    duplicates.append(page.title) # The duplicate list does not include ourselves, obviously
+    duplicates += [title, page.title] # The duplicate list does not include ourselves, obviously
 
-    if 'Theshowdown05 ru' in page.title:
-      raise # What about translated versions of textless images?
-
-    if 'User' in page.title:
-      raise # What about user images?
-    
     if verbose:
       print(f'Found duplicate image: {page.title}')
 
@@ -42,6 +44,10 @@ List of all duplicate files; <onlyinclude>{unique}</onlyinclude> unique files, {
     date = strftime(r'%H:%M, %d %B %Y', gmtime()))
 
   for dupe_list in all_duplicates:
+    dupe_list = [d for d in dupe_list if not d.startswith('File:User')]
+    if len(dupe_list) <= 1:
+      continue
+
     counts = []
     for duplicate in dupe_list:
       link_count = Page(w, duplicate).get_link_count()

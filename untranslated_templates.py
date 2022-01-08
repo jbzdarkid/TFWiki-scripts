@@ -6,7 +6,7 @@ from wikitools import wiki
 from wikitools.page import Page
 
 verbose = False
-LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
+LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 PAGESCRAPERS = 50
 
 def pagescraper(w, pages, done, translations):
@@ -103,8 +103,6 @@ def main(w):
 
   outputs = []
   for language in LANGS:
-    if language == 'en':
-      raise # What
     output = """\
 {{{{DISPLAYTITLE: {count} templates missing {{{{lang name|name|{lang}}}}} translation}}}}
 Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.

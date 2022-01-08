@@ -70,7 +70,8 @@ def main(w):
   }
 
   navbox_templates = {}
-  for page in get_navbox_templates(w):
+  navbox = Page(w, 'Template:Navbox')
+  for page in navbox.get_transclusions(namespace=10, filter_redirects=False):
     if page.title.lower().startswith('template:navbox'):
       continue # Exclude alternative navbox templates
     if page.title.lower().endswith('sandbox'):
