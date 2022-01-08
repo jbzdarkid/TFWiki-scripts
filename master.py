@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import importlib
 from os import environ
-from subprocess import check_call
+from subprocess import check_output
 from sys import argv, stdout
 from traceback import print_exc
 from wikitools import wiki
@@ -70,9 +70,10 @@ if __name__ == '__main__':
     root = 'User:Darkid/Reports'
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
 
-    merge_base = check_call(['git', 'merge-base', 'HEAD', 'origin/' + environ['GITHUB_BASE_REF']], text=True).strip()
+    check_output(['git', 'fetch', 'origin', environ['GITHUB_BASE_REF'])
+    merge_base = check_output(['git', 'merge-base', 'HEAD', 'FETCH_HEAD'], text=True).strip()
     print(merge_base)
-    diff = check_call(['git', 'diff-index', '--name-only', merge_base], text=True).strip()
+    diff = check_output(['git', 'diff-index', '--name-only', merge_base], text=True).strip()
     print(diff)
     for row in diff.split('\n'):
       file = row.replace('.py', '').strip()
