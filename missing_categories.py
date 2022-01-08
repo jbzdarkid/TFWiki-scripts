@@ -53,9 +53,11 @@ There are <onlyinclude>{count}</onlyinclude> categories which are not translated
       print(f'{language} is missing {len(missing_cats)} categories')
 
     def filter(category):
-      signal = object()
-      is_empty = next(w.get_all_category_pages(category), signal) == signal
-      return not is_empty
+      if 'image' in category:
+        signal = object()
+        is_empty = next(w.get_all_category_pages(category), signal) == signal
+        return not is_empty
+      return True
     missing_cats = [category for category in missing_cats if not filter(category)]
 
     if verbose:
