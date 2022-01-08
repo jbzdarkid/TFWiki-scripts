@@ -120,13 +120,6 @@ class Wiki:
       auwitheditsonly='true',
     )
 
-  def get_all_bots(self):
-    return [user['name'] for user in self.get_with_continue('query', 'allusers',
-      list='allusers',
-      aulimit=500,
-      aurights='bot', # Only return bots
-    )]
-
   def get_all_pages(self):
     def skip(entry): # Should we filter out a given page?
       title = entry['title']

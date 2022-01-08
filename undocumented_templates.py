@@ -66,6 +66,8 @@ There are <onlyinclude>{count}</onlyinclude> templates which are in use but are 
       count=len(badpages),
       date=strftime(r'%H:%M, %d %B %Y', gmtime()))
 
+  if 'Template:Show achievement plain' not in [d[1] for d in badpages]:
+    raise
   for count, title in badpages:
     output += '* [[%s|]] ([{{fullurl:Special:WhatLinksHere/%s|limit=%d&namespace=0&hideredirs=1&hidelinks=1}} %d use%s])\n' % (title, title, min(50, count), count, '' if count == 1 else 's')
   return output

@@ -87,7 +87,6 @@ def addTopUsers(w, sortedList, count):
   if verbose:
     print("Adding top", count, "users")
 
-  bots = list(w.get_all_bots())
   output = ""
   i = 0
   while i < count:
@@ -97,7 +96,7 @@ def addTopUsers(w, sortedList, count):
     userregistration = user['registration']
     userlink = 'User:'+username
     place = i+1 # List is indexed 0-99, editors are indexed 1-100
-    if username in bots:
+    if 'BOT' in username or username in ['Pillownet', 'PhoneWave']:
       place = "<small>''BOT''</small>"
       del sortedList[i]
       i -= 1
