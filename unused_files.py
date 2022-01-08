@@ -17,6 +17,8 @@ def main(w):
     #   continue
     if file.startswith('Tf') and file.endswith('.txt'):
       continue # Externally linked as part of Template:PatchDiff
+    if '3D' in file:
+      raise # not working somehow
     if file.endswith(' 3D.png'):
       p = Page(w, file)
       if p.get_transclusion_count() > 0:

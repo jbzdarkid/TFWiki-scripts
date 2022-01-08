@@ -15,6 +15,12 @@ def main(w):
       continue
     duplicates.append(page.title) # The duplicate list does not include ourselves, obviously
 
+    if 'Theshowdown05 ru' in page.title:
+      raise # What about translated versions of textless images?
+
+    if 'User' in page.title:
+      raise # What about user images?
+    
     if verbose:
       print(f'Found duplicate image: {page.title}')
 

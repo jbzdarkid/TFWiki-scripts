@@ -103,6 +103,8 @@ def main(w):
 
   outputs = []
   for language in LANGS:
+    if language == 'en':
+      raise # What
     output = """\
 {{{{DISPLAYTITLE: {count} templates missing {{{{lang name|name|{lang}}}}} translation}}}}
 Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.

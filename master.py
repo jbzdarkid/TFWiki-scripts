@@ -11,7 +11,7 @@ from wikitools.page import Page
 # Sort external links by domain (with sub-headers)
 # External links is a mess. It needs a modern eye.
 # update readme (again)
-# Improve the wikitools/wiki get_with_continue to actually yield the pagenames, not just the json objects.
+# Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 
 diff_links = []
 

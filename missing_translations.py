@@ -13,6 +13,12 @@ def main(w):
       pass # Not english
     elif 'OTFWH' in page.title: # ETF2L Highlander Community Challenge/OTFWH
       pass # Do not translate
+    # TODO: What about tracking categories?
+    elif 'Ecuadorians' in page.title:
+      raise
+    # TODO: Image-only cateogires?
+    elif 'Bombinomicon images' in page.title:
+      raise
     else:
       english_pages.add(page.title)
 
@@ -37,7 +43,7 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       count=len(missing_pages),
       date=strftime(r'%H:%M, %d %B %Y', gmtime()))
     for page in sorted(missing_pages):
-      output += f'\n* [[{page}]] ([[{page}/{language}|create]])'
+      output += f'\n# [[{page}]] ([[{page}/{language}|create]])'
     outputs.append([language, output])
   return outputs
 
