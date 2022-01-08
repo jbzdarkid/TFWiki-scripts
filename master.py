@@ -26,7 +26,7 @@ def publish_report(w, module, report_name, root, summary):
       for lang, output in report_output:
         link_map[lang] = Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary)
     else:
-      link_map['en'] = Page(w, f'{root}/{report_name}').edit(output, bot=True, summary=summary)
+      link_map['en'] = Page(w, f'{root}/{report_name}').edit(report_output, bot=True, summary=summary)
   except Exception:
     print(f'Failed to update {report_name}')
     print_exc(file=stdout)
