@@ -70,8 +70,7 @@ if __name__ == '__main__':
     root = 'User:Darkid/Reports'
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
 
-    check_output(['git', 'fetch', 'origin', environ['GITHUB_BASE_REF']])
-    merge_base = check_output(['git', 'merge-base', 'HEAD', 'FETCH_HEAD'], text=True).strip()
+    merge_base = check_output(['git', 'merge-base', 'HEAD', environ['GITHUB_BASE_REF'], text=True).strip()
     print(merge_base)
     diff = check_output(['git', 'diff-index', '--name-only', merge_base], text=True).strip()
     print(diff)
