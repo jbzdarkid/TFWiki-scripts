@@ -106,7 +106,8 @@ if __name__ == '__main__':
   comment = 'Please verify the following diffs:\n'
   succeeded = True
 
-  for module, report_name in modules_to_run:
+  for module in modules_to_run:
+    report_name = all_reports[module]
     start = datetime.now()
     link_map = publish_report(w, module, report_name, root, summary)
     duration = datetime.now() - start
