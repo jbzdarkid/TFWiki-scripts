@@ -11,12 +11,13 @@ from wikitools.page import Page
 # Sort external links by domain (with sub-headers)
 # External links is a mess. It needs a modern eye.
 # update readme (again)
-# Improve the wikitools/wiki get_with_continue to actually yield the pagenames, not just the json objects.
+# Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 
 diff_links = []
 
 def publish_single_report(w, module, report_name):
   start = datetime.now()
+  print(f'Started {report_name} at {start}')
   try:
     main = importlib.import_module(module).main
     diff_link = Page(w, f'{root}/{report_name}').edit(main(w), bot=True, summary=summary)
@@ -29,6 +30,7 @@ def publish_single_report(w, module, report_name):
 
 def publish_lang_report(w, module, report_name):
   start = datetime.now()
+  print(f'Started {report_name} at {start}')
   try:
     main = importlib.import_module(module).main
     diff_link_map = {}
@@ -43,7 +45,7 @@ def publish_lang_report(w, module, report_name):
     return 1
 
 if __name__ == '__main__':
-  event = environ['GITHUB_EVENT_NAME']
+  event = environ.get('GITHUB_EVENT_NAME', 'local_run')
   if event == 'schedule':
     root = 'Team Fortress Wiki:Reports'
     is_daily = True
@@ -62,6 +64,21 @@ if __name__ == '__main__':
     is_weekly = True
     is_monthly = False
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
+  elif event == 'local_run':
+    root = 'Team Fortress Wiki:Reports'
+    summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
+    w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+    failures = 0
+    failures += publish_lang_report(w, 'untranslated_templates', 'Untranslated templates')
+    failures += publish_lang_report(w, 'missing_translations', 'Missing translations')
+    failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
+    failures += publish_lang_report(w, 'all_articles', 'All articles')
+    failures += publish_single_report(w, 'wanted_templates', 'Wanted templates')
+    failures += publish_single_report(w, 'navboxes', 'Pages which are missing navboxes')
+    failures += publish_single_report(w, 'overtranslated', 'Pages with no english equivalent')
+    print(f'{failures} failed')
+    exit(failures)
+
   else:
     print(f'Not sure what to run in response to {event}')
     exit(1)

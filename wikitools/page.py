@@ -43,23 +43,24 @@ class Page:
   def get_transclusion_count(self):
     return sum(1 for _ in self.get_transclusions())
 
-  def get_transclusions(self):
-    return [Page(self.wiki, entry['title'], entry) for entry in self.wiki.get_with_continue('query', 'embeddedin',
+  # By default, only return links from the main namespace (ns:0)
+  def get_transclusions(self, *, namespace=0):
+    for entry in self.wiki.get_with_continue('query', 'embeddedin',
       list='embeddedin',
-      eifilterredir='nonredirects', # Filter out redirects
-      einamespace=0, # Links from the Main namespace only
+      einamespace=namespace,
       eilimit=500,
       eititle=self.url_title,
-    )]
+    ):
+      yield Page(self.wiki, entry['title'], entry)
 
-  # This should probably be on page.py though
   def get_links(self):
-    return [Page(self.wiki, entry['title'], entry) for entry in self.wiki.get_with_continue('query', 'pages',
+    for entry in self.wiki.get_with_continue('query', 'pages',
       generator='links',
       gplnamespace=0, # Main
       gpllimit=500,
       titles=self.url_title,
-    )]
+    ):
+      yield Page(self.wiki, entry['title'], entry)
 
   # TODO: Rename, ambiguous (file links only)
   def get_link_count(self):

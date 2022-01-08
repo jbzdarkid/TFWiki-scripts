@@ -50,6 +50,9 @@ def main(w):
       language_files = unused_files[ext][language]
       if len(language_files) > 0:
         output += '=== {{lang name|name|%s}} ===\n' % language
+        if language == 'en' and ext == 'PNG':
+          output += 'Some of these files are 3D images, which traditionally were always marked unused. These images are ''actually'' unused, as they have no transclusions.\n'
+
         for file in sorted(language_files):
           output += f'* [[:File:{file}]]\n'
 

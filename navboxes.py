@@ -6,15 +6,6 @@ from wikitools.page import Page
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
-# This wants something very specific so I'm not putting it into wikitools.
-def get_navbox_templates(w):
-  return [Page(w, entry['title'], entry) for entry in w.get_with_continue('query', 'pages',
-    generator='transcludedin',
-    titles='Template:Navbox',
-    gtinamespace=10, # Template:
-    gtilimit=500,
-  )]
-
 def main(w):
   excluded_templates = [
     # Class navs have way too many items in them to be useful
@@ -43,7 +34,7 @@ def main(w):
     'Template:Main Page (Classic) layout',
     'Template:Main Page layout',
     'Template:Mann Vs Machine Nav/no category',
-    'Template:Mann Vs Machine Nav/missioncategoryonly',
+    'Template:Mvm Missions Nav/missioncategoryonly',
     'Template:Patch layout',
   ]
 
@@ -70,7 +61,8 @@ def main(w):
   }
 
   navbox_templates = {}
-  for page in get_navbox_templates(w):
+  navbox = Page(w, 'Template:Navbox')
+  for page in navbox.get_transclusions(namespace=10):
     if page.title.lower().startswith('template:navbox'):
       continue # Exclude alternative navbox templates
     if page.title.lower().endswith('sandbox'):
@@ -125,7 +117,7 @@ There are <onlyinclude>{count}</onlyinclude> pages which are part of a navbox bu
       count=count,
       date=strftime(r'%H:%M, %d %B %Y', gmtime()))
 
-  for template in missing_navboxes:
+  for template in sorted(missing_navboxes.keys()):
     if len(missing_navboxes[template]) == 0:
       continue
 
