@@ -14,8 +14,10 @@ from wikitools.page import Page
 # update readme (again)
 # Improve the wikitools/wiki get_with_continue to actually yield the pagenames, not just the json objects.
 # Sort untranslated templates by # uses
+# Sort missing categories by # pages
+# Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 
-def publish_report(w, module, report_name):
+def publish_report(w, module, report_name, root, summary):
   try:
     report_output = importlib.import_module(module).main(w)
 
@@ -48,7 +50,7 @@ all_reports = {
 }
 
 if __name__ == '__main__':
-  event = environ['GITHUB_EVENT_NAME']
+  event = environ.get('GITHUB_EVENT_NAME', 'local_run')
   reports_to_run = []
 
   if event == 'schedule':
@@ -81,6 +83,12 @@ if __name__ == '__main__':
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
     reports_to_run = all_reports.keys() # On manual triggers, run everything
 
+  elif event == 'local_run':
+    w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+    for report in reports_to_run:
+      publish_report(w, report, all_reports[report])
+    exit(0)
+
   else:
     print(f'Not sure what to run in response to {event}')
     exit(1)
@@ -94,7 +102,7 @@ if __name__ == '__main__':
 
   for report in reports_to_run:
     start = datetime.now()
-    diff_link_map = publish_report(w, report, all_reports[report])
+    diff_link_map = publish_report(w, report, all_reports[report], root, summary)
     duration = datetime.now() - start
     if not diff_link_map:
       action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/runs/' + environ['GITHUB_ACTION']

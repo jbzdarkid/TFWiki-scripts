@@ -106,12 +106,13 @@ class Wiki:
           raise
 
   def get_all_templates(self):
-    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'allpages',
+    for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
       apfilterredir='nonredirects', # Filter out redirects
       apnamespace='10', # Template namespace
-    )]
+    ):
+      yield Page(self, entry['title'], entry)
 
   def get_all_users(self):
     return self.get_with_continue('query', 'allusers',
@@ -120,13 +121,6 @@ class Wiki:
       auprop='editcount|registration',
       auwitheditsonly='true',
     )
-
-  def get_all_bots(self):
-    return [user['name'] for user in self.get_with_continue('query', 'allusers',
-      list='allusers',
-      aulimit=500,
-      aurights='bot', # Only return bots
-    )]
 
   def get_all_pages(self):
     # TODO: Wait, does allpages have a namespace restriction? hmmm....
@@ -141,28 +135,31 @@ class Wiki:
       yield Page(self, title, entry)
 
   def get_all_categories(self, filter_redirects=True):
-    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'allpages',
+    for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
       apnamespace=14, # Categories
       apfilterredir='nonredirects' if filter_redirects else None,
-    )]
+    ):
+      yield Page(self, entry['title'], entry)
 
   def get_all_category_pages(self, category):
-    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'categorymembers',
+    for entry in self.get_with_continue('query', 'categorymembers',
       list='categorymembers',
       cmlimit=500,
-      cmtitle='Category:' + category,
+      cmtitle=category,
       cmprop='title', # Only return page titles, not page IDs
       cmnamespace='0', # Links from the Main namespace only
-    )]
+    ):
+      yield Page(self, entry['title'], entry)
 
   def get_all_files(self):
-    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'pages',
+    for entry in self.get_with_continue('query', 'pages',
       generator='allimages',
       gailimit=500,
       prop='duplicatefiles', # Include info about duplicates
-    )]
+    ):
+      yield Page(self, entry['title'], entry)
 
   def get_all_unused_files(self):
     for html in self.get_html_with_continue('Special:UnusedFiles'):
