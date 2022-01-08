@@ -48,7 +48,7 @@ There are <onlyinclude>{count}</onlyinclude> categories which are not translated
   outputs.append(['en', output])
 
   for language in LANGS:
-    missing_cats = english_cats - lang_cats[language]
+    missing_cats = english_cats - lang_cats[language] - english_only_cats
     if verbose:
       print(f'{language} is missing {len(missing_cats)} categories')
 
@@ -58,7 +58,7 @@ There are <onlyinclude>{count}</onlyinclude> categories which are not translated
         is_empty = next(w.get_all_category_pages(category), signal) == signal
         return not is_empty
       return True
-    missing_cats = [category for category in missing_cats if not filter(category)]
+    missing_cats = [category for category in missing_cats if filter(category)]
 
     if verbose:
       print(f'{language} is missing {len(missing_cats)} categories (after filtering)')
