@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import importlib
 from os import environ
-from subprocess import run, PIPE
+from subprocess import check_call
 from sys import argv, stdout
 from traceback import print_exc
 from wikitools import wiki
@@ -18,18 +18,20 @@ from wikitools.page import Page
 # Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 
 def publish_report(w, module, report_name, root, summary):
+  link_map = {}
   try:
     report_output = importlib.import_module(module).main(w)
 
     if isinstance(report_output, list):
       for lang, output in report_output:
-        diff_link_map[lang] = Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary)
+        link_map[lang] = Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary)
     else:
-      diff_link_map['en'] = Page(w, f'{root}/{report_name}').edit(output, bot=True, summary=summary)
-    return diff_link_map
+      link_map['en'] = Page(w, f'{root}/{report_name}').edit(output, bot=True, summary=summary)
   except Exception:
     print(f'Failed to update {report_name}')
     print_exc(file=stdout)
+
+  return link_map
 
 all_reports = {
   'untranslated_templates': 'Untranslated templates',
@@ -68,8 +70,10 @@ if __name__ == '__main__':
     root = 'User:Darkid/Reports'
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
 
-    merge_base = run(['git', 'merge-base', 'HEAD', environ['GITHUB_BASE_REF']], text=True, stdout=PIPE).stdout.strip()
-    diff = run(['git', 'diff-index', '--name-only', merge_base], text=True, stdout=PIPE).stdout.strip()
+    merge_base = check_call(['git', 'merge-base', 'HEAD', 'origin/' + environ['GITHUB_BASE_REF']], text=True).strip()
+    print(merge_base)
+    diff = check_call(['git', 'diff-index', '--name-only', merge_base], text=True).strip()
+    print(diff)
     for row in diff.split('\n'):
       file = row.replace('.py', '').strip()
       if file in all_reports:
@@ -105,7 +109,7 @@ if __name__ == '__main__':
     start = datetime.now()
     link_map = publish_report(w, module, report_name, root, summary)
     duration = datetime.now() - start
-    if not diff_link_map:
+    if not link_map:
       action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/runs/' + environ['GITHUB_ACTION']
       comment += f'- [ ] {report_name} failed after {duration}: {action_url}\n'
       succeeded = False
