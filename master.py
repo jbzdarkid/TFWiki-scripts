@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import importlib
 from os import environ
+from subprocess import run, PIPE
 from sys import argv, stdout
 from traceback import print_exc
 from wikitools import wiki
@@ -15,26 +16,18 @@ from wikitools.page import Page
 
 diff_links = []
 
-def publish_single_report(w, module, report_name):
+def publish_report(w, module, report_name):
   start = datetime.now()
   try:
-    main = importlib.import_module(module).main
-    diff_link = Page(w, f'{root}/{report_name}').edit(main(w), bot=True, summary=summary)
-    diff_links.append((report_name, datetime.now() - start, {'en': diff_link}))
-    return 0
-  except Exception:
-    print(f'Failed to update {report_name}')
-    print_exc(file=stdout)
-    return 1
-
-def publish_lang_report(w, module, report_name):
-  start = datetime.now()
-  try:
-    main = importlib.import_module(module).main
+    report_output = importlib.import_module(module).main(w)
     diff_link_map = {}
-    for lang, output in main(w):
-      diff_link = Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary)
-      diff_link_map[lang] = diff_link
+
+    if isinstance(report_output, list):
+      for lang, output in report_output:
+        diff_link_map[lang] = Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary)
+    else:
+      diff_link_map['en'] = Page(w, f'{root}/{report_name}').edit(output, bot=True, summary=summary)
+
     diff_links.append((report_name, datetime.now() - start, diff_link_map))
     return 0
   except Exception:
@@ -42,26 +35,42 @@ def publish_lang_report(w, module, report_name):
     print_exc(file=stdout)
     return 1
 
+all_reports = {
+  'untranslated_templates': 'Untranslated templates',
+  'missing_translations': 'Missing translations',
+  'missing_categories': 'Untranslated categories',
+  'all_articles': 'All articles',
+  'wanted_templates': 'Wanted templates',
+}
+
 if __name__ == '__main__':
   event = environ['GITHUB_EVENT_NAME']
   if event == 'schedule':
     root = 'Team Fortress Wiki:Reports'
-    is_daily = True
-    is_weekly = datetime.now().weekday() == 0 # Monday
-    is_monthly = datetime.now().day == 1 # 1st of every month
     summary = 'Automatic update via https://github.com/jbzdarkid/TFWiki-scripts'
-  elif event == 'workflow_dispatch':
-    root = 'User:Darkid/Reports'
-    is_daily = True
-    is_weekly = True
-    is_monthly = True
-    summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
+
+    # Multi-language reports need frequent updates since we have many translators
+    reports_to_run = ['untranslated_templates', 'missing_transations', 'missing_categories', 'all_articles']
+    if datetime.now().weekday() == 0: # Every Monday, run english-only (or otherwise less frequently needed) reports
+      reports_to_run += ['wanted_templates', 'navboxes', 'overtranslated']
+    if datetime.now().day == 1 # On the 1st of every month, run everything
+      reports_to_run = all_reports.keys()
+
   elif event == 'pull_request':
     root = 'User:Darkid/Reports'
-    is_daily = True
-    is_weekly = True
-    is_monthly = False
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
+
+    merge_base = run(['git', 'merge-base', 'HEAD', environ['GITHUB_BASE_REF'], text=True, stdout=PIPE).stdout.strip()
+    diff = run(['git', 'diff-index', 'HEAD', merge_base], text=True, stdout=PIPE).stdout.strip()
+
+    # somehow turn that output into a bunch of files, idk man
+
+
+  elif event == 'workflow_dispatch':
+    root = 'User:Darkid/Reports'
+    summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
+    reports_to_run = all_reports.keys() # On manual triggers, run everything
+
   else:
     print(f'Not sure what to run in response to {event}')
     exit(1)
@@ -71,7 +80,11 @@ if __name__ == '__main__':
     exit(1)
   failures = 0
 
-  if is_daily: # Multi-language reports need frequent updates since we have many translators
+  for report in lang_reports:
+    failures += publish_lang_report(w, report['file'], report['title'])
+  for report in single_reports:
+    failures += publish_single_report(w, report['file'], report['title'])
+
     failures += publish_lang_report(w, 'untranslated_templates', 'Untranslated templates')
     failures += publish_lang_report(w, 'missing_translations', 'Missing translations')
     failures += publish_lang_report(w, 'missing_categories', 'Untranslated categories')
