@@ -6,15 +6,6 @@ from wikitools.page import Page
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
-# This wants something very specific so I'm not putting it into wikitools.
-def get_navbox_templates(w):
-  return [Page(w, entry['title'], entry) for entry in w.get_with_continue('query', 'pages',
-    generator='transcludedin',
-    titles='Template:Navbox',
-    gtinamespace=10, # Template:
-    gtilimit=500,
-  )]
-
 def main(w):
   excluded_templates = [
     # Class navs have way too many items in them to be useful
