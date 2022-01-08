@@ -17,8 +17,6 @@ def main(w):
     #   continue
     if file.startswith('Tf') and file.endswith('.txt'):
       continue # Externally linked as part of Template:PatchDiff
-    if '3D' in file:
-      raise # not working somehow
     if file.endswith(' 3D.png'):
       p = Page(w, file)
       if p.get_transclusion_count() > 0:
@@ -52,6 +50,9 @@ def main(w):
       language_files = unused_files[ext][language]
       if len(language_files) > 0:
         output += '=== {{lang name|name|%s}} ===\n' % language
+        if language == 'en' and ext == 'PNG':
+          output += 'Some of these files are 3D images, which traditionally were always marked unused. These images are ''actually'' unused, as they have no transclusions.\n'
+
         for file in sorted(language_files):
           output += f'* [[:File:{file}]]\n'
 
