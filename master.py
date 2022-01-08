@@ -51,18 +51,18 @@ all_reports = {
 
 if __name__ == '__main__':
   event = environ.get('GITHUB_EVENT_NAME', 'local_run')
-  reports_to_run = []
+  modules_to_run = []
 
   if event == 'schedule':
     root = 'Team Fortress Wiki:Reports'
     summary = 'Automatic update via https://github.com/jbzdarkid/TFWiki-scripts'
 
     # Multi-language reports need frequent updates since we have many translators
-    reports_to_run += ['untranslated_templates', 'missing_transations', 'all_articles']
+    modules_to_run += ['untranslated_templates', 'missing_transations', 'all_articles']
     if datetime.now().weekday() == 0: # Every Monday, run english-only (or otherwise less frequently needed) reports
-      reports_to_run += ['wanted_templates', 'navboxes', 'overtranslated', 'missing_categories']
+      modules_to_run += ['wanted_templates', 'navboxes', 'overtranslated', 'missing_categories']
     if datetime.now().day == 1: # On the 1st of every month, run everything
-      reports_to_run = all_reports.keys()
+      modules_to_run = all_reports.keys()
 
   elif event == 'pull_request':
     root = 'User:Darkid/Reports'
@@ -73,20 +73,21 @@ if __name__ == '__main__':
     for row in diff.split('\n'):
       file = row.replace('.py', '').strip()
       if file in all_reports:
-        reports_to_run.append(file)
+        modules_to_run.append(file)
       elif file in ['wikitools/wiki', 'wikitools/page']:
-        reports_to_run = all_reports.keys()
+        modules_to_run = all_reports.keys()
         break
 
   elif event == 'workflow_dispatch':
     root = 'User:Darkid/Reports'
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
-    reports_to_run = all_reports.keys() # On manual triggers, run everything
+    modules_to_run = all_reports.keys() # On manual triggers, run everything
 
   elif event == 'local_run':
     w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
     for report in all_reports:
-      publish_report(w, report, all_reports[report])
+      # Root and summary don't matter because we can't publish anyways.
+      publish_report(w, report, all_reports[report], '', '')
     exit(0)
 
   else:
@@ -100,9 +101,9 @@ if __name__ == '__main__':
   comment = 'Please verify the following diffs:\n'
   succeeded = True
 
-  for report in reports_to_run:
+  for module, report_name in modules_to_run:
     start = datetime.now()
-    diff_link_map = publish_report(w, report, all_reports[report], root, summary)
+    link_map = publish_report(w, module, report_name, root, summary)
     duration = datetime.now() - start
     if not diff_link_map:
       action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/runs/' + environ['GITHUB_ACTION']

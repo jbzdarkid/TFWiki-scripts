@@ -58,6 +58,11 @@ def main(w):
     'Template:Goldrush Update Nav': ['Medic achievements', 'Obtaining Medic achievements'],
     'Template:Sniper Vs Spy Update Nav': ['Sniper achievements', 'Obtaining Sniper achievements', 'Spy achievements', 'Obtaining Spy achievements'],
     'Template:Two Cities Update Nav': ['Mann vs. Machievements', 'Obtaining Mann vs. Machievements'],
+
+    # Similarly for major updates which had new soundtracks.
+    'Template:Scream Fortress Nav': 'Team Fortress 2 Official Soundtrack',
+    'Template:Meet Your Match Update Nav': 'Team Fortress 2 Official Soundtrack',
+    'Template:Jungle Inferno Update Nav': 'Team Fortress 2 Official Soundtrack',
   }
 
   navbox_templates = {}
