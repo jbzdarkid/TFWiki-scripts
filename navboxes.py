@@ -44,6 +44,7 @@ def main(w):
     'Template:Main Page layout',
     'Template:Mann Vs Machine Nav/no category',
     'Template:Mvm Missions Nav/missioncategoryonly'
+    'Template:Patch layout',
   ]
 
   excluded_pages = {
