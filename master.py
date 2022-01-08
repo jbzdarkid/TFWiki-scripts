@@ -68,7 +68,7 @@ if __name__ == '__main__':
     root = 'User:Darkid/Reports'
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
 
-    merge_base = run(['git', 'merge-base', 'HEAD', environ['GITHUB_BASE_REF'], text=True, stdout=PIPE).stdout.strip()
+    merge_base = run(['git', 'merge-base', 'HEAD', environ['GITHUB_BASE_REF']], text=True, stdout=PIPE).stdout.strip()
     diff = run(['git', 'diff-index', '--name-only', merge_base], text=True, stdout=PIPE).stdout.strip()
     for row in diff.split('\n'):
       file = row.replace('.py', '').strip()
@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
   elif event == 'local_run':
     w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
-    for report in reports_to_run:
+    for report in all_reports:
       publish_report(w, report, all_reports[report])
     exit(0)
 
