@@ -13,6 +13,7 @@ from wikitools.page import Page
 # External links is a mess. It needs a modern eye.
 # update readme (again)
 # Improve the wikitools/wiki get_with_continue to actually yield the pagenames, not just the json objects.
+# Sort untranslated templates by # uses
 
 def publish_report(w, module, report_name):
   try:
