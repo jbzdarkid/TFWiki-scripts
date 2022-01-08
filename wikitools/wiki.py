@@ -12,6 +12,7 @@ class Wiki:
     self.api_url = api_url
     self.wiki_url = api_url.replace('api.php', 'index.php')
     self.lgtoken = None
+    self.page_text_cache = {}
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
@@ -128,18 +129,16 @@ class Wiki:
     )]
 
   def get_all_pages(self):
-    def skip(entry): # Should we filter out a given page?
-      title = entry['title']
-      if title.endswith('.js') or title.endswith('.css'):
-        return True
-      return False
-
     # TODO: Wait, does allpages have a namespace restriction? hmmm....
-    return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'allpages',
+    for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
       apfilterredir='nonredirects', # Filter out redirects
-    ) if not skip(entry)]
+    ):
+      title = entry['title']
+      if title.endswith('.js') or title.endswith('.css'):
+        continue
+      yield Page(self, title, entry)
 
   def get_all_categories(self, filter_redirects=True):
     return [Page(self, entry['title'], entry) for entry in self.get_with_continue('query', 'allpages',

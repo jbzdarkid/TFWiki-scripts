@@ -1,5 +1,6 @@
 import functools
 from requests.exceptions import RequestException
+import requests
 
 @functools.total_ordering
 class Page:
@@ -16,10 +17,19 @@ class Page:
     return self.url_title < other.url_title
 
   def get_wiki_text(self):
+    cached_text = self.wiki.page_text_cache.get(self.title, None)
+    if cached_text:
+      return cached_text
     try:
-      return self.wiki.get('parse', page=self.url_title, prop='wikitext')['parse']['wikitext']['*']
+      text = self.wiki.get('parse', page=self.url_title, prop='wikitext')['parse']['wikitext']['*']
+      self.wiki.page_text_cache[self.title] = text
+      return text
     except RequestException:
       return '' # Unable to fetch page contents, pretend it's empty
+
+  def get_raw_html(self):
+    r = requests.get(self.wiki.wiki_url, allow_redirects=True, params={'title': self.url_title})
+    return r.text
 
   # Do not use this. Just iterate all pages instead.
   # def exists(self):
