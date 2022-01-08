@@ -43,7 +43,7 @@ There are <onlyinclude>{count}</onlyinclude> categories which are not translated
     count=len(english_only_cats),
     date=strftime(r'%H:%M, %d %B %Y', gmtime()))
 
-  for page in english_only_cats:
+  for page in sorted(english_only_cats):
     output += f'\n# [[:{page}]]'
   outputs.append(['en', output])
 

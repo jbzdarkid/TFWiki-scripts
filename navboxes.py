@@ -34,7 +34,7 @@ def main(w):
     'Template:Main Page (Classic) layout',
     'Template:Main Page layout',
     'Template:Mann Vs Machine Nav/no category',
-    'Template:Mvm Missions Nav/missioncategoryonly'
+    'Template:Mvm Missions Nav/missioncategoryonly',
     'Template:Patch layout',
   ]
 
@@ -117,7 +117,7 @@ There are <onlyinclude>{count}</onlyinclude> pages which are part of a navbox bu
       count=count,
       date=strftime(r'%H:%M, %d %B %Y', gmtime()))
 
-  for template in missing_navboxes:
+  for template in sorted(missing_navboxes.keys()):
     if len(missing_navboxes[template]) == 0:
       continue
 
