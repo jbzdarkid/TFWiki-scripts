@@ -34,16 +34,28 @@ all_reports = {
   'missing_categories': 'Untranslated categories',
   'all_articles': 'All articles',
   'wanted_templates': 'Wanted templates',
+  'navboxes': 'Pages which are missing navboxes',
+  'overtranslated': 'Pages with no english equivalent',
+  'incorrectly_categorized': 'Pages with incorrect categorization',
+  'duplicate_files': 'Duplicate files',
+  'unused_files': 'Unused files',
+  'undocumented_templates': 'Undocumented templates',
+  'edit_stats': 'Users by edit count',
+  'external_links': 'External links',
+  'mismatched': 'Mismatched parenthesis',
+  'displaytitles': 'Duplicate displaytitles',
 }
 
 if __name__ == '__main__':
   event = environ['GITHUB_EVENT_NAME']
+  reports_to_run = []
+
   if event == 'schedule':
     root = 'Team Fortress Wiki:Reports'
     summary = 'Automatic update via https://github.com/jbzdarkid/TFWiki-scripts'
 
     # Multi-language reports need frequent updates since we have many translators
-    reports_to_run = ['untranslated_templates', 'missing_transations', 'missing_categories', 'all_articles']
+    reports_to_run += ['untranslated_templates', 'missing_transations', 'missing_categories', 'all_articles']
     if datetime.now().weekday() == 0: # Every Monday, run english-only (or otherwise less frequently needed) reports
       reports_to_run += ['wanted_templates', 'navboxes', 'overtranslated']
     if datetime.now().day == 1 # On the 1st of every month, run everything
@@ -54,10 +66,14 @@ if __name__ == '__main__':
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
 
     merge_base = run(['git', 'merge-base', 'HEAD', environ['GITHUB_BASE_REF'], text=True, stdout=PIPE).stdout.strip()
-    diff = run(['git', 'diff-index', 'HEAD', merge_base], text=True, stdout=PIPE).stdout.strip()
-
-    # somehow turn that output into a bunch of files, idk man
-
+    diff = run(['git', 'diff-index', '--name-only', merge_base], text=True, stdout=PIPE).stdout.strip()
+    for row in diff.split('\n'):
+      file = row.replace('.py', '').strip()
+      if file in all_reports:
+        reports_to_run.append(file)
+      elif file in ['wikitools/wiki', 'wikitools/page']:
+        reports_to_run = all_reports.keys()
+        break
 
   elif event == 'workflow_dispatch':
     root = 'User:Darkid/Reports'
@@ -73,7 +89,7 @@ if __name__ == '__main__':
     exit(1)
 
   comment = 'Please verify the following diffs:\n'
-  suceeded = True
+  succeeded = True
 
   for report in reports_to_run:
     start = datetime.now()
