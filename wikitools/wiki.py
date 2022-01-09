@@ -88,7 +88,11 @@ class Wiki:
       'format': 'json',
     })
     r = self.session.post(self.api_url, data=kwargs)
-    return r.json()
+    try:
+      return r.json()
+    except:
+      print(r.status_code, r.text)
+      raise
 
   def post_with_csrf(self, action, **kwargs):
     # We would rather not lose all our hard work, so we try pretty hard to make the edit succeed.
@@ -97,7 +101,7 @@ class Wiki:
       try:
         kwargs['token'] = self.get('query', meta='tokens')['query']['tokens']['csrftoken']
         return self.post_with_login(action, **kwargs)
-      except RequestException as e:
+      except e:
         print(f'Attempt {i} failed:\n{e}')
         if i < 5:
           i += 1

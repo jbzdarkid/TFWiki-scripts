@@ -19,6 +19,7 @@ class Page:
   def get_wiki_text(self):
     cached_text = self.wiki.page_text_cache.get(self.title, None)
     if cached_text:
+      print(self.title, len(cached_text))
       return cached_text
     try:
       text = self.wiki.get('parse', page=self.url_title, prop='wikitext')['parse']['wikitext']['*']
