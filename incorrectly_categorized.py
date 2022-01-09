@@ -102,6 +102,7 @@ def main(w):
       if verbose:
         print(f'Category:{category} has {len(miscategorized[category])} miscategorized pages')
 
+
   output = """\
 {{{{DISPLAYTITLE: {page_count} miscategorized pages}}}}
 {category_count} categories have pages from other languages ('''<onlyinclude>{page_count}</onlyinclude>''' total pages). Data as of {date}.
