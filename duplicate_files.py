@@ -50,7 +50,7 @@ List of all duplicate files; <onlyinclude>{unique}</onlyinclude> unique files, {
 
     counts = []
     for duplicate in dupe_list:
-      link_count = Page(w, duplicate).get_link_count()
+      link_count = Page(w, duplicate).get_file_link_count()
       counts.append([link_count, duplicate])
 
     counts.sort(key=lambda s: (-s[0], s[1]))

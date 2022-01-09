@@ -101,7 +101,7 @@ class Wiki:
       try:
         kwargs['token'] = self.get('query', meta='tokens')['query']['tokens']['csrftoken']
         return self.post_with_login(action, **kwargs)
-      except e:
+      except Exception as e:
         print(f'Attempt {i} failed:\n{e}')
         if i < 5:
           i += 1
@@ -127,10 +127,10 @@ class Wiki:
     )
 
   def get_all_pages(self):
-    # TODO: Wait, does allpages have a namespace restriction? hmmm....
     for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
+      apnamespace=0, # Pages from the Main namespace only
       apfilterredir='nonredirects', # Filter out redirects
     ):
       title = entry['title']

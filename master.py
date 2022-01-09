@@ -7,6 +7,8 @@ from traceback import print_exc
 from wikitools import wiki
 from wikitools.page import Page
 
+import open_pr_comment
+
 # Write a replacement script for broken external links -> WindBOT filter
 #   forums.tfmaps.net?t=# -> tf2maps.net/threads/#
 # Sort external links by domain (with sub-headers)
@@ -121,9 +123,11 @@ if __name__ == '__main__':
         comment += f' [{language}]({link_map[language]})'
       comment += '\n'
 
-  # Pass this as output to github-actions, so it can be used in later steps
-  # Or, like, import the other file and just call it. IDK.
-  with open(environ['GITHUB_ENV'], 'a') as f:
-    f.write(f'GITHUB_COMMENT<<EOF\n{comment}\nEOF\n')
+    if event == 'pull_request':
+      open_pr_comment.create_or_edit_pr_comment(comment)
+  if event == 'workflow_dispatch':
+    open_pr_comment.create_issue('Workflow dispatch finished', comment)
+  elif environ['GITHUB_EVENT_NAME'] == 'schedule':
+    print(comment)
 
   exit(0 if succeeded else 1)

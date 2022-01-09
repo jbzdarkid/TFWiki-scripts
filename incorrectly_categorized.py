@@ -5,8 +5,6 @@ verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 def main(w):
-  # TODO: Filter based on Category:Maintenance?
-  # https://wiki.teamfortress.com/w/api.php?action=query&list=categorymembers&cmtitle=Category:Maintenance&cmnamespace=14
   maintanence_categories = [
     'Articles needing videos',
     'Articles marked for grammar correction/lang',
