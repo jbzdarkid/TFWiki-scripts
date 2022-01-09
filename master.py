@@ -60,7 +60,7 @@ if __name__ == '__main__':
     summary = 'Automatic update via https://github.com/jbzdarkid/TFWiki-scripts'
 
     # Multi-language reports need frequent updates since we have many translators
-    modules_to_run += ['untranslated_templates', 'missing_transations', 'all_articles']
+    modules_to_run += ['untranslated_templates', 'missing_translations', 'all_articles']
     if datetime.now().weekday() == 0: # Every Monday, run english-only (or otherwise less frequently needed) reports
       modules_to_run += ['wanted_templates', 'navboxes', 'overtranslated', 'missing_categories']
     if datetime.now().day == 1: # On the 1st of every month, run everything
