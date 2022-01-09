@@ -65,6 +65,7 @@ def main(w):
     'Template:Jungle Inferno Update Nav': 'Team Fortress 2 Official Soundtrack',
   }
 
+
   navbox_templates = {}
   navbox = Page(w, 'Template:Navbox')
   for page in navbox.get_transclusions(namespace=10):

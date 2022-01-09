@@ -80,6 +80,7 @@ def main(w):
         output += f'* [{page.get_edit_url()} {page.title}]\n'
   return output
 
+
 if __name__ == '__main__':
   verbose = True
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
