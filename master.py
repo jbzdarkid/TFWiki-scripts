@@ -18,6 +18,7 @@ import open_pr_comment
 # Sort untranslated templates by # uses
 # Sort missing categories by # pages
 # Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
+# images without licensing?
 
 def publish_report(w, module, report_name, root, summary):
   link_map = {}
