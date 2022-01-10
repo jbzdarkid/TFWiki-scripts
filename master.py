@@ -44,7 +44,7 @@ all_reports = {
   'wanted_templates': 'Wanted templates',
   'navboxes': 'Pages which are missing navboxes',
   'overtranslated': 'Pages with no english equivalent',
-  'incorrectly_categorized': 'Pages with incorrect categorization',
+#  'incorrectly_categorized': 'Pages with incorrect categorization',
   'duplicate_files': 'Duplicate files',
   'unused_files': 'Unused files',
   'undocumented_templates': 'Undocumented templates',
