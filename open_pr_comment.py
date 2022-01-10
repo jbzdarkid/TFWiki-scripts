@@ -10,7 +10,8 @@ headers = {
 def make_request(method, path, *args, **kwargs):
   kwargs['headers'] = headers
   r = requests.request(method, f'{api_url}/{path}', *args, **kwargs)
-  print(r.text)
+  if not r.ok:
+    print(r.status_code, r.text)
   r.raise_for_status()
   return r.json()
 

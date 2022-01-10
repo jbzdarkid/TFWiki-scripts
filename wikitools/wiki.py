@@ -91,7 +91,7 @@ class Wiki:
     try:
       return r.json()
     except:
-      print(r.status_code, r.text)
+      print('<94>', r.status_code, r.text)
       raise
 
   def post_with_csrf(self, action, **kwargs):

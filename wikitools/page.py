@@ -63,9 +63,8 @@ class Page:
       return html.count('mw-whatlinkshere-tools') # Class for (<-- links | edit)
 
   def edit(self, text, summary, bot=True):
-    if len(text) > 4000 * 1000: # 4 KB
-      text = text[:4000 * 1000]
-      print('Warning: Truncated text to 4 KB (max page length)')
+    if len(text) > 3000 * 1000: # 3 KB
+      text = '<span class="error">Warning: Report truncated to 3 KB</span>\n' + text[:3000 * 1000]
 
     data = self.wiki.post_with_csrf('edit',
       title=self.url_title,
