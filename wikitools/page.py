@@ -13,6 +13,9 @@ class Page:
   def __str__(self):
     return self.title
 
+  def __repr__(self):
+    return f'Page(w, {self.title})'
+
   def __le__(self, other):
     return self.url_title < other.url_title
 
