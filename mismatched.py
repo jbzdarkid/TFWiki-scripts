@@ -13,14 +13,23 @@ pairs = [
   ['<!--', '-->'],
   ['<([a-zA-Z]*)(?: [^>/]*)?>', '</([a-zA-Z]*?)>'], # HTML tags, e.g. <div width="2px"> </div>
 ]
+tracked_tags = [
+  # HTML standard
+  'a', 'b', 'code', 'center', 'em', 'i', 'li', 'ol', 'p', 's', 'small', 'sub', 'sup', 'td', 'th', 'tr', 'tt', 'u', 'ul',
+
+  # Mediawiki custom
+  'gallery',
+  'includeonly',
+  'noinclude',
+  'nowiki',
+  'onlyinclude',
+  'ref',
+]
 
 # Some pages are expected to have mismatched parenthesis (as they are part of the update history, item description, etc)
 exemptions = {
-  'Advanced_Weaponiser': pairs[5],      # Includes example console commands
-  'Bots': pairs[5],                     # Includes example console commands
   'Linux dedicated server': pairs[0],   # Includes a bash script with case
-  'List_of_default_keys': pairs[2],     # Includes {{Key|]}}
-  'List_of_useful_console_commands': pairs[5], # Includes placeholder <>
+  'List of default keys': pairs[2],     # Includes {{Key|]}}
   'Uber Update': pairs[0],              # The update notes include 1) 2)
 }
 
@@ -61,14 +70,14 @@ def pagescraper(pages, done, translation_data):
 
       for m in finditer(pair[0], text):
         match_info = get_match_info(m)
-        if match_info in ['br', 'references']:
-          continue # The <br> and <references /> tags are self-contained, and do not need a closing match.
+        if match_info not in tracked_tags:
+          continue # Unfortunately, we use < and > all over the place, so this has to be opt-in.
         locations.append([m.start(), +1, match_info])
 
       for m in finditer(pair[1], text):
         match_info = get_match_info(m)
-        if match_info == 'br':
-          continue # The </br> tag is self-contained, and does not need a matching <br>
+        if match_info not in tracked_tags:
+          continue # Unfortunately, we use < and > all over the place, so this has to be opt-in.
         locations.append([m.start(), -1, match_info])
 
       locations.sort()
@@ -139,7 +148,7 @@ def main(w):
 
   output = """\
 {{{{DISPLAYTITLE: {count} pages with mismatched parenthesis}}}}
-Pages with mismatched <nowiki>(), [], and {{}}</nowiki>. Data as of {date}.
+<onlyinclude>{count}</onlyinclude> pages with mismatched <nowiki>(), [], and {{}}</nowiki>. Data as of {date}.
 {{{{TOC limit|2}}}}
 
 """.format(
