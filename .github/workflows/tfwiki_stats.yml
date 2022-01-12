@@ -21,13 +21,19 @@ jobs:
       with:
         python-version: '3.x'
     - run: pip install -r requirements.txt
-    - run: python master.py
-      timeout-minutes: 20
+    - run: python master.py > stdout.txt
+      id: main
+      timeout-minutes: 5
       env:
         WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
         WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
         PULL_REQUEST_ID: ${{ github.event.pull_request.number }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/upload-artifact@v2
+      if: failure()
+      with:
+        name: stdout
+        path: stdout.txt
     - uses: actions/upload-artifact@v2
       with:
         name: Failed uploads
