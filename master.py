@@ -14,11 +14,10 @@ import open_pr_comment
 # Sort external links by domain (with sub-headers)
 # External links is a mess. It needs a modern eye.
 # update readme (again)
-# Improve the wikitools/wiki get_with_continue to actually yield the pagenames, not just the json objects.
-# Sort untranslated templates by # uses
 # Sort missing categories by # pages
 # Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 # images without licensing?
+# Consider running some scripts against the Help: namespace, too
 
 def publish_report(w, module, report_name, root, summary):
   link_map = {}
@@ -74,9 +73,7 @@ if __name__ == '__main__':
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
 
     merge_base = check_output(['git', 'merge-base', 'HEAD', 'origin/' + environ['GITHUB_BASE_REF']], text=True).strip()
-    print(merge_base)
-    diff = check_output(['git', 'diff-index', '--name-only', merge_base], text=True).strip()
-    print(diff)
+    diff = check_output(['git', 'diff', '--name-only', merge_base], text=True).strip()
     for row in diff.split('\n'):
       file = row.replace('.py', '').strip()
       if file in all_reports:
@@ -113,8 +110,9 @@ if __name__ == '__main__':
     start = datetime.now()
     link_map = publish_report(w, module, report_name, root, summary)
     duration = datetime.now() - start
+    duration -= timedelta(microseconds=duration.microseconds) # Strip microseconds
     if not link_map:
-      action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/runs/' + environ['GITHUB_ACTION']
+      action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/actions/runs/' + environ['GITHUB_RUN_ID']
       comment += f'- [ ] {report_name} failed after {duration}: {action_url}\n'
       succeeded = False
     else:

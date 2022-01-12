@@ -1,6 +1,7 @@
 import functools
 from requests.exceptions import RequestException
 import requests
+from time import sleep
 
 @functools.total_ordering
 class Page:
@@ -79,6 +80,7 @@ class Page:
           summary=summary,
           bot=bot,
         )
+        break
       except Exception as e:
         print(f'Attempt {i} failed:\n{e}')
         if i < 5:
