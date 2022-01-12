@@ -21,8 +21,9 @@ jobs:
       with:
         python-version: '3.x'
     - run: pip install -r requirements.txt
-    - run: python master.py
-      timeout-minutes: 180
+    # - run: python master.py
+    - run: python untranslated_templates.py
+      timeout-minutes: 20
       env:
         WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
         WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
