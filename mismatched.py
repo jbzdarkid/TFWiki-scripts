@@ -70,13 +70,13 @@ def pagescraper(pages, done, translation_data):
 
       for m in finditer(pair[0], text):
         match_info = get_match_info(m)
-        if match_info not in tracked_tags:
+        if pair == pairs[5] and match_info not in tracked_tags:
           continue # Unfortunately, we use < and > all over the place, so this has to be opt-in.
         locations.append([m.start(), +1, match_info])
 
       for m in finditer(pair[1], text):
         match_info = get_match_info(m)
-        if match_info not in tracked_tags:
+        if pair == pairs[5] and match_info not in tracked_tags:
           continue # Unfortunately, we use < and > all over the place, so this has to be opt-in.
         locations.append([m.start(), -1, match_info])
 
