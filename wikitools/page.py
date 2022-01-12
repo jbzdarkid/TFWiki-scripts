@@ -81,6 +81,7 @@ class Page:
           summary=summary,
           bot=bot,
         )
+        break
       except Exception as e:
         print(f'Attempt {i} failed:\n{e}')
         if i < 5:
