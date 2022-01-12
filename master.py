@@ -84,7 +84,6 @@ if __name__ == '__main__':
     print('Running the following modules:')
     modules_to_run = list(modules_to_run)
     print(modules_to_run)
-    exit(0)
 
   elif event == 'workflow_dispatch':
     root = 'User:Darkid/Reports'
@@ -111,6 +110,7 @@ if __name__ == '__main__':
 
   for module in modules_to_run:
     report_name = all_reports[module]
+    print(module, report_name)
     start = datetime.now()
     link_map = publish_report(w, module, report_name, root, summary)
     duration = datetime.now() - start
