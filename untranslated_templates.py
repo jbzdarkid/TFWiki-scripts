@@ -111,9 +111,10 @@ def main(w):
       thread.join()
 
   usage_counts = {}
-  for template in translations[language]:
-    if template not in all_templates:
-      usage_counts[template.title] = template.get_transclusion_count()
+  for language in LANGS:
+    for template in translations[language]:
+      if template not in all_templates:
+        usage_counts[template.title] = template.get_transclusion_count()
 
   outputs = []
   for language in LANGS:
