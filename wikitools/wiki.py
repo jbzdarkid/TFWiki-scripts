@@ -87,13 +87,16 @@ class Wiki:
       'action': action,
       'format': 'json',
     })
+    print('<90>')
     r = self.session.post(self.api_url, data=kwargs)
     if r.status_code >= 500:
       r.raise_for_status()
     return r.json()
 
   def post_with_csrf(self, action, **kwargs):
+    print('<96>')
     kwargs['token'] = self.get('query', meta='tokens')['query']['tokens']['csrftoken']
+    print('<98>')
     return self.post_with_login(action, **kwargs)
 
   def get_all_templates(self):
