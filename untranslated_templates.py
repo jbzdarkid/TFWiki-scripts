@@ -5,7 +5,7 @@ from time import gmtime, strftime
 from wikitools import wiki
 from wikitools.page import Page
 
-verbose = True
+verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 PAGESCRAPERS = 50
 
@@ -29,6 +29,7 @@ def pagescraper(pages, done, translations, usage_counts):
   while True:
     try:
       page = pages.get(True, 1)
+      print('Got', page)
     except Empty:
       if done.is_set():
         return
@@ -107,12 +108,16 @@ def main(w):
       if page.title[:13] == 'Template:User':
         continue # Don't include userboxes
       pages.put(page)
+      print('Putting', page)
 
   finally:
+    print('Page generation done, joining threads')
     done.set()
-    for thread in threads:
+    for i, thread in enumerate(threads):
       thread.join()
+      print(f'Thread {i} joined')
 
+  print('Generating output')
   outputs = []
   for language in LANGS:
     output = """\
