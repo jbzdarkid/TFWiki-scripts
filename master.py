@@ -22,14 +22,15 @@ import open_pr_comment
 def publish_report(w, module, report_name, root, summary):
   link_map = {}
   try:
-    a = importlib.import_module(module)
-    print('<26>')
-    report_output = a.main(w)
+    report_output = importlib.import_module(module).main(w)
     print('<28>')
 
     if isinstance(report_output, list):
+      print('<31>')
       for lang, output in report_output:
+        print('<33>', lang)
         link_map[lang] = Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary)
+        print('<35>', lang)
     else:
       link_map['en'] = Page(w, f'{root}/{report_name}').edit(report_output, bot=True, summary=summary)
   except Exception:
