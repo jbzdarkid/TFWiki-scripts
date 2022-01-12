@@ -74,7 +74,6 @@ class Page:
     i = 0
     while True:
       try:
-        print('<77> post with csrf')
         data = self.wiki.post_with_csrf('edit',
           title=self.url_title,
           text=text,

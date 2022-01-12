@@ -23,21 +23,16 @@ def publish_report(w, module, report_name, root, summary):
   link_map = {}
   try:
     report_output = importlib.import_module(module).main(w)
-    print('<28>')
 
     if isinstance(report_output, list):
-      print('<31>')
       for lang, output in report_output:
-        print('<33>', lang)
         link_map[lang] = Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary)
-        print('<35>', lang)
     else:
       link_map['en'] = Page(w, f'{root}/{report_name}').edit(report_output, bot=True, summary=summary)
   except Exception:
     print(f'Failed to update {report_name}')
     print_exc(file=stdout)
 
-  print('<39>')
   return link_map
 
 all_reports = {
@@ -84,12 +79,8 @@ if __name__ == '__main__':
       if file in all_reports:
         modules_to_run.append(file)
       elif file in ['wikitools/wiki', 'wikitools/page']:
-        pass
-        # modules_to_run = all_reports.keys()
-        # break
-    print('Running the following modules:')
-    modules_to_run = list(modules_to_run)
-    print(modules_to_run)
+        modules_to_run = all_reports.keys()
+        break
 
   elif event == 'workflow_dispatch':
     root = 'User:Darkid/Reports'
@@ -116,11 +107,9 @@ if __name__ == '__main__':
 
   for module in modules_to_run:
     report_name = all_reports[module]
-    print(module, report_name)
     start = datetime.now()
     link_map = publish_report(w, module, report_name, root, summary)
     duration = datetime.now() - start
-    print('Report done, got link map:', link_map)
     duration -= timedelta(microseconds=duration.microseconds) # Strip microseconds
     if not link_map:
       action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/actions/runs/' + environ['GITHUB_RUN_ID']
@@ -134,13 +123,10 @@ if __name__ == '__main__':
       comment += '\n'
 
     if event == 'pull_request':
-      print('Opening PR comment')
       open_pr_comment.create_or_edit_pr_comment(comment)
   if event == 'workflow_dispatch':
     open_pr_comment.create_issue('Workflow dispatch finished', comment)
   elif environ['GITHUB_EVENT_NAME'] == 'schedule':
     print(comment)
-
-  print('All done...')
 
   exit(0 if succeeded else 1)
