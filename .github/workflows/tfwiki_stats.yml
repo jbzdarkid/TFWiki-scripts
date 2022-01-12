@@ -24,8 +24,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - run: python master.py
-      with:
-        timeout-minutes: 180
+      timeout-minutes: 180
       env:
         WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
         WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
