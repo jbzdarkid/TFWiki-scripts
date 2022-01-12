@@ -88,22 +88,13 @@ class Wiki:
       'format': 'json',
     })
     r = self.session.post(self.api_url, data=kwargs)
+    if r.status_code >= 500:
+      r.raise_for_status()
     return r.json()
 
   def post_with_csrf(self, action, **kwargs):
-    # We would rather not lose all our hard work, so we try pretty hard to make the edit succeed.
-    i = 0
-    while True:
-      try:
-        kwargs['token'] = self.get('query', meta='tokens')['query']['tokens']['csrftoken']
-        return self.post_with_login(action, **kwargs)
-      except RequestException as e:
-        print(f'Attempt {i} failed:\n{e}')
-        if i < 5:
-          i += 1
-          sleep(4**i)
-        else:
-          raise
+    kwargs['token'] = self.get('query', meta='tokens')['query']['tokens']['csrftoken']
+    return self.post_with_login(action, **kwargs)
 
   def get_all_templates(self):
     for entry in self.get_with_continue('query', 'allpages',
@@ -123,10 +114,10 @@ class Wiki:
     )
 
   def get_all_pages(self):
-    # TODO: Wait, does allpages have a namespace restriction? hmmm....
     for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
+      apnamespace=0, # Pages from the Main namespace only
       apfilterredir='nonredirects', # Filter out redirects
     ):
       title = entry['title']

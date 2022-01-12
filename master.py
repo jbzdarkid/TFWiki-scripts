@@ -7,6 +7,8 @@ from traceback import print_exc
 from wikitools import wiki
 from wikitools.page import Page
 
+import open_pr_comment
+
 # Write a replacement script for broken external links -> WindBOT filter
 #   forums.tfmaps.net?t=# -> tf2maps.net/threads/#
 # Sort external links by domain (with sub-headers)
@@ -16,6 +18,7 @@ from wikitools.page import Page
 # Sort untranslated templates by # uses
 # Sort missing categories by # pages
 # Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
+# images without licensing?
 
 def publish_report(w, module, report_name, root, summary):
   link_map = {}
@@ -60,7 +63,7 @@ if __name__ == '__main__':
     summary = 'Automatic update via https://github.com/jbzdarkid/TFWiki-scripts'
 
     # Multi-language reports need frequent updates since we have many translators
-    modules_to_run += ['untranslated_templates', 'missing_transations', 'all_articles']
+    modules_to_run += ['untranslated_templates', 'missing_translations', 'all_articles']
     if datetime.now().weekday() == 0: # Every Monday, run english-only (or otherwise less frequently needed) reports
       modules_to_run += ['wanted_templates', 'navboxes', 'overtranslated', 'missing_categories']
     if datetime.now().day == 1: # On the 1st of every month, run everything
@@ -121,9 +124,11 @@ if __name__ == '__main__':
         comment += f' [{language}]({link_map[language]})'
       comment += '\n'
 
-  # Pass this as output to github-actions, so it can be used in later steps
-  # Or, like, import the other file and just call it. IDK.
-  with open(environ['GITHUB_ENV'], 'a') as f:
-    f.write(f'GITHUB_COMMENT<<EOF\n{comment}\nEOF\n')
+    if event == 'pull_request':
+      open_pr_comment.create_or_edit_pr_comment(comment)
+  if event == 'workflow_dispatch':
+    open_pr_comment.create_issue('Workflow dispatch finished', comment)
+  elif environ['GITHUB_EVENT_NAME'] == 'schedule':
+    print(comment)
 
   exit(0 if succeeded else 1)

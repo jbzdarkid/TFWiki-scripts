@@ -7,6 +7,7 @@ verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 def main(w):
+  # TODO: Category:Navigational templates ?
   excluded_templates = [
     # Class navs have way too many items in them to be useful
     'Template:Scout Nav',
@@ -64,6 +65,7 @@ def main(w):
     'Template:Meet Your Match Update Nav': 'Team Fortress 2 Official Soundtrack',
     'Template:Jungle Inferno Update Nav': 'Team Fortress 2 Official Soundtrack',
   }
+
 
   navbox_templates = {}
   navbox = Page(w, 'Template:Navbox')

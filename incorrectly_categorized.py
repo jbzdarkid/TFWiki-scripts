@@ -1,88 +1,22 @@
+from queue import Queue, Empty
+from threading import Thread, Event
 from time import gmtime, strftime
 from wikitools import wiki
+from wikitools.page import Page
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
+PAGESCRAPERS = 50
 
-def main(w):
-  # TODO: Filter based on Category:Maintenance?
-  # https://wiki.teamfortress.com/w/api.php?action=query&list=categorymembers&cmtitle=Category:Maintenance&cmnamespace=14
-  maintanence_categories = [
-    'Articles needing videos',
-    'Articles marked for grammar correction/lang',
-    'Articles marked for open review',
-    'Articles needing 3D views',
-    'Articles needing copy-editing',
-    'Articles needing images',
-    'Community strategy stubs/lang',
-    'Custom maps unreleased stubs/lang',
-    'ERROR',
-    'Featured articles/lang',
-    'Featured articles (Classic)/lang',
-    'GFDL images',
-    'Images that need improving',
-    'Item infobox usage',
-    "Item infobox using 'loadout-name'",
-    "Item infobox using 'loadout-prefix'",
-    'Language redirects',
-    'Level ERROR',
-    'Lists to be expanded',
-    'Map infobox outdated parameters',
-    'Maps without a screenshot',
-    'Marked for deletion',
-    'Needs Template Translation',
-    'Out of date pages', # I wish I didn't have to do this but it's misreporting.
-    'Out of date pages/lang',
-    'Outdated Backpack item parameters',
-    'Pages needing citations',
-    'Pages requiring retranslation',
-    'Pages using duplicate arguments in template calls',
-    'Pages using invalid self-closed HTML tags',
-    'Pages where node count is exceeded',
-    'Pages where template include size is exceeded',
-    'Pages with broken file links',
-    'Pages with reference errors',
-    'Pages with too many expensive parser function calls',
-    'Protected pages',
-    'Quotations needing translating',
-    'Strange rank name ERROR',
-    'Stubs/lang',
-    'Translating into Arabic',
-    'Translating into Chinese (Simplified)',
-    'Translating into Chinese (Traditional)',
-    'Translating into Czech',
-    'Translating into Danish',
-    'Translating into Dutch',
-    'Translating into Finnish',
-    'Translating into French',
-    'Translating into German',
-    'Translating into Hungarian',
-    'Translating into Italian',
-    'Translating into Japanese',
-    'Translating into Korean',
-    'Translating into Norwegian',
-    'Translating into Polish',
-    'Translating into Portuguese',
-    'Translating into Portuguese (Brazil)',
-    'Translating into Romanian',
-    'Translating into Spanish',
-    'Translating into Swedish',
-    'Translating into Turkish',
-    'Translations needing updating',
-    'Templates that use translation switching',
-    'Uses Full Moon templates/lang',
-  ]
-
-  miscategorized = {}
-  category_keys = {language: [] for language in LANGS}
-  unique_pages = set()
-  for category in w.get_all_categories(filter_redirects=False):
-    category = category.title
-    if category in maintanence_categories:
-      continue
-
-    if verbose:
-      print(f'Processing {category}')
+def pagescraper(categories, done, miscategorized):
+  while True:
+    try:
+      category = categories.get(True, 1)
+    except Empty:
+      if done.is_set():
+        return
+      else:
+        continue
 
     cat_lang = category.rpartition('/')[2]
     if cat_lang not in LANGS:
@@ -92,15 +26,76 @@ def main(w):
       if page_lang not in LANGS:
         page_lang = 'en'
       if page_lang != cat_lang:
-        if category not in miscategorized:
-          miscategorized[category] = [page.title]
+        if category not in miscategorized[cat_lang]:
+          miscategorized[cat_lang][category] = [page]
         else:
-          miscategorized[category].append(page.title)
-        unique_pages.add(page.title)
-    if category in miscategorized: # We actually found pages
-      category_keys[cat_lang].append([len(miscategorized[category]), category])
-      if verbose:
-        print(f'Category:{category} has {len(miscategorized[category])} miscategorized pages')
+          miscategorized[cat_lang][category].append(page)
+
+def main(w):
+  # TODO: Consider including /lang categories again
+  # TODO: Mark these as non-article
+  maintanence_categories = [
+    'Category:Community strategy stubs/lang',
+    'Category:Custom maps unreleased stubs/lang',
+    'Category:GFDL images',
+    'Category:Images that need improving',
+    'Category:Lists to be expanded',
+    'Category:Protected pages',
+    'Category:Quotations needing translating',
+    'Category:Translating into Arabic',
+    'Category:Translating into Chinese (Simplified)',
+    'Category:Translating into Chinese (Traditional)',
+    'Category:Translating into Czech',
+    'Category:Translating into Danish',
+    'Category:Translating into Dutch',
+    'Category:Translating into Finnish',
+    'Category:Translating into French',
+    'Category:Translating into German',
+    'Category:Translating into Hungarian',
+    'Category:Translating into Italian',
+    'Category:Translating into Japanese',
+    'Category:Translating into Korean',
+    'Category:Translating into Norwegian',
+    'Category:Translating into Polish',
+    'Category:Translating into Portuguese (Brazil)',
+    'Category:Translating into Portuguese',
+    'Category:Translating into Romanian',
+    'Category:Translating into Russian',
+    'Category:Translating into Spanish',
+    'Category:Translating into Swedish',
+    'Category:Translating into Turkish',
+    'Category:Translations needing updating',
+    'Category:Uses Full Moon templates/lang',
+  ]
+
+  for page in Page(w, 'Template:Non-article category').get_transclusions(namespace=14):
+    maintanence_categories.append(page.title)
+
+  categories, done = Queue(), Event()
+  miscategorized = {lang: {} for lang in LANGS}
+  threads = []
+  for _ in range(PAGESCRAPERS): # Number of threads
+    thread = Thread(target=pagescraper, args=(categories, done, miscategorized))
+    threads.append(thread)
+    thread.start()
+  try:
+    i = 0
+    for category in w.get_all_categories(filter_redirects=False):
+      i += 1
+      if category.title not in maintanence_categories:
+        if verbose:
+          print(f'Processing {category}')
+        categories.put(category.title)
+
+  finally:
+    done.set()
+    for thread in threads:
+      thread.join()
+
+  unique_pages = set()
+  for language in LANGS:
+    for pages in miscategorized[language].values():
+      unique_pages.update(page.title for page in pages)
 
   output = """\
 {{{{DISPLAYTITLE: {page_count} miscategorized pages}}}}
@@ -113,14 +108,25 @@ def main(w):
     date=strftime(r'%H:%M, %d %B %Y', gmtime()))
 
   for language in LANGS:
-    if len(category_keys[language]) == 0:
+    if len(miscategorized[language]) == 0:
       continue
 
+    category_keys = []
+    for category in miscategorized[language]:
+      category_keys.append([len(miscategorized[language][category]), category])
+      if verbose:
+        print(f'{category} has {category_keys[-1][0]} miscategorized pages')
+
+    if verbose:
+      print(f'{len(category_keys)} categories with bad pages in {language}')
+
     output += '== {{lang name|name|%s}} ==\n' % language
-    for _, category in sorted(category_keys[language], reverse=True):
-      output += f'=== [[:Category:{category}]] ===\n'
-      for page in sorted(miscategorized[category]):
-        output += '* [{{fullurl:%s|action=edit}} %s]\n' % (page, page)
+    for _, category in sorted(category_keys, reverse=True):
+      output += f'=== [[:{category}]] ===\n'
+      if verbose:
+        print(f'  {len(miscategorized[language][category])} pages in category {category}')
+      for page in sorted(miscategorized[language][category]):
+        output += f'* [{page.get_edit_url()} {page.title}]\n'
 
   return output
 
