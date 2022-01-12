@@ -113,7 +113,7 @@ def main(w):
   usage_counts = {}
   for language in LANGS:
     for template in translations[language]:
-      if template not in all_templates:
+      if template.title not in usage_counts:
         usage_counts[template.title] = template.get_transclusion_count()
 
   outputs = []
