@@ -81,6 +81,10 @@ if __name__ == '__main__':
       elif file in ['wikitools/wiki', 'wikitools/page']:
         modules_to_run = all_reports.keys()
         break
+    print('Running the following modules:')
+    modules_to_run = list(modules_to_run)
+    print(modules_to_run)
+    exit(0)
 
   elif event == 'workflow_dispatch':
     root = 'User:Darkid/Reports'
