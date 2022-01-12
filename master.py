@@ -110,6 +110,7 @@ if __name__ == '__main__':
     start = datetime.now()
     link_map = publish_report(w, module, report_name, root, summary)
     duration = datetime.now() - start
+    duration -= timedelta(microseconds=duration.microseconds) # Strip microseconds
     if not link_map:
       action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/actions/runs/' + environ['GITHUB_RUN_ID']
       comment += f'- [ ] {report_name} failed after {duration}: {action_url}\n'
