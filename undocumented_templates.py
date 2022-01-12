@@ -71,6 +71,7 @@ There are <onlyinclude>{count}</onlyinclude> templates which are in use but are 
   return output
 
 if __name__ == '__main__':
+  global verbose
   verbose = True
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   with open('wiki_undocumented_templates.txt', 'w') as f:

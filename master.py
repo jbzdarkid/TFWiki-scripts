@@ -79,8 +79,8 @@ if __name__ == '__main__':
       if file in all_reports:
         modules_to_run.append(file)
       elif file in ['wikitools/wiki', 'wikitools/page']:
-        modules_to_run = all_reports.keys()
-        break
+        # modules_to_run = all_reports.keys()
+        # break
     print('Running the following modules:')
     modules_to_run = list(modules_to_run)
     print(modules_to_run)

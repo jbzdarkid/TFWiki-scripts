@@ -1,6 +1,7 @@
 import functools
 from requests.exceptions import RequestException
 import requests
+from time import sleep
 
 @functools.total_ordering
 class Page:
