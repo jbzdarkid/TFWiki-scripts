@@ -22,7 +22,10 @@ import open_pr_comment
 def publish_report(w, module, report_name, root, summary):
   link_map = {}
   try:
-    report_output = importlib.import_module(module).main(w)
+    a = importlib.import_module(module)
+    print('<26>')
+    report_output = a.main(w)
+    print('<28>')
 
     if isinstance(report_output, list):
       for lang, output in report_output:
@@ -33,6 +36,7 @@ def publish_report(w, module, report_name, root, summary):
     print(f'Failed to update {report_name}')
     print_exc(file=stdout)
 
+  print('<39>')
   return link_map
 
 all_reports = {
