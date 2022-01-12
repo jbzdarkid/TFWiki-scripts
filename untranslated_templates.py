@@ -1,6 +1,6 @@
 from queue import Empty, Queue
 from threading import Thread, Event
-from re import finditer, DOTALL
+from re import compile, IGNORECASE, VERBOSE
 from time import gmtime, strftime
 from wikitools import wiki
 from wikitools.page import Page
@@ -8,6 +8,22 @@ from wikitools.page import Page
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 PAGESCRAPERS = 50
+
+LANG_TEMPLATE_START = compile("""\
+  [^{]{{    # The start of a template '{{' which is not the start of a parameter '{{{'
+  \s*       # Any amount of whitespace is allowed before the template name
+  lang      # Language template (duh)
+  \s*       # Any amount of whitespace (but critically, no more ascii characters)
+  \|        # Start of parameter list
+""", IGNORECASE | VERBOSE)
+
+LANG_TEMPLATE_ARGS = compile("""\
+  \|        # Start of a parameter
+  (
+    [^=]*?  # Key name
+  )
+  =         # Start of a value
+""", VERBOSE)
 
 def pagescraper(w, pages, done, translations):
   while True:
@@ -46,7 +62,7 @@ def pagescraper(w, pages, done, translations):
     for index, value in locations:
       try:
         buffer[stack[-1]] += page_text[lastIndex:index]
-      except KeyError: #
+      except KeyError: # New addition
         buffer[stack[-1]] = page_text[lastIndex:index]
       except IndexError: # Unmached parenthesis, e.g. Class Weapons Tables
         buffer[0] += page_text[lastIndex:index] # Add text to default layer
@@ -63,22 +79,15 @@ def pagescraper(w, pages, done, translations):
       print(page.title, 'contains', len(buffer), 'pairs of braces')
 
     missing_languages = set()
-    # Finally, search through for lang templates via positive lookahead
-    for match in finditer('{(?=(.*?)\|)', page_text, DOTALL):
-      template = match.group(1).strip().lower()
-      languages = []
-      if template == 'lang': # And count out their params
-        if page_text[match.start()-2:match.start()+1] == '{{{':
-          continue # Skip any parameters named lang, viz.: {{{lang|}}}
-        for match2 in finditer('\|(.*?)=', buffer[match.start()]):
-          languages.append(match2.group(1).strip().lower())
-        for language in translations:
-          if language not in languages: # Add missing translations
-            translations[language].add(page.title)
-            missing_languages.add(language)
-    if len(missing_languages) > 0:
-      if verbose:
-        print(page.title, 'is not translated into', len(missing_languages), 'languages:', ', '.join(missing_languages))
+    # Finally, search through for lang templates using regex
+    for match in LANG_TEMPLATE_START.finditer(page_text):
+      for match2 in LANG_TEMPLATE_ARGS.finditer(buffer[match.start() + 2]):
+        language = match2.group(1).strip().lower()
+        if language in LANGS:
+          translations[language].add(page)
+          missing_languages.add(language)
+    if verbose and len(missing_languages) > 0:
+      print(f'{page.title} is not translated into {len(missing_languages)} languages:', ', '.join(missing_languages))
 
 def main(w):
   pages, done = Queue(), Event()
@@ -101,6 +110,11 @@ def main(w):
     for thread in threads:
       thread.join()
 
+  usage_counts = {}
+  for template in translations[language]:
+    if template not in all_templates:
+      usage_counts[template.title] = template.get_transclusion_count()
+
   outputs = []
   for language in LANGS:
     output = """\
@@ -116,8 +130,9 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       lang=language,
       count=len(translations[language]),
       date=strftime(r'%H:%M, %d %B %Y', gmtime()))
-    for template in sorted(translations[language]):
-      output += f'\n# [[{template}]]'
+
+    for template in sorted(translations[language], key=lambda template: -usage_counts[template.title]):
+      output += f'\n# [{template.get_edit_url()} {template.title} has {usage_counts[template.title]} uses]'
     outputs.append([language, output])
   return outputs
 

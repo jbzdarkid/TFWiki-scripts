@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 0
+        fetch-depth: 0 # We need full git history to use git merge-base
     - uses: actions/setup-python@v2
       with:
         python-version: 3.8
@@ -24,8 +24,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - run: python master.py
+      with:
+        timeout-minutes: 180
       env:
         WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
         WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
         PULL_REQUEST_ID: ${{ github.event.pull_request.number }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Failed uploads
+        path: wiki_*.txt
