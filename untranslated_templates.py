@@ -25,7 +25,7 @@ LANG_TEMPLATE_ARGS = compile("""\
   =         # Start of a value
 """, VERBOSE)
 
-def pagescraper(w, pages, done, translations):
+def pagescraper(pages, done, translations, usage_counts):
   while True:
     try:
       page = pages.get(True, 1)
@@ -86,15 +86,18 @@ def pagescraper(w, pages, done, translations):
         if language in LANGS:
           translations[language].add(page)
           missing_languages.add(language)
-    if verbose and len(missing_languages) > 0:
-      print(f'{page.title} is not translated into {len(missing_languages)} languages:', ', '.join(missing_languages))
+    if len(missing_languages) > 0:
+      usage_counts[page.title] = page.get_transclusion_count()
+      if verbose:
+        print(f'{page.title} is not translated into {len(missing_languages)} languages:', ', '.join(missing_languages))
 
 def main(w):
   pages, done = Queue(), Event()
   translations = {lang: set() for lang in LANGS}
+  usage_counts = {}
   threads = []
   for _ in range(PAGESCRAPERS): # Number of threads
-    thread = Thread(target=pagescraper, args=(w, pages, done, translations))
+    thread = Thread(target=pagescraper, args=(pages, done, translations, usage_counts))
     threads.append(thread)
     thread.start()
   try:
@@ -109,12 +112,6 @@ def main(w):
     done.set()
     for thread in threads:
       thread.join()
-
-  usage_counts = {}
-  for language in LANGS:
-    for template in translations[language]:
-      if template.title not in usage_counts:
-        usage_counts[template.title] = template.get_transclusion_count()
 
   outputs = []
   for language in LANGS:

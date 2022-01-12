@@ -1,15 +1,13 @@
 from os import environ
 import requests
 
-api_url = 'https://api.github.com/repos/' + environ['GITHUB_REPOSITORY']
-headers = {
-  'Accept': 'application/vnd.github.v3+json',
-  'Authorization': 'Bearer ' + environ['GITHUB_TOKEN'],
-}
-
 def make_request(method, path, *args, **kwargs):
-  kwargs['headers'] = headers
-  r = requests.request(method, f'{api_url}/{path}', *args, **kwargs)
+  url = f'https://api.github.com/repos/{environ["GITHUB_REPOSITORY"]}/{path}'
+  kwargs['headers'] = {
+    'Accept': 'application/vnd.github.v3+json',
+    'Authorization': 'Bearer ' + environ['GITHUB_TOKEN'],
+  }
+  r = requests.request(method, url, *args, **kwargs)
   if not r.ok:
     print(r.status_code, r.text)
   r.raise_for_status()
