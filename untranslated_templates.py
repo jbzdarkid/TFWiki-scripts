@@ -29,7 +29,6 @@ def pagescraper(pages, done, translations, usage_counts):
   while True:
     try:
       page = pages.get(True, 1)
-      print('Got', page)
     except Empty:
       if done.is_set():
         return
@@ -108,14 +107,11 @@ def main(w):
       if page.title[:13] == 'Template:User':
         continue # Don't include userboxes
       pages.put(page)
-      print('Putting', page)
 
   finally:
-    print('Page generation done, joining threads')
     done.set()
-    for i, thread in enumerate(threads):
+    for thread in threads:
       thread.join()
-      print(f'Thread {i} joined')
 
   print('Generating output')
   outputs = []
@@ -137,6 +133,7 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
     for template in sorted(translations[language], key=lambda template: -usage_counts[template.title]):
       output += f'\n# [{template.get_edit_url()} {template.title} has {usage_counts[template.title]} uses]'
     outputs.append([language, output])
+  print('Returning')
   return outputs
 
 if __name__ == '__main__':

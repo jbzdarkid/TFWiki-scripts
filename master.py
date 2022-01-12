@@ -115,6 +115,7 @@ if __name__ == '__main__':
     start = datetime.now()
     link_map = publish_report(w, module, report_name, root, summary)
     duration = datetime.now() - start
+    print('Report done, got link map:', link_map)
     duration -= timedelta(microseconds=duration.microseconds) # Strip microseconds
     if not link_map:
       action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/actions/runs/' + environ['GITHUB_RUN_ID']
@@ -128,10 +129,13 @@ if __name__ == '__main__':
       comment += '\n'
 
     if event == 'pull_request':
+      print('Opening PR comment')
       open_pr_comment.create_or_edit_pr_comment(comment)
   if event == 'workflow_dispatch':
     open_pr_comment.create_issue('Workflow dispatch finished', comment)
   elif environ['GITHUB_EVENT_NAME'] == 'schedule':
     print(comment)
+
+  print('All done...')
 
   exit(0 if succeeded else 1)
