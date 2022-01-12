@@ -5,7 +5,7 @@ from time import gmtime, strftime
 from wikitools import wiki
 from wikitools.page import Page
 
-verbose = False
+verbose = True
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 PAGESCRAPERS = 50
 
@@ -92,7 +92,6 @@ def pagescraper(pages, done, translations, usage_counts):
         print(f'{page.title} is not translated into {len(missing_languages)} languages:', ', '.join(missing_languages))
 
 def main(w):
-  verbose = True
   pages, done = Queue(), Event()
   translations = {lang: set() for lang in LANGS}
   usage_counts = {}
