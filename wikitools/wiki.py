@@ -79,7 +79,7 @@ class Wiki:
       yield r.text
       params['offset'] += params['limit']
 
-  def post_with_login(self, action, **kwargs):
+  def post_with_login(self, action, files=None, **kwargs):
     if not self.lgtoken:
       raise ValueError('Error: Not logged in')
     kwargs.update({
@@ -87,7 +87,7 @@ class Wiki:
       'action': action,
       'format': 'json',
     })
-    r = self.session.post(self.api_url, data=kwargs)
+    r = self.session.post(self.api_url, data=kwargs, files=files)
     if r.status_code >= 500:
       r.raise_for_status()
     return r.json()

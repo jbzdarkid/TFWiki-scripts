@@ -87,8 +87,7 @@ class Page:
           i += 1
           sleep(30)
         else:
-          print(f'Failed to edit {self.title}:')
-          print(e)
+          print(f'Failed to edit {self.title}:\n{e}')
           return
 
     if 'error' in data:
