@@ -12,7 +12,7 @@ PAGESCRAPERS = 50
 LANG_TEMPLATE_START = compile("""\
   [^{]{{    # The start of a template '{{' which is not the start of a parameter '{{{'
   \s*       # Any amount of whitespace is allowed before the template name
-  lang      # Language template (duh)
+  lang      # Language template. Note that this does not allow invocations of {{lang incomplete}}
   \s*       # Any amount of whitespace (but critically, no more ascii characters)
   \|        # Start of parameter list
 """, IGNORECASE | VERBOSE)
@@ -81,11 +81,13 @@ def pagescraper(pages, done, translations, usage_counts):
     missing_languages = set()
     # Finally, search through for lang templates using regex
     for match in LANG_TEMPLATE_START.finditer(page_text):
+
+      this_missing_languages = set(LANGS)
       for match2 in LANG_TEMPLATE_ARGS.finditer(buffer[match.start() + 2]):
         language = match2.group(1).strip().lower()
-        if language in LANGS:
-          translations[language].add(page)
-          missing_languages.add(language)
+        this_missing_languages.discard(language)
+      missing_languages |= this_missing_languages
+
     if len(missing_languages) > 0:
       usage_counts[page.title] = page.get_transclusion_count()
       if verbose:
@@ -106,6 +108,8 @@ def main(w):
         continue # Don't include subpage templates like Template:Dictionary and Template:PatchDiff
       if page.title[:13] == 'Template:User':
         continue # Don't include userboxes
+      if page.title == 'Template:Lang':
+        continue # Special exclusion
       pages.put(page)
 
   finally:
