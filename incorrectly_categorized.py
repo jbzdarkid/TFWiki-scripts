@@ -8,7 +8,7 @@ verbose = True
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 PAGESCRAPERS = 50
 
-def pagescraper(categories, done, miscategorized):
+def pagescraper(w, categories, done, miscategorized):
   while True:
     try:
       category = categories.get(True, 1)
@@ -75,7 +75,7 @@ def main(w):
   miscategorized = {lang: {} for lang in LANGS}
   threads = []
   for _ in range(PAGESCRAPERS): # Number of threads
-    thread = Thread(target=pagescraper, args=(categories, done, miscategorized))
+    thread = Thread(target=pagescraper, args=(w, categories, done, miscategorized))
     threads.append(thread)
     thread.start()
   try:
