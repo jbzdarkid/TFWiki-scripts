@@ -4,7 +4,7 @@ from time import gmtime, strftime
 from wikitools import wiki
 from wikitools.page import Page
 
-verbose = False
+verbose = True
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 PAGESCRAPERS = 50
 
@@ -79,9 +79,7 @@ def main(w):
     threads.append(thread)
     thread.start()
   try:
-    i = 0
     for category in w.get_all_categories(filter_redirects=False):
-      i += 1
       if category.title not in maintanence_categories:
         if verbose:
           print(f'Processing {category}')
