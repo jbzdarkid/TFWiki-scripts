@@ -12,7 +12,9 @@ def main(w):
     if page.title.rpartition('/')[2] in LANGS:
       pass # Not english
     elif 'OTFWH' in page.title: # ETF2L Highlander Community Challenge/OTFWH
-      pass # Do not translate
+      pass # Special, non-translated page
+    elif page.title.startswith('WebAPI/'):
+      pass # WebAPI pages are very technical and shouldn't be translated.
     else:
       english_pages.add(page.title)
 
