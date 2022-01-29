@@ -78,7 +78,7 @@ def pagescraper(pages, done, translations, usage_counts):
     if verbose:
       print(page.title, 'contains', len(buffer), 'pairs of braces')
 
-    missing_languages = set()
+    missing_languages = []
     # Finally, search through for lang templates using regex
     for match in LANG_TEMPLATE_START.finditer(page_text):
 
@@ -86,16 +86,24 @@ def pagescraper(pages, done, translations, usage_counts):
       for match2 in LANG_TEMPLATE_ARGS.finditer(buffer[match.start() + 2]):
         language = match2.group(1).strip().lower()
         this_missing_languages.discard(language)
-      missing_languages |= this_missing_languages
+      missing_languages += this_missing_languages
 
     if len(missing_languages) > 0:
-      usage_counts[page.title] = page.get_transclusion_count()
       if verbose:
-        print(f'{page.title} is not translated into {len(missing_languages)} languages:', ', '.join(missing_languages))
+        actually_missing = sorted(set(missing_languages))
+        print(f'{page.title} is not translated into {len(actually_missing)} languages:', ', '.join(actually_missing))
+
+      usage_count = page.get_transclusion_count()
+      if usage_count == 0:
+        continue
+      usage_counts[page.title] =  usage_count
+      for lang in LANGS:
+        if lang in missing_languages:
+          translations[lang].append((page, missing_languages.count(lang)))
 
 def main(w):
   pages, done = Queue(), Event()
-  translations = {lang: set() for lang in LANGS}
+  translations = {lang: [] for lang in LANGS}
   usage_counts = {}
   threads = []
   for _ in range(PAGESCRAPERS): # Number of threads
@@ -117,7 +125,6 @@ def main(w):
     for thread in threads:
       thread.join()
 
-  print('Generating output')
   outputs = []
   for language in LANGS:
     output = """\
@@ -134,10 +141,9 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       count=len(translations[language]),
       date=strftime(r'%H:%M, %d %B %Y', gmtime()))
 
-    for template in sorted(translations[language], key=lambda template: -usage_counts[template.title]):
-      output += f'\n# [{template.get_edit_url()} {template.title} has {usage_counts[template.title]} uses]'
+    for template, missing in sorted(translations[language], key=lambda elem: -usage_counts[elem[0].title]):
+      output += f'\n# [{template.get_edit_url()} {template.title} has {usage_counts[template.title]} uses] and is missing {missing} translation{"s"[:missing^1]}'
     outputs.append([language, output])
-  print('Returning')
   return outputs
 
 if __name__ == '__main__':
