@@ -98,7 +98,8 @@ def pagescraper(pages, done, translations, usage_counts):
         continue
       usage_counts[page.title] =  usage_count
       for lang in LANGS:
-        translations[lang].append((page, missing_languages.count(lang)))
+        if lang in missing_languages:
+          translations[lang].append((page, missing_languages.count(lang)))
 
 def main(w):
   pages, done = Queue(), Event()
@@ -141,7 +142,7 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       date=strftime(r'%H:%M, %d %B %Y', gmtime()))
 
     for template, missing in sorted(translations[language], key=lambda elem: -usage_counts[elem[0].title]):
-      output += f'\n# [{template.get_edit_url()} {template.title} has {usage_counts[template.title]} uses] and is missing {missing} translations'
+      output += f'\n# [{template.get_edit_url()} {template.title} has {usage_counts[template.title]} uses] and is missing {missing} translation{"s"[:missing^1]}'
     outputs.append([language, output])
   return outputs
 
