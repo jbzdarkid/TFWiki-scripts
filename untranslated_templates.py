@@ -20,7 +20,7 @@ LANG_TEMPLATE_START = compile("""\
 LANG_TEMPLATE_ARGS = compile("""\
   \|        # Start of a parameter
   (
-    [^=]*?  # Key name
+    [^|=]*?  # Key name
   )
   =         # Start of a value
 """, VERBOSE)
@@ -87,6 +87,10 @@ def pagescraper(pages, done, translations, usage_counts):
         language = match2.group(1).strip().lower()
         this_missing_languages.discard(language)
       missing_languages += this_missing_languages
+
+      if verbose:
+        line = page_text[:match.start()].count('\n') + 1
+        print(f'Lang template at line {line} is missing translations for', ', '.join(sorted(this_missing_languages)))
 
     if len(missing_languages) > 0:
       if verbose:
