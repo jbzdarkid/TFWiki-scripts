@@ -32,3 +32,4 @@ jobs:
       with:
         name: Failed uploads
         path: wiki_*.txt
+        if-no-files-found: ignore

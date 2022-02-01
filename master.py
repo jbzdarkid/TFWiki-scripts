@@ -19,6 +19,19 @@ import open_pr_comment
 # images without licensing?
 # Consider running some scripts against the Help: namespace, too
 
+def handle_failed_edits(link_map, report_output, report_name):
+  missing_languages = [lang for lang in link_map if link_map[lang] is None]
+  if len(missing_languages) == 0:
+    return
+  if isinstance(report_output, str):
+    with open(f'wiki_{report_name}.txt', 'w') as f:
+      f.write(report_output)
+  else:
+    for lang, output in report_output:
+      if lang in missing_languages:
+        with open(f'wiki_{report_name}_{lang}.txt', 'w') as f:
+          f.write(output)
+
 def publish_report(w, module, report_name, root, summary):
   link_map = {}
   try:
@@ -29,6 +42,9 @@ def publish_report(w, module, report_name, root, summary):
         link_map[lang] = Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary)
     else:
       link_map['en'] = Page(w, f'{root}/{report_name}').edit(report_output, bot=True, summary=summary)
+
+    handle_failed_edits(link_map, report_output, report_name)
+
   except Exception:
     print(f'Failed to update {report_name}')
     print_exc(file=stdout)
