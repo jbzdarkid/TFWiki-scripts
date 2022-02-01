@@ -145,7 +145,7 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       count=len(translations[language]),
       date=strftime(r'%H:%M, %d %B %Y', gmtime()))
 
-    for template, missing in sorted(translations[language], key=lambda elem: -usage_counts[elem[0].title]):
+    for template, missing in sorted(translations[language], key=lambda elem: (-usage_counts[elem[0].title], elem[0].title)):
       output += f'\n# [{template.get_edit_url()} {template.title} has {usage_counts[template.title]} uses] and is missing {missing} translation{"s"[:missing^1]}'
     outputs.append([language, output])
   return outputs
