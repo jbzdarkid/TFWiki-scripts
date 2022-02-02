@@ -1,4 +1,4 @@
-from time import gmtime, strftime
+from utils import time_and_date
 from wikitools import wiki
 
 verbose = False
@@ -31,7 +31,7 @@ def main(w):
 
 """.format(
       count=count,
-      date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+      date=time_and_date())
 
   for language in LANGS:
     if len(overtranslated[language]) == 0:

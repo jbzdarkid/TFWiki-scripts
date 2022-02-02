@@ -1,5 +1,4 @@
-from time import gmtime, strftime
-from utils import plural, whatlinkshere
+from utils import plural, time_and_date, whatlinkshere
 from wikitools import wiki
 from wikitools.page import Page
 
@@ -40,9 +39,9 @@ def main(w):
 List of all duplicate files; <onlyinclude>{unique}</onlyinclude> unique files, {count} duplicated files in total. Data as of {date}.
 
 == List ==\n""".format(
-    unique = len(all_duplicates),
-    count = sum(len(dupe_list) for dupe_list in all_duplicates),
-    date = strftime(r'%H:%M, %d %B %Y', gmtime()))
+    unique=len(all_duplicates),
+    count=sum(len(dupe_list) for dupe_list in all_duplicates),
+    date=time_and_date())
 
   for dupe_list in all_duplicates:
     dupe_list = [d for d in dupe_list if not d.startswith('File:User')]

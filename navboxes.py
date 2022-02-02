@@ -1,5 +1,5 @@
 from re import finditer, DOTALL
-from time import gmtime, strftime
+from utils import time_and_date
 from wikitools import wiki
 from wikitools.page import Page
 
@@ -122,7 +122,7 @@ There are <onlyinclude>{count}</onlyinclude> pages which are part of a navbox bu
 
 """.format(
       count=count,
-      date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+      date=time_and_date())
 
   for template in sorted(missing_navboxes.keys()):
     if len(missing_navboxes[template]) == 0:

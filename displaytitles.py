@@ -1,56 +1,34 @@
-from queue import Queue, Empty
 from re import search
-from threading import Thread, Event
-from time import gmtime, strftime
+from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
-PAGESCRAPERS = 50
 
-def pagescraper(pages, done, errors, overflow):
-  while True:
-    try:
-      page = pages.get(True, 1)
-    except Empty:
-      if done.is_set():
-        return
-      else:
-        continue
+def pagescraper(page, errors, overflow):
+  if __name__ != '__main__':
+    # When running as part of automation, wiki text will be cached, so it is faster to query the wikitext
+    # before making another network call to get the page source.
+    # ... but this prevents finding other errors
+    wikitext = page.get_wiki_text()
+    if 'DISPLAYTITLE' not in wikitext:
+      return
 
-    if __name__ != '__main__':
-      # When running as part of automation, wiki text will be cached, so it is faster to query the wikitext
-      # before making another network call to get the page source.
-      wikitext = page.get_wiki_text()
-      if 'DISPLAYTITLE' not in wikitext:
-        continue
-
-    html = page.get_raw_html()
-    m = search('<span class="error">(.*?)</span>', html)
-    if not m:
-      continue
-    if 'Display title' in m.group(0):
-      errors.append(page)
-    else:
-      overflow[m.group(1)] = page
+  html = page.get_raw_html()
+  m = search('<span class="error">(.*?)</span>', html)
+  if not m:
+    return
+  if 'Display title' in m.group(0):
+    errors.append(page)
+  else:
+    overflow[m.group(1)] = page
 
 def main(w):
-  pages, done = Queue(), Event()
   errors = []
   overflow = {}
-  threads = []
-  for _ in range(PAGESCRAPERS): # Number of threads
-    thread = Thread(target=pagescraper, args=(pages, done, errors, overflow))
-    threads.append(thread)
-    thread.start()
-  try:
+  with pagescraper_queue(pagescraper, errors, overflow) as pages:
     for page in w.get_all_pages():
       pages.put(page)
-
-  finally:
-    done.set()
-    for thread in threads:
-      thread.join()
 
   duplicate_errors = {lang: [] for lang in LANGS}
   for page in errors:
@@ -66,7 +44,7 @@ def main(w):
 
 """.format(
     count=len(errors),
-    date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+    date=time_and_date())
 
   if len(overflow) > 0:
     output += '== Other errors ==\n'

@@ -1,5 +1,4 @@
-from time import strftime, gmtime
-from utils import plural, whatlinkshere
+from utils import plural, time_and_date, whatlinkshere
 from wikitools import wiki
 from wikitools.page import Page
 
@@ -19,8 +18,8 @@ def main(w):
 List of all <onlyinclude>{count}</onlyinclude> broken template transclusions (usually due to typos or missing dictionary entries). Data as of {date}.
 
 == List ==\n""".format(
-    count = sum(i[0] for i in wanted_templates),
-    date = strftime(r'%H:%M, %d %B %Y', gmtime()))
+    count=sum(i[0] for i in wanted_templates),
+    date=time_and_date())
 
   for count, title in sorted(wanted_templates, reverse=True):
     output += f'* [{whatlinkshere(title, count)} {title} has {plural.uses(count)}]\n'

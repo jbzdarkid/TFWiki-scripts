@@ -1,8 +1,6 @@
 from re import finditer
-from queue import Queue, Empty
-from threading import Thread, Event
-from time import gmtime, strftime
 from unicodedata import east_asian_width as width
+from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
 pairs = [
@@ -35,7 +33,6 @@ exemptions = {
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
-PAGESCRAPERS = 50
 
 # For regex matches which have a group, we want to include the group contents, so that we can compare pairs of HTML tags.
 # For pure punctuation matches, we don't need any comparison.
@@ -46,105 +43,85 @@ def get_match_info(m):
   else:
     return groups[0].lower()
 
-def pagescraper(pages, done, translation_data):
-  while True:
-    try:
-      page = pages.get(True, 1)
-    except Empty:
-      if done.is_set():
-        return
-      else:
-        continue
+def pagescraper(page, translation_data):
+  text = page.get_wiki_text()
+  base, _, lang = page.title.rpartition('/')
+  if lang not in LANGS:
+    lang = 'en'
+    base = page.title
 
-    text = page.get_wiki_text()
-    base, _, lang = page.title.rpartition('/')
-    if lang not in LANGS:
-      lang = 'en'
-      base = page.title
+  errors = []
+  for pair in pairs:
+    locations = []
+    if pair in exemptions.get(base, []):
+      continue
 
-    errors = []
-    for pair in pairs:
-      locations = []
-      if pair in exemptions.get(base, []):
-        continue
+    for m in finditer(pair[0], text):
+      match_info = get_match_info(m)
+      if pair == pairs[5] and match_info not in tracked_tags:
+        continue # Unfortunately, we use < and > all over the place, so this has to be opt-in.
+      locations.append([m.start(), +1, match_info])
 
-      for m in finditer(pair[0], text):
-        match_info = get_match_info(m)
-        if pair == pairs[5] and match_info not in tracked_tags:
-          continue # Unfortunately, we use < and > all over the place, so this has to be opt-in.
-        locations.append([m.start(), +1, match_info])
+    for m in finditer(pair[1], text):
+      match_info = get_match_info(m)
+      if pair == pairs[5] and match_info not in tracked_tags:
+        continue # Unfortunately, we use < and > all over the place, so this has to be opt-in.
+      locations.append([m.start(), -1, match_info])
 
-      for m in finditer(pair[1], text):
-        match_info = get_match_info(m)
-        if pair == pairs[5] and match_info not in tracked_tags:
-          continue # Unfortunately, we use < and > all over the place, so this has to be opt-in.
-        locations.append([m.start(), -1, match_info])
+    locations.sort()
 
-      locations.sort()
-
-      opens = []
-      for index, val, contents in locations:
-        if val == +1:
-          opens.append([index, contents])
-        elif val == -1:
-          if len(opens) == 0:
-            errors.append(index) # Closing tag without a matching opening
-          elif opens[-1][1] != contents: # Mismatched HTML tag
-            errors.append(index) # Mark the closing tag, hopefully not too confusing if it was actually the open tag's fault
-          else:
-            opens.pop() # Matching
-
-      for extra_open in opens:
-        errors.append(extra_open[0]) # Opening tags without a matching closing
-
-    if len(errors) > 0:
-      if verbose:
-        print(f'Found {len(errors)} errors for page {page.title}')
-      data = f'<h3> [{page.get_edit_url()} {page.title}] </h3>\n'
-      errors.sort()
-      for error in errors:
-        # For display purposes, we want to highlight the mismatched symbol. To do so, we replicate the symbol on the line below, at the same horizontal offset.
-        # For sanity reasons, we don't want to show too long of a line.
-
-        start = text.rfind('\n', error-60, error) # Find the start of the line (max 80 chars behind)
-        if start == -1:
-          start = max(0, error-60) # Not found
+    opens = []
+    for index, val, contents in locations:
+      if val == +1:
+        opens.append([index, contents])
+      elif val == -1:
+        if len(opens) == 0:
+          errors.append(index) # Closing tag without a matching opening
+        elif opens[-1][1] != contents: # Mismatched HTML tag
+          errors.append(index) # Mark the closing tag, hopefully not too confusing if it was actually the open tag's fault
         else:
-          start += 1 # We don't actually want to include the \n
+          opens.pop() # Matching
 
-        # Find the next EOL, potentially including >1 line if EOL is within 20 characters.
-        end = text.find('\n', start+10, start+120)
-        if end == -1:
-          end = start+120
+    for extra_open in opens:
+      errors.append(extra_open[0]) # Opening tags without a matching closing
 
-        # Compute additional padding for wide characters
-        widths = [width(char) for char in text[start:error]]
-        extra_width = widths.count('W') # + widths.count('F')
+  if len(errors) > 0:
+    if verbose:
+      print(f'Found {len(errors)} errors for page {page.title}')
+    data = f'<h3> [{page.get_edit_url()} {page.title}] </h3>\n'
+    errors.sort()
+    for error in errors:
+      # For display purposes, we want to highlight the mismatched symbol. To do so, we replicate the symbol on the line below, at the same horizontal offset.
+      # For sanity reasons, we don't want to show too long of a line.
 
-        data += '<div class="mw-code"><nowiki>\n'
-        data += text[start:end] + '\n'
-        extra_width = int(widths.count('W') * 0.8) # ... a guess
-        data += ' '*(error-start+extra_width) + text[error] + '\n'
-        data += '</nowiki></div>\n'
+      start = text.rfind('\n', error-60, error) # Find the start of the line (max 80 chars behind)
+      if start == -1:
+        start = max(0, error-60) # Not found
+      else:
+        start += 1 # We don't actually want to include the \n
 
-      translation_data[lang].append(data)
+      # Find the next EOL, potentially including >1 line if EOL is within 20 characters.
+      end = text.find('\n', start+10, start+120)
+      if end == -1:
+        end = start+120
+
+      # Compute additional padding for wide characters
+      widths = [width(char) for char in text[start:error]]
+      extra_width = widths.count('W') # + widths.count('F')
+
+      data += '<div class="mw-code"><nowiki>\n'
+      data += text[start:end] + '\n'
+      extra_width = int(widths.count('W') * 0.8) # ... a guess
+      data += ' '*(error-start+extra_width) + text[error] + '\n'
+      data += '</nowiki></div>\n'
+
+    translation_data[lang].append(data)
 
 def main(w):
-  pages, done = Queue(), Event()
   translation_data = {lang: [] for lang in LANGS}
-  threads = []
-  for _ in range(PAGESCRAPERS): # Number of threads
-    thread = Thread(target=pagescraper, args=(pages, done, translation_data))
-    threads.append(thread)
-    thread.start()
-  try:
+  with pagescraper_queue(pagescraper, translation_data) as pages:
     for page in w.get_all_pages():
       pages.put(page)
-
-  finally:
-    done.set()
-    for thread in threads:
-      thread.join()
 
   output = """\
 {{{{DISPLAYTITLE: {count} pages with mismatched parenthesis}}}}
@@ -153,7 +130,7 @@ def main(w):
 
 """.format(
     count=sum(len(lang_pages) for lang_pages in translation_data.values()),
-    date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+    date=time_and_date())
 
   for language in LANGS:
     if len(translation_data[language]) > 0:
