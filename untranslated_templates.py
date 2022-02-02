@@ -148,7 +148,7 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
 
     for template, missing in sorted(translations[language], key=lambda elem: (-usage_counts[elem[0].title], elem[0].title)):
       count = usage_counts[template.title]
-      output += f'\n# [{template.get_edit_url()} {template.title}] has [{whatlinkshere(template.title, count) {plural.uses(count)}] and is missing {plural.translations(missing)}'
+      output += f'\n# [{template.get_edit_url()} {template.title}] has [{whatlinkshere(template.title, count)} {plural.uses(count)}] and is missing {plural.translations(missing)}'
     outputs.append([language, output])
   return outputs
 
