@@ -138,9 +138,9 @@ if __name__ == '__main__':
         comment += f' [{language}]({link_map[language]})'
       comment += '\n'
 
-    if event == 'pull_request':
-      open_pr_comment.create_or_edit_pr_comment(comment)
-  if event == 'workflow_dispatch':
+  if event == 'pull_request':
+    open_pr_comment.create_or_edit_pr_comment(comment)
+  elif event == 'workflow_dispatch':
     open_pr_comment.create_issue('Workflow dispatch finished', comment)
   elif environ['GITHUB_EVENT_NAME'] == 'schedule':
     print(comment)
