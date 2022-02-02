@@ -35,7 +35,7 @@ class pagescraper_queue:
       self.threads.append(thread)
       thread.start()
 
-  def __exit__(self, exc_type, exc_val, traceback)
+  def __exit__(self, exc_type, exc_val, traceback):
     self.done.set()
     for thread in self.threads:
       thread.join()
