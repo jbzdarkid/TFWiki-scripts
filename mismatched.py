@@ -1,6 +1,6 @@
 from re import finditer
-from utils import pagescraper_queue, time_and_date
 from unicodedata import east_asian_width as width
+from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
 pairs = [

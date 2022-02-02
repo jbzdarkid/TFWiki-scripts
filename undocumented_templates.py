@@ -9,13 +9,13 @@ def pagescraper(page, badpages):
   page_text = page.get_wiki_text()
   page_visible = sub('<includeonly>.*?</includeonly>', '', page_text)
   if len(page_text) == 0:
-    continue # Empty templates (usually due to HTTP failures)
+    return # Empty templates (usually due to HTTP failures)
   elif float(len(page_visible)) / len(page_text) > .80:
-    continue # Template is self-documenting, as it shows the majority of its contents.
+    return # Template is self-documenting, as it shows the majority of its contents.
   elif '{{tlx|' in page_visible or '{{tl|' in page_visible:
-    continue # Page has example usages
+    return # Page has example usages
   elif search('{{([Dd]oc begin|[Tt]emplate doc|[Dd]ocumentation|[Ww]ikipedia doc|[dD]ictionary/wrapper)}}', page_visible):
-    continue # Page uses a documentation template
+    return # Page uses a documentation template
 
   count = page.get_transclusion_count()
   if count > 0:

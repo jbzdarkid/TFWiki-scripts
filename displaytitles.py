@@ -12,18 +12,20 @@ def pagescraper(page, errors, overflow):
     # ... but this prevents finding other errors
     wikitext = page.get_wiki_text()
     if 'DISPLAYTITLE' not in wikitext:
-      continue
+      return
 
   html = page.get_raw_html()
   m = search('<span class="error">(.*?)</span>', html)
   if not m:
-    continue
+    return
   if 'Display title' in m.group(0):
     errors.append(page)
   else:
     overflow[m.group(1)] = page
 
 def main(w):
+  errors = []
+  overflow = {}
   with pagescraper_queue(pagescraper, errors, overflow) as pages:
     for page in w.get_all_pages():
       pages.put(page)
