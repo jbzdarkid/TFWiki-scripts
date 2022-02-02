@@ -1,5 +1,5 @@
 from re import sub
-from time import gmtime, strftime
+from utils import time_and_date
 from wikitools import wiki
 
 verbose = False
@@ -31,7 +31,7 @@ All articles in {{{{lang info|{lang}}}}}; '''<onlyinclude>{count}</onlyinclude>'
 == List ==""".format(
       lang=language,
       count=len(all_pages[language]),
-      date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+      date=time_and_date())
 
     if language == 'en': # Fixup, because english doesn't have translations
       output = output.replace('{{lang name|name|en}}', 'English')
@@ -49,7 +49,7 @@ List of all English articles; <onlyinclude>{count}</onlyinclude> in total. Data 
 
 == List ==""".format(
     count=len(all_english_pages),
-    date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+    date=time_and_date())
   for page in sorted(all_english_pages):
     english_output += f'\n# [[{page}]]'
 

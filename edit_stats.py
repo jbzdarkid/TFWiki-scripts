@@ -1,7 +1,7 @@
 from __future__ import division
 from datetime import date, datetime
 from operator import itemgetter
-from time import strftime, strptime, gmtime
+from utils import time_and_date
 from wikitools import wiki
 
 verbose = False
@@ -123,7 +123,7 @@ def main(w):
   sortedList = sorted(usersList, key=itemgetter('editcount'), reverse=True)
   timeSortedList = sorted(usersList, key=itemgetter('registration'))
 
-  output = """User edits statistics. Data accurate as of """ + str(strftime(r'%H:%M, %d %B %Y', gmtime())) + """ (GMT).
+  output = """User edits statistics. Data accurate as of """ + time_and_date() + """.
 ;Note: All data excludes registered users with no edits.
 
 == Edit count distribution ==

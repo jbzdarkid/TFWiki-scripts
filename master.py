@@ -94,7 +94,7 @@ if __name__ == '__main__':
       file = row.replace('.py', '').strip()
       if file in all_reports:
         modules_to_run.append(file)
-      elif file in ['wikitools/wiki', 'wikitools/page']:
+      elif file in ['wikitools/wiki', 'wikitools/page', 'utils']:
         modules_to_run = all_reports.keys()
         break
 

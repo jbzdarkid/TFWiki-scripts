@@ -1,4 +1,4 @@
-from time import gmtime, strftime
+from utils import time_and_date
 from wikitools import wiki
 
 verbose = False
@@ -37,7 +37,7 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
 == List ==""".format(
       lang=language,
       count=len(missing_pages),
-      date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+      date=time_and_date())
     for page in sorted(missing_pages):
       output += f'\n# [[{page}]] ([[{page}/{language}|create]])'
     outputs.append([language, output])

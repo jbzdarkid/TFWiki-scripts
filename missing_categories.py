@@ -1,4 +1,4 @@
-from time import gmtime, strftime
+from utils import time_and_date
 from wikitools import wiki
 from wikitools.page import Page
 
@@ -41,7 +41,7 @@ There are <onlyinclude>{count}</onlyinclude> categories which are not translated
 
 == List ==""".format(
     count=len(english_only_cats),
-    date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+    date=time_and_date())
 
   for page in sorted(english_only_cats):
     output += f'\n# [[:{page}]]'
@@ -75,7 +75,7 @@ Categories missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinc
 == List ==""".format(
       lang=language,
       count=len(missing_cats),
-      date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+      date=time_and_date())
     for page in sorted(missing_cats):
       output += f'\n# [[:{page}]] ([[:{page}/{language}|create]])'
     outputs.append([language, output])

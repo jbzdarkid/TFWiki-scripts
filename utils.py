@@ -1,5 +1,6 @@
 from queue import Empty, Queue
 from threading import Thread, Event
+from time import gmtime, strftime
 
 class meta_plural(type):
   def __getattr__(cls, word):
@@ -9,6 +10,9 @@ class meta_plural(type):
 
 class plural(metaclass=meta_plural):
   pass
+
+def time_and_date():
+  return strftime(r'%H:%M, %d %B %Y (GMT)', gmtime())
 
 def whatlinkshere(title, count, **kwargs):
   kwargs.setdefault('limit', min(50, count))
@@ -20,8 +24,6 @@ def whatlinkshere(title, count, **kwargs):
 
 
 class pagescraper_queue:
-  NUM_THREADS = 50
-
   def __init__(self, thread_func, *args):
     self.thread_func = thread_func
     self.thread_func_args = args
@@ -30,18 +32,20 @@ class pagescraper_queue:
     self.q = Queue()
     self.done = Event()
     self.threads = []
+    NUM_THREADS = 50
     for _ in range(NUM_THREADS): # Number of threads
       thread = Thread(target=self.meta_thread_func)
       self.threads.append(thread)
       thread.start()
+    return self
+
+  def put(self, obj):
+    self.q.put(obj)
 
   def __exit__(self, exc_type, exc_val, traceback):
     self.done.set()
     for thread in self.threads:
       thread.join()
-
-  def put(self, obj):
-    self.q.put(obj)
 
   def meta_thread_func(self):
     while True:

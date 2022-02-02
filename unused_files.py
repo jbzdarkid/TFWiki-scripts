@@ -1,4 +1,4 @@
-from time import strftime, gmtime
+from utils import time_and_date
 from wikitools import wiki
 from wikitools.page import Page
 
@@ -43,7 +43,7 @@ def main(w):
 
 """.format(
   count=count,
-  date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+  date=time_and_date())
   for ext in sorted(unused_files.keys()):
     output += f'== {ext} ==\n'
     for language in LANGS:

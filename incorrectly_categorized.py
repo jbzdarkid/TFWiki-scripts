@@ -1,35 +1,23 @@
-from queue import Queue, Empty
-from threading import Thread, Event
-from time import gmtime, strftime
+from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 from wikitools.page import Page
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
-PAGESCRAPERS = 50
 
-def pagescraper(w, categories, done, miscategorized):
-  while True:
-    try:
-      category = categories.get(True, 1)
-    except Empty:
-      if done.is_set():
-        return
+def pagescraper(category, w, miscategorized):
+  cat_lang = category.rpartition('/')[2]
+  if cat_lang not in LANGS:
+    cat_lang = 'en'
+  for page in w.get_all_category_pages(category):
+    page_lang = page.title.rpartition('/')[2]
+    if page_lang not in LANGS:
+      page_lang = 'en'
+    if page_lang != cat_lang:
+      if category not in miscategorized[cat_lang]:
+        miscategorized[cat_lang][category] = [page]
       else:
-        continue
-
-    cat_lang = category.rpartition('/')[2]
-    if cat_lang not in LANGS:
-      cat_lang = 'en'
-    for page in w.get_all_category_pages(category):
-      page_lang = page.title.rpartition('/')[2]
-      if page_lang not in LANGS:
-        page_lang = 'en'
-      if page_lang != cat_lang:
-        if category not in miscategorized[cat_lang]:
-          miscategorized[cat_lang][category] = [page]
-        else:
-          miscategorized[cat_lang][category].append(page)
+        miscategorized[cat_lang][category].append(page)
 
 def main(w):
   # TODO: Consider including /lang categories again
@@ -71,24 +59,13 @@ def main(w):
   for page in Page(w, 'Template:Non-article category').get_transclusions(namespace=14):
     maintanence_categories.append(page.title)
 
-  categories, done = Queue(), Event()
   miscategorized = {lang: {} for lang in LANGS}
-  threads = []
-  for _ in range(PAGESCRAPERS): # Number of threads
-    thread = Thread(target=pagescraper, args=(w, categories, done, miscategorized))
-    threads.append(thread)
-    thread.start()
-  try:
+  with pagescraper_queue(pagescraper, w, miscategorized) as categories:
     for category in w.get_all_categories(filter_redirects=False):
       if category.title not in maintanence_categories:
         if verbose:
           print(f'Processing {category}')
         categories.put(category.title)
-
-  finally:
-    done.set()
-    for thread in threads:
-      thread.join()
 
   unique_pages = set()
   for language in LANGS:
@@ -103,7 +80,7 @@ def main(w):
 """.format(
     category_count=len(miscategorized),
     page_count=len(unique_pages),
-    date=strftime(r'%H:%M, %d %B %Y', gmtime()))
+    date=time_and_date())
 
   for language in LANGS:
     if len(miscategorized[language]) == 0:
