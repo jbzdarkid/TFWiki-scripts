@@ -2,7 +2,7 @@ from queue import Empty, Queue
 from threading import Thread, Event
 from re import compile, IGNORECASE, VERBOSE
 from time import gmtime, strftime
-from utils import plural
+from utils import plural, whatlinkshere
 from wikitools import wiki
 from wikitools.page import Page
 
