@@ -2,6 +2,7 @@ from queue import Empty, Queue
 from threading import Thread, Event
 from re import compile, IGNORECASE, VERBOSE
 from time import gmtime, strftime
+from utils import plural, whatlinkshere
 from wikitools import wiki
 from wikitools.page import Page
 
@@ -20,7 +21,7 @@ LANG_TEMPLATE_START = compile("""\
 LANG_TEMPLATE_ARGS = compile("""\
   \|        # Start of a parameter
   (
-    [^=]*?  # Key name
+    [^|=]*?  # Key name
   )
   =         # Start of a value
 """, VERBOSE)
@@ -88,6 +89,10 @@ def pagescraper(pages, done, translations, usage_counts):
         this_missing_languages.discard(language)
       missing_languages += this_missing_languages
 
+      if verbose:
+        line = page_text[:match.start()].count('\n') + 1
+        print(f'Lang template at line {line} is missing translations for', ', '.join(sorted(this_missing_languages)))
+
     if len(missing_languages) > 0:
       if verbose:
         actually_missing = sorted(set(missing_languages))
@@ -141,8 +146,9 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       count=len(translations[language]),
       date=strftime(r'%H:%M, %d %B %Y', gmtime()))
 
-    for template, missing in sorted(translations[language], key=lambda elem: -usage_counts[elem[0].title]):
-      output += f'\n# [{template.get_edit_url()} {template.title} has {usage_counts[template.title]} uses] and is missing {missing} translation{"s"[:missing^1]}'
+    for template, missing in sorted(translations[language], key=lambda elem: (-usage_counts[elem[0].title], elem[0].title)):
+      count = usage_counts[template.title]
+      output += f'\n# [{template.get_edit_url()} {template.title}] has [{whatlinkshere(template.title, count)} {plural.uses(count)}] and is missing {plural.translations(missing)}'
     outputs.append([language, output])
   return outputs
 

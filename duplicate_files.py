@@ -1,4 +1,5 @@
 from time import gmtime, strftime
+from utils import plural, whatlinkshere
 from wikitools import wiki
 from wikitools.page import Page
 
@@ -57,7 +58,7 @@ List of all duplicate files; <onlyinclude>{unique}</onlyinclude> unique files, {
 
     output += f'[[{dupe_list[0]}|200px]]\n'
     for count, title in counts:
-      output += '* [[:%s|]] ([{{fullurl:Special:WhatLinksHere/%s|limit=%d&namespace=0&hideredirs=1}} %d use%s])\n' % (title, title, min(50, count), count, '' if count == 1 else 's')
+      output += f'* [[:{title}|]] ([{whatlinkshere(title, count)} {plural.uses(count)}])\n'
     output += '\n'
   return output
 
