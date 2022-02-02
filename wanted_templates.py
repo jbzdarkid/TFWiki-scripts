@@ -1,4 +1,5 @@
 from time import strftime, gmtime
+from utils import plural, whatlinkshere
 from wikitools import wiki
 from wikitools.page import Page
 
@@ -22,7 +23,7 @@ List of all <onlyinclude>{count}</onlyinclude> broken template transclusions (us
     date = strftime(r'%H:%M, %d %B %Y', gmtime()))
 
   for count, title in sorted(wanted_templates, reverse=True):
-    output += '* [{{fullurl:Special:WhatLinksHere/%s|limit=%d&namespace=0&hideredirs=1}} %s has %d use%s]\n' % (title, min(50, count), title, count, '' if count == 1 else 's')
+    output += f'* [{whatlinkshere(title, count)} {title} has {plural.uses(count)}]\n'
   return output
 
 if __name__ == '__main__':

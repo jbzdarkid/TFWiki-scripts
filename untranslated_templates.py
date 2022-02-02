@@ -2,6 +2,7 @@ from queue import Empty, Queue
 from threading import Thread, Event
 from re import compile, IGNORECASE, VERBOSE
 from time import gmtime, strftime
+from utils import plural
 from wikitools import wiki
 from wikitools.page import Page
 
@@ -146,7 +147,8 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       date=strftime(r'%H:%M, %d %B %Y', gmtime()))
 
     for template, missing in sorted(translations[language], key=lambda elem: (-usage_counts[elem[0].title], elem[0].title)):
-      output += f'\n# [{template.get_edit_url()} {template.title} has {usage_counts[template.title]} uses] and is missing {missing} translation{"s"[:missing^1]}'
+      count = usage_counts[template.title]
+      output += f'\n# [{template.get_edit_url()} {template.title}] has [{whatlinkshere(template.title, count) {plural.uses(count)}] and is missing {plural.translations(missing)}'
     outputs.append([language, output])
   return outputs
 
