@@ -55,7 +55,7 @@ def main(w):
     if len(duplicate_errors[language]) > 0:
       output += '== {{lang name|name|%s}} ==\n' % language
       for page in duplicate_errors[language]:
-        output += f'* [{page.get_edit_url()} {page.title}]\n'
+        output += f'* [[{page.title}]]\n'
   return output
 
 if __name__ == '__main__':
