@@ -105,6 +105,7 @@ if __name__ == '__main__':
 
   elif event == 'local_run':
     w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+    w.namespaces['Main'] = w.namespaces['Team Fortress Wiki'] # HACKITY HACK HACK
     for report in all_reports:
       # Root and summary don't matter because we can't publish anyways.
       publish_report(w, report, all_reports[report], '', '')

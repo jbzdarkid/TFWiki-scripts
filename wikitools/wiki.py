@@ -5,8 +5,6 @@ import requests
 
 from .page import Page
 
-# List of namespaces: https://wiki.teamfortress.com/w/api.php?action=query&meta=siteinfo&siprop=namespaces
-
 class Wiki:
   def __init__(self, api_url):
     self.api_url = api_url
@@ -16,6 +14,8 @@ class Wiki:
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
+
+    self.namespaces = self.get_namespaces()
 
   def get(self, action, **params):
     params.update({
@@ -81,7 +81,7 @@ class Wiki:
 
   def post_with_login(self, action, files=None, **kwargs):
     if not self.lgtoken:
-      raise ValueError('Error: Not logged in')
+      return None
     kwargs.update({
       'lgtoken': self.lgtoken,
       'action': action,
@@ -96,12 +96,23 @@ class Wiki:
     kwargs['token'] = self.get('query', meta='tokens')['query']['tokens']['csrftoken']
     return self.post_with_login(action, **kwargs)
 
+  def get_namespaces(self):
+    namespaces = {}
+    for namespace in self.get_with_continue('query', 'namespaces',
+      meta='siteinfo',
+      siprop='namespaces'
+    ):
+      key = namespace['*']
+      key = 'Main' if key == '' else key
+      namespaces[key] = namespace['id']
+    return namespaces
+
   def get_all_templates(self):
     for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
       apfilterredir='nonredirects', # Filter out redirects
-      apnamespace='10', # Template namespace
+      apnamespace=self.namespaces['Template'],
     ):
       yield Page(self, entry['title'], entry)
 
@@ -117,7 +128,7 @@ class Wiki:
     for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
-      apnamespace=0, # Pages from the Main namespace only
+      apnamespace=self.namespaces['Main'],
       apfilterredir='nonredirects', # Filter out redirects
     ):
       title = entry['title']
@@ -129,7 +140,7 @@ class Wiki:
     for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
-      apnamespace=14, # Categories
+      apnamespace=self.namespaces['Category'],
       apfilterredir='nonredirects' if filter_redirects else None,
     ):
       yield Page(self, entry['title'], entry)
@@ -140,7 +151,7 @@ class Wiki:
       cmlimit=500,
       cmtitle=category,
       cmprop='title', # Only return page titles, not page IDs
-      cmnamespace='0', # Links from the Main namespace only
+      cmnamespace=self.namespaces['Main'],
     ):
       yield Page(self, entry['title'], entry)
 
