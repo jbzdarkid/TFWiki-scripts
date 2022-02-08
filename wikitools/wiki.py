@@ -1,6 +1,5 @@
 from re import finditer
 from requests.exceptions import RequestException
-from time import sleep
 import requests
 
 from .page import Page
@@ -124,6 +123,10 @@ class Wiki:
       auwitheditsonly='true',
     )
 
+  # When you have a default parameter that is an object, it is persisted across function calls.
+  # Ergo, any modifications made inside the function will persist to subsequent calls.
+  # As long as you do not modify (and do not return) this object, it is safe to use this pattern.
+  # pylint: disable-next=dangerous-default-value
   def get_all_pages(self, *, namespaces=['Main']):
     for namespace in namespaces:
       for entry in self.get_with_continue('query', 'allpages',

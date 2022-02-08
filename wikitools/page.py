@@ -1,7 +1,7 @@
-import functools
 from requests.exceptions import RequestException
-import requests
 from time import sleep
+import functools
+import requests
 
 @functools.total_ordering
 class Page:
@@ -97,14 +97,17 @@ class Page:
     if 'error' in data:
       print(f'Failed to edit {self.title}:')
       print(data['error'])
+      return None
     elif data['edit']['result'] != 'Success':
       print(f'Failed to edit {self.title}:')
       print(data['edit'])
+      return None
     elif 'new' in data['edit']:
       print(f'Successfully created {self.title}.')
       return 'https://wiki.tf/d/' + str(data['edit']['newrevid'])
     elif 'nochange' in data['edit']:
       print(f'No change to {self.title}')
+      return None
     else:
       print(f'Successfully edited {self.title}')
       return 'https://wiki.tf/d/' + str(data['edit']['newrevid'])

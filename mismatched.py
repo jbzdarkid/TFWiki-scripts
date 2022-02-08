@@ -1,4 +1,4 @@
-from re import finditer
+from re import finditer, IGNORECASE
 from unicodedata import east_asian_width as width
 from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
@@ -25,12 +25,14 @@ html_tags = [
 ]
 for tag in html_tags:
   # The tag open match needs to allow for properties, e.g. <div style="foo">
-  pairs.append([f'<{tag}(?: [^>/]*)?>', f'</{tag}>']
+  pairs.append([f'<{tag}(?: [^>/]*)?>', f'</{tag}>'])
 
 # Some pages are expected to have mismatched parenthesis (as they are part of the update history, item description, etc)
 exemptions = {
   'Linux dedicated server': pairs[0],   # Includes a bash script with case
   'List of default keys': pairs[2],     # Includes {{Key|]}}
+  'Deathcam': pairs[2],                 # Includes {{Key|[}}
+  'Demoman robot': pairs[0],            # Uses :)
   'Uber Update': pairs[0],              # The update notes include 1) 2)
 }
 
@@ -59,30 +61,45 @@ def pagescraper(page, translation_data):
     if pair in exemptions.get(base, []):
       continue
 
-    for m in finditer(pair[0], text):
+    for m in finditer(pair[0], text, IGNORECASE):
       match_info = get_match_info(m)
       locations.append([m.start(), +1, match_info])
 
-    for m in finditer(pair[1], text):
+    for m in finditer(pair[1], text, IGNORECASE):
       match_info = get_match_info(m)
       locations.append([m.start(), -1, match_info])
 
     locations.sort()
 
     opens = []
+    in_nowiki = False
+    in_comment = False
     for index, val, contents in locations:
+      if contents == '<nowiki>':
+        in_nowiki = True
+      elif contents == '</nowiki>':
+        in_nowiki = False
+      elif contents == '<!--':
+        in_comment = True
+      elif contents == '-->':
+        in_comment = False
+      elif in_nowiki or in_comment:
+        continue # Ignore all escaped text
+
       if val == +1:
         opens.append([index, contents])
       elif val == -1:
         if len(opens) == 0:
           errors.append(index) # Closing tag without a matching opening
-        elif opens[-1][1] != contents: # Mismatched HTML tag
-          errors.append(index) # Mark the closing tag, hopefully not too confusing if it was actually the open tag's fault
         else:
           opens.pop() # Matching
 
-    for extra_open in opens:
-      errors.append(extra_open[0]) # Opening tags without a matching closing
+    # Check for leftover opening tags that were not properly closed
+    for index, contents in opens:
+      if contents == '<noinclude>' and page.title.startswith('Template:'):
+        continue # Templates may leave off the closing </noinclude>, mediawiki figures it out.
+
+      errors.append(index)
 
   if len(errors) > 0:
     if verbose:
@@ -109,7 +126,7 @@ def pagescraper(page, translation_data):
       extra_width = widths.count('W') # + widths.count('F')
 
       data += '<div class="mw-code"><nowiki>\n'
-      data += text[start:end].replace('<nowiki>', '&#60;nowiki&#62;') + '\n'
+      data += text[start:end].replace('<nowiki', '&#60;nowiki') + '\n'
       extra_width = int(widths.count('W') * 0.8) # Some padding because non-ascii characters are wide
       data += ' '*(error-start+extra_width) + text[error] + ' '*10 + '\n'
       data += '</nowiki></div>\n'
@@ -119,13 +136,17 @@ def pagescraper(page, translation_data):
 def main(w):
   translation_data = {lang: [] for lang in LANGS}
   with pagescraper_queue(pagescraper, translation_data) as pages:
-    for page in w.get_all_pages(namespaces=['Main', 'TFW', 'File', 'Template', 'Help', 'Category']):
+    for page in w.get_all_pages(namespaces=['Main', 'File', 'Template', 'Help', 'Category']):
       if page.title.startswith('Team Fortress Wiki:Discussion'):
         continue
-      if page.title.endswith(' 3D.jpg') or page.endswith(' 3D.png'):
+      if page.title.endswith(' 3D.jpg') or page.title.endswith(' 3D.png'):
+        continue
+      if page.title.startswith('File:Painted '):
         continue
       if page.title.startswith('Template:PatchDiff'):
         continue
+      if page.title.startswith('Template:Dictionary/items/') or page.title.startswith('Template:Dictionary/common_strings/'):
+        continue # The main pages are already analyzed but we don't need to duplicate the subpages
       pages.put(page)
 
   output = """\
