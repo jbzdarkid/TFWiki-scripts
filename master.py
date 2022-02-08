@@ -23,13 +23,14 @@ def handle_failed_edits(link_map, report_output, report_name):
   missing_languages = [lang for lang in link_map if link_map[lang] is None]
   if len(missing_languages) == 0:
     return
+  report_name = report_name.lower().replace(' ', '_')
   if isinstance(report_output, str):
-    with open(f'wiki_{report_name}.txt', 'w') as f:
+    with open(f'wiki_{report_name}.txt', 'w', encoding='utf-8') as f:
       f.write(report_output)
   else:
     for lang, output in report_output:
       if lang in missing_languages:
-        with open(f'wiki_{report_name}_{lang}.txt', 'w') as f:
+        with open(f'wiki_{report_name}_{lang}.txt', 'w', encoding='utf-8') as f:
           f.write(output)
 
 def publish_report(w, module, report_name, root, summary):
@@ -105,7 +106,7 @@ if __name__ == '__main__':
 
   elif event == 'local_run':
     w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
-    w.namespaces['Main'] = w.namespaces['Team Fortress Wiki'] # HACKITY HACK HACK
+    w.namespaces['Main'] = w.namespaces['File'] # HACKITY HACK HACK
     for report in all_reports:
       # Root and summary don't matter because we can't publish anyways.
       publish_report(w, report, all_reports[report], '', '')

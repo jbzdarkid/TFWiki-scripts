@@ -81,7 +81,7 @@ class Wiki:
 
   def post_with_login(self, action, files=None, **kwargs):
     if not self.lgtoken:
-      return None
+      return {'error': 'Not logged in'}
     kwargs.update({
       'lgtoken': self.lgtoken,
       'action': action,
@@ -102,9 +102,9 @@ class Wiki:
       meta='siteinfo',
       siprop='namespaces'
     ):
-      key = namespace['*']
-      key = 'Main' if key == '' else key
-      namespaces[key] = namespace['id']
+      namespaces[namespace['*']] = namespace['id']
+    namespaces['Main'] = namespaces['']
+    namespaces['TFW'] = namespaces['Team Fortress Wiki']
     return namespaces
 
   def get_all_templates(self):
