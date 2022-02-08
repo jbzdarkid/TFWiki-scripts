@@ -9,9 +9,9 @@ pairs = [
   ['\\[', '\\]'],
   ['{', '}'],
   ['<!--', '-->'],
-  ['<([a-zA-Z]*)(?: [^>/]*)?>', '</([a-zA-Z]*?)>'], # HTML tags, e.g. <div width="2px"> </div>
+#  ['<([a-zA-Z]*)(?: [^>/]*)?>', '</([a-zA-Z]*?)>'], # HTML tags, e.g. <div width="2px"> </div>
 ]
-tracked_tags = [
+html_tags = [
   # HTML standard
   'a', 'b', 'code', 'center', 'em', 'i', 'li', 'ol', 'p', 's', 'small', 'sub', 'sup', 'td', 'th', 'tr', 'tt', 'u', 'ul',
 
@@ -23,6 +23,9 @@ tracked_tags = [
   'onlyinclude',
   'ref',
 ]
+for tag in html_tags:
+  # The tag open match needs to allow for properties, e.g. <div style="foo">
+  pairs.append([f'<{tag}(?: [^>/]*)?>', f'</{tag}>']
 
 # Some pages are expected to have mismatched parenthesis (as they are part of the update history, item description, etc)
 exemptions = {
@@ -58,14 +61,10 @@ def pagescraper(page, translation_data):
 
     for m in finditer(pair[0], text):
       match_info = get_match_info(m)
-      if pair == pairs[5] and match_info not in tracked_tags:
-        continue # Unfortunately, we use < and > all over the place, so this has to be opt-in.
       locations.append([m.start(), +1, match_info])
 
     for m in finditer(pair[1], text):
       match_info = get_match_info(m)
-      if pair == pairs[5] and match_info not in tracked_tags:
-        continue # Unfortunately, we use < and > all over the place, so this has to be opt-in.
       locations.append([m.start(), -1, match_info])
 
     locations.sort()
@@ -110,9 +109,9 @@ def pagescraper(page, translation_data):
       extra_width = widths.count('W') # + widths.count('F')
 
       data += '<div class="mw-code"><nowiki>\n'
-      data += text[start:end] + '\n'
-      extra_width = int(widths.count('W') * 0.8) # ... a guess
-      data += ' '*(error-start+extra_width) + text[error] + '\n'
+      data += text[start:end].replace('<nowiki>', '&#60;nowiki&#62;') + '\n'
+      extra_width = int(widths.count('W') * 0.8) # Some padding because non-ascii characters are wide
+      data += ' '*(error-start+extra_width) + text[error] + ' '*10 + '\n'
       data += '</nowiki></div>\n'
 
     translation_data[lang].append(data)
@@ -120,7 +119,13 @@ def pagescraper(page, translation_data):
 def main(w):
   translation_data = {lang: [] for lang in LANGS}
   with pagescraper_queue(pagescraper, translation_data) as pages:
-    for page in w.get_all_pages():
+    for page in w.get_all_pages(namespaces=['Main', 'TFW', 'File', 'Template', 'Help', 'Category']):
+      if page.title.startswith('Team Fortress Wiki:Discussion'):
+        continue
+      if page.title.endswith(' 3D.jpg') or page.endswith(' 3D.png'):
+        continue
+      if page.title.startswith('Template:PatchDiff'):
+        continue
       pages.put(page)
 
   output = """\

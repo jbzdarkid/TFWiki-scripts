@@ -18,6 +18,7 @@ import open_pr_comment
 # Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 # images without licensing?
 # Consider running some scripts against the Help: namespace, too
+# Threading for navboxes.py?
 
 def handle_failed_edits(link_map, report_output, report_name):
   missing_languages = [lang for lang in link_map if link_map[lang] is None]
@@ -106,7 +107,6 @@ if __name__ == '__main__':
 
   elif event == 'local_run':
     w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
-    w.namespaces['Main'] = w.namespaces['File'] # HACKITY HACK HACK
     for report in all_reports:
       # Root and summary don't matter because we can't publish anyways.
       publish_report(w, report, all_reports[report], '', '')

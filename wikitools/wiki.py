@@ -124,17 +124,18 @@ class Wiki:
       auwitheditsonly='true',
     )
 
-  def get_all_pages(self):
-    for entry in self.get_with_continue('query', 'allpages',
-      list='allpages',
-      aplimit=500,
-      apnamespace=self.namespaces['Main'],
-      apfilterredir='nonredirects', # Filter out redirects
-    ):
-      title = entry['title']
-      if title.endswith('.js') or title.endswith('.css'):
-        continue
-      yield Page(self, title, entry)
+  def get_all_pages(self, *, namespaces=['Main']):
+    for namespace in namespaces:
+      for entry in self.get_with_continue('query', 'allpages',
+        list='allpages',
+        aplimit=500,
+        apnamespace=self.namespaces[namespace],
+        apfilterredir='nonredirects', # Filter out redirects
+      ):
+        title = entry['title']
+        if title.endswith('.js') or title.endswith('.css'):
+          continue
+        yield Page(self, title, entry)
 
   def get_all_categories(self, filter_redirects=True):
     for entry in self.get_with_continue('query', 'allpages',

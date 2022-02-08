@@ -41,22 +41,19 @@ class Page:
   def get_transclusion_count(self):
     return sum(1 for _ in self.get_transclusions())
 
-  # By default, only return links from the main namespace
-  def get_transclusions(self, *, namespace=None):
-    if not namespace:
-      namespace = self.wiki.namespaces['Main']
+  def get_transclusions(self, *, namespace='Main'):
     for entry in self.wiki.get_with_continue('query', 'embeddedin',
       list='embeddedin',
-      einamespace=namespace,
+      einamespace=self.wiki.namespaces[namespace],
       eilimit=500,
       eititle=self.url_title,
     ):
       yield Page(self.wiki, entry['title'], entry)
 
-  def get_links(self):
+  def get_links(self, *, namespace='Main'):
     for entry in self.wiki.get_with_continue('query', 'pages',
       generator='links',
-      gplnamespace=self.wiki.namespaces['Main'],
+      gplnamespace=self.wiki.namespaces[namespace],
       gpllimit=500,
       titles=self.url_title,
     ):
