@@ -18,6 +18,8 @@ def pagescraper(page, errors, overflow):
   m = search('<span class="error">(.*?)</span>', html)
   if not m:
     return
+  if verbose:
+    print(f'Page {page.title} has an error: {m.group(0)}')
   if 'Display title' in m.group(0):
     errors.append(page)
   else:
@@ -29,6 +31,9 @@ def main(w):
   with pagescraper_queue(pagescraper, errors, overflow) as pages:
     for page in w.get_all_pages():
       pages.put(page)
+
+  if verbose:
+    print(f'Found {len(errors) + len(overflow)} pages with errors')
 
   duplicate_errors = {lang: [] for lang in LANGS}
   for page in errors:
