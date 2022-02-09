@@ -5,7 +5,7 @@ from wikitools.page import Page
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
-NAMESPACES = ['Main', 'TFW', 'Help', 'File', 'Template', 'Category']
+NAMESPACES = ['Main', 'TFW', 'Help', 'File', 'Template']
 
 def main(w):
   excluded_templates = [
@@ -37,6 +37,9 @@ def main(w):
     'Template:Mann Vs Machine Nav/no category',
     'Template:Mvm Missions Nav/missioncategoryonly',
     'Template:Patch layout',
+    # These are navbox-esque but generate too many false positives.
+    'Template:CentralDiscussion',
+    'Template:Chinese Editor Team',
   ]
 
   excluded_pages = {
@@ -108,7 +111,8 @@ def main(w):
         lang = 'en'
         basename = page.title
 
-      if basename in excluded_pages.get(template, []): # Some additional manual removals
+      # Some additional manual removals
+      if basename in excluded_pages.get(template, []):
         continue
 
       if basename in links:
