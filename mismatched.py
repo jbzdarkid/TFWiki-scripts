@@ -127,12 +127,9 @@ def pagescraper(page, translation_data):
 
     translation_data[lang].append(data)
 
-from wikitools.page import Page
 def main(w):
   translation_data = {lang: [] for lang in LANGS}
   with pagescraper_queue(pagescraper, translation_data) as pages:
-    pages.put(Page(w, 'List of default keys/fi'))
-    """
     for page in w.get_all_pages(namespaces=['Main', 'File', 'Template', 'Help', 'Category']):
       if page.title.startswith('Team Fortress Wiki:Discussion'):
         continue
@@ -150,7 +147,6 @@ def main(w):
       if page.title.startswith('Template:Dictionary/steam ids'):
         continue # Usernames can be literally anything, but commonly include :)
       pages.put(page)
-    """
 
   output = """\
 {{{{DISPLAYTITLE: {count} pages with mismatched parenthesis}}}}
