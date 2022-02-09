@@ -17,7 +17,7 @@ def main(w):
     #   continue
     if file.startswith('Tf') and file.endswith('.txt'):
       continue # Externally linked as part of Template:PatchDiff
-    if file.endswith(' 3D.png'):
+    if file.endswith(' 3D.png') or file.endswith(' 3D.jpg'):
       p = Page(w, file)
       if p.get_transclusion_count() > 0:
         continue # The 3D viewer template transcludes files, instead of linking them.

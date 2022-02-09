@@ -7,7 +7,7 @@ LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl',
 
 def main(w):
   non_article_categories = set()
-  for page in Page(w, 'Template:Non-article category').get_transclusions(namespace=14):
+  for page in Page(w, 'Template:Non-article category').get_transclusions(namespace='Category'):
     non_article_categories.add(page.title)
   if verbose:
     print(f'Found {len(non_article_categories)} non-article categories')

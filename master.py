@@ -18,18 +18,20 @@ import open_pr_comment
 # Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 # images without licensing?
 # Consider running some scripts against the Help: namespace, too
+# Threading for navboxes.py?
 
 def handle_failed_edits(link_map, report_output, report_name):
   missing_languages = [lang for lang in link_map if link_map[lang] is None]
   if len(missing_languages) == 0:
     return
+  report_name = report_name.lower().replace(' ', '_')
   if isinstance(report_output, str):
-    with open(f'wiki_{report_name}.txt', 'w') as f:
+    with open(f'wiki_{report_name}.txt', 'w', encoding='utf-8') as f:
       f.write(report_output)
   else:
     for lang, output in report_output:
       if lang in missing_languages:
-        with open(f'wiki_{report_name}_{lang}.txt', 'w') as f:
+        with open(f'wiki_{report_name}_{lang}.txt', 'w', encoding='utf-8') as f:
           f.write(output)
 
 def publish_report(w, module, report_name, root, summary):

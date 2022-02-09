@@ -1,11 +1,8 @@
 from re import finditer
 from requests.exceptions import RequestException
-from time import sleep
 import requests
 
 from .page import Page
-
-# List of namespaces: https://wiki.teamfortress.com/w/api.php?action=query&meta=siteinfo&siprop=namespaces
 
 class Wiki:
   def __init__(self, api_url):
@@ -16,6 +13,8 @@ class Wiki:
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
+
+    self.namespaces = self.get_namespaces()
 
   def get(self, action, **params):
     params.update({
@@ -81,7 +80,7 @@ class Wiki:
 
   def post_with_login(self, action, files=None, **kwargs):
     if not self.lgtoken:
-      raise ValueError('Error: Not logged in')
+      return {'error': 'Not logged in'}
     kwargs.update({
       'lgtoken': self.lgtoken,
       'action': action,
@@ -96,12 +95,23 @@ class Wiki:
     kwargs['token'] = self.get('query', meta='tokens')['query']['tokens']['csrftoken']
     return self.post_with_login(action, **kwargs)
 
+  def get_namespaces(self):
+    namespaces = {}
+    for namespace in self.get_with_continue('query', 'namespaces',
+      meta='siteinfo',
+      siprop='namespaces'
+    ):
+      namespaces[namespace['*']] = namespace['id']
+    namespaces['Main'] = namespaces['']
+    namespaces['TFW'] = namespaces['Team Fortress Wiki']
+    return namespaces
+
   def get_all_templates(self):
     for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
       apfilterredir='nonredirects', # Filter out redirects
-      apnamespace='10', # Template namespace
+      apnamespace=self.namespaces['Template'],
     ):
       yield Page(self, entry['title'], entry)
 
@@ -113,23 +123,28 @@ class Wiki:
       auwitheditsonly='true',
     )
 
-  def get_all_pages(self):
-    for entry in self.get_with_continue('query', 'allpages',
-      list='allpages',
-      aplimit=500,
-      apnamespace=0, # Pages from the Main namespace only
-      apfilterredir='nonredirects', # Filter out redirects
-    ):
-      title = entry['title']
-      if title.endswith('.js') or title.endswith('.css'):
-        continue
-      yield Page(self, title, entry)
+  # When you have a default parameter that is an object, it is persisted across function calls.
+  # Ergo, any modifications made inside the function will persist to subsequent calls.
+  # As long as you do not modify (and do not return) this object, it is safe to use this pattern.
+  # pylint: disable-next=dangerous-default-value
+  def get_all_pages(self, *, namespaces=['Main']):
+    for namespace in namespaces:
+      for entry in self.get_with_continue('query', 'allpages',
+        list='allpages',
+        aplimit=500,
+        apnamespace=self.namespaces[namespace],
+        apfilterredir='nonredirects', # Filter out redirects
+      ):
+        title = entry['title']
+        if title.endswith('.js') or title.endswith('.css'):
+          continue
+        yield Page(self, title, entry)
 
   def get_all_categories(self, filter_redirects=True):
     for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
       aplimit=500,
-      apnamespace=14, # Categories
+      apnamespace=self.namespaces['Category'],
       apfilterredir='nonredirects' if filter_redirects else None,
     ):
       yield Page(self, entry['title'], entry)
@@ -140,7 +155,7 @@ class Wiki:
       cmlimit=500,
       cmtitle=category,
       cmprop='title', # Only return page titles, not page IDs
-      cmnamespace='0', # Links from the Main namespace only
+      cmnamespace=self.namespaces['Main'],
     ):
       yield Page(self, entry['title'], entry)
 

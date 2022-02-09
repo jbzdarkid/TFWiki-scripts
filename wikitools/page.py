@@ -1,7 +1,7 @@
-import functools
 from requests.exceptions import RequestException
-import requests
 from time import sleep
+import functools
+import requests
 
 @functools.total_ordering
 class Page:
@@ -41,20 +41,19 @@ class Page:
   def get_transclusion_count(self):
     return sum(1 for _ in self.get_transclusions())
 
-  # By default, only return links from the main namespace (ns:0)
-  def get_transclusions(self, *, namespace=0):
+  def get_transclusions(self, *, namespace='Main'):
     for entry in self.wiki.get_with_continue('query', 'embeddedin',
       list='embeddedin',
-      einamespace=namespace,
+      einamespace=self.wiki.namespaces[namespace],
       eilimit=500,
       eititle=self.url_title,
     ):
       yield Page(self.wiki, entry['title'], entry)
 
-  def get_links(self):
+  def get_links(self, *, namespace='Main'):
     for entry in self.wiki.get_with_continue('query', 'pages',
       generator='links',
-      gplnamespace=0, # Main
+      gplnamespace=self.wiki.namespaces[namespace],
       gpllimit=500,
       titles=self.url_title,
     ):
@@ -62,7 +61,12 @@ class Page:
 
   def get_file_link_count(self):
     # Unfortunately, the mediawiki APIs don't include file links, so we have to scrape the HTML.
-    for html in self.wiki.get_html_with_continue('Special:WhatLinksHere', target=self.url_title, hidelinks=1, hidetrans=1, namespace=0):
+    for html in self.wiki.get_html_with_continue('Special:WhatLinksHere',
+      target=self.url_title,
+      hidelinks=1,
+      hidetrans=1,
+      namespace=self.wiki.namespaces['Main'],
+    ):
       # Also, this report uses page IDs for iteration, so for now we're returning solely based on the first page of results.
       return html.count('mw-whatlinkshere-tools') # Class for (<-- links | edit)
 
@@ -93,14 +97,17 @@ class Page:
     if 'error' in data:
       print(f'Failed to edit {self.title}:')
       print(data['error'])
+      return None
     elif data['edit']['result'] != 'Success':
       print(f'Failed to edit {self.title}:')
       print(data['edit'])
+      return None
     elif 'new' in data['edit']:
       print(f'Successfully created {self.title}.')
       return 'https://wiki.tf/d/' + str(data['edit']['newrevid'])
     elif 'nochange' in data['edit']:
       print(f'No change to {self.title}')
+      return None
     else:
       print(f'Successfully edited {self.title}')
       return 'https://wiki.tf/d/' + str(data['edit']['newrevid'])

@@ -5,9 +5,9 @@ from wikitools.page import Page
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
+NAMESPACES = ['Main', 'TFW', 'Help', 'File', 'Template']
 
 def main(w):
-  # TODO: Category:Navigational templates ?
   excluded_templates = [
     # Class navs have way too many items in them to be useful
     'Template:Scout Nav',
@@ -37,6 +37,9 @@ def main(w):
     'Template:Mann Vs Machine Nav/no category',
     'Template:Mvm Missions Nav/missioncategoryonly',
     'Template:Patch layout',
+    # These are navbox-esque but generate too many false positives.
+    'Template:CentralDiscussion',
+    'Template:Chinese Editor Team',
   ]
 
   excluded_pages = {
@@ -69,7 +72,7 @@ def main(w):
 
   navbox_templates = {}
   navbox = Page(w, 'Template:Navbox')
-  for page in navbox.get_transclusions(namespace=10):
+  for page in navbox.get_transclusions(namespace='Template'):
     if page.title.lower().startswith('template:navbox'):
       continue # Exclude alternative navbox templates
     if page.title.lower().endswith('sandbox'):
@@ -79,9 +82,14 @@ def main(w):
     if page.title in excluded_templates: # Some templates are simply too large to be put on every page.
       continue
 
+    links = []
+    transclusions = []
+    for namespace in NAMESPACES:
+      links.extend(page.get_links(namespace=namespace))
+      transclusions.extend(page.get_transclusions(namespace=namespace))
     navbox_templates[page.title] = [
-      set(link.title for link in page.get_links()),
-      set(trans.title for trans in page.get_transclusions()),
+      set(link.title for link in links),
+      set(trans.title for trans in transclusions),
     ]
     if verbose:
       print(f'Navbox {page.title} links to {len(navbox_templates[page.title][0])} pages and is transcluded by {len(navbox_templates[page.title][1])} pages')
@@ -91,7 +99,7 @@ def main(w):
 
   missing_navboxes = {template: [] for template in navbox_templates}
   count = 0
-  for page in w.get_all_pages():
+  for page in w.get_all_pages(namespaces=NAMESPACES):
     expected_navboxes = 0
     page_missing_navboxes = []
 
@@ -103,7 +111,8 @@ def main(w):
         lang = 'en'
         basename = page.title
 
-      if basename in excluded_pages.get(template, []): # Some additional manual removals
+      # Some additional manual removals
+      if basename in excluded_pages.get(template, []):
         continue
 
       if basename in links:
