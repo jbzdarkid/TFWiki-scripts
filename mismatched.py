@@ -9,7 +9,6 @@ pairs = [
   ['\\[', '\\]'],
   ['{', '}'],
   ['<!--', '-->'],
-#  ['<([a-zA-Z]*)(?: [^>/]*)?>', '</([a-zA-Z]*?)>'], # HTML tags, e.g. <div width="2px"> </div>
 ]
 html_tags = [
   # HTML standard
@@ -39,15 +38,6 @@ exemptions = {
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
-# For regex matches which have a group, we want to include the group contents, so that we can compare pairs of HTML tags.
-# For pure punctuation matches, we don't need any comparison.
-def get_match_info(m):
-  groups = m.groups()
-  if len(groups) == 0:
-    return None
-  else:
-    return groups[0].lower()
-
 def pagescraper(page, translation_data):
   text = page.get_wiki_text()
   base, _, lang = page.title.rpartition('/')
@@ -55,51 +45,54 @@ def pagescraper(page, translation_data):
     lang = 'en'
     base = page.title
 
-  errors = []
+  locations = []
   for pair in pairs:
-    locations = []
     if pair in exemptions.get(base, []):
       continue
 
     for m in finditer(pair[0], text, IGNORECASE):
-      match_info = get_match_info(m)
-      locations.append([m.start(), +1, match_info])
+      locations.append([m.start(), +1, pair[0]])
 
     for m in finditer(pair[1], text, IGNORECASE):
-      match_info = get_match_info(m)
-      locations.append([m.start(), -1, match_info])
+      locations.append([m.start(), -1, pair[1]])
 
-    locations.sort()
+  locations.sort()
 
-    opens = []
-    in_nowiki = False
-    in_comment = False
-    for index, val, contents in locations:
-      if contents == '<nowiki>':
-        in_nowiki = True
-      elif contents == '</nowiki>':
-        in_nowiki = False
-      elif contents == '<!--':
-        in_comment = True
-      elif contents == '-->':
-        in_comment = False
-      elif in_nowiki or in_comment:
-        continue # Ignore all escaped text
+  errors = []
+  opens = []
 
-      if val == +1:
-        opens.append([index, contents])
-      elif val == -1:
-        if len(opens) == 0:
-          errors.append(index) # Closing tag without a matching opening
-        else:
-          opens.pop() # Matching
+  in_nowiki = False
+  in_comment = False
+  for index, val, contents in locations:
+    if '<nowiki' in contents:
+      in_nowiki = True
+    elif '</nowiki' in contents:
+      in_nowiki = False
+    elif contents == '<!--':
+      in_comment = True
+    elif contents == '-->':
+      in_comment = False
+    elif in_nowiki or in_comment:
+      continue # Ignore all escaped text (note that this may behave poorly for interleaved escapes)
 
-    # Check for leftover opening tags that were not properly closed
-    for index, contents in opens:
-      if contents == '<noinclude>' and page.title.startswith('Template:'):
-        continue # Templates may leave off the closing </noinclude>, mediawiki figures it out.
+    if val == +1:
+      opens.append([index, contents])
+    elif val == -1:
+      if len(opens) == 0:
+        errors.append(index) # Closing tag without a matching opening
+      elif [opens[-1][1], contents] not in pairs:
+        errors.append(index) # Mismatched closing tag
+      else:
+        opens.pop() # Matching
 
-      errors.append(index)
+  # Check for leftover opening tags that were not properly closed
+  for index, contents in opens:
+    if contents == '<noinclude>' and page.title.startswith('Template:'):
+      if verbose:
+        print(f'Ignoring trailing noinclude on {page.title}')
+      continue # Templates may leave off the closing </noinclude>, mediawiki figures it out.
+
+    errors.append(index)
 
   if len(errors) > 0:
     if verbose:
@@ -133,6 +126,7 @@ def pagescraper(page, translation_data):
 
     translation_data[lang].append(data)
 
+from wikitools.page import Page
 def main(w):
   translation_data = {lang: [] for lang in LANGS}
   with pagescraper_queue(pagescraper, translation_data) as pages:
@@ -141,12 +135,17 @@ def main(w):
         continue
       if page.title.endswith(' 3D.jpg') or page.title.endswith(' 3D.png'):
         continue
-      if page.title.startswith('File:Painted '):
+      if page.title.startswith('File:User'):
         continue
       if page.title.startswith('Template:PatchDiff'):
         continue
-      if page.title.startswith('Template:Dictionary/items/') or page.title.startswith('Template:Dictionary/common_strings/'):
-        continue # The main pages are already analyzed but we don't need to duplicate the subpages
+      # Don't analyze the main dictionary pages, in case there's a mismatch which evens out between two strings
+      if page.title.startswith('Template:Dictionary') and page.title.count('/') == 1: # Dictionary/items, e.g.
+        continue
+      if page.title.startswith('Template:Dictionary/achievements/') and page.title.count('/') == 2: # Dictionary/achievements/medic, e.g.
+        continue
+      if page.title.startswith('Template:Dictionary/steam ids'):
+        continue # Usernames can be literally anything, but commonly include :)
       pages.put(page)
 
   output = """\
