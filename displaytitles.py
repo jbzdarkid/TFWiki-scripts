@@ -59,7 +59,7 @@ def main(w):
   for language in LANGS:
     if len(duplicate_errors[language]) > 0:
       output += '== {{lang name|name|%s}} ==\n' % language
-      for page in duplicate_errors[language]:
+      for page in sorted(duplicate_errors[language]):
         output += f'* [[{page.title}]]\n'
   return output
 
