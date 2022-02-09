@@ -1,3 +1,4 @@
+# coding: utf-8
 from re import finditer, IGNORECASE
 from unicodedata import east_asian_width as width
 from utils import pagescraper_queue, time_and_date
@@ -32,7 +33,7 @@ exemptions = {
   'List of default keys': pairs[2],     # Includes {{Key|]}}
   'Deathcam': pairs[2],                 # Includes {{Key|[}}
   'Demoman robot': pairs[0],            # Uses :)
-  'Uber Update': pairs[0],              # The update notes include 1) 2)
+  'Über Update': pairs[0],              # The update notes include 1) 2)
 }
 
 verbose = False
@@ -47,7 +48,7 @@ def pagescraper(page, translation_data):
 
   locations = []
   for pair in pairs:
-    if pair in exemptions.get(base, []):
+    if pair == exemptions.get(base, None):
       continue
 
     for m in finditer(pair[0], text, IGNORECASE):
@@ -130,6 +131,8 @@ from wikitools.page import Page
 def main(w):
   translation_data = {lang: [] for lang in LANGS}
   with pagescraper_queue(pagescraper, translation_data) as pages:
+    pages.put(Page(w, 'List of default keys/fi'))
+    """
     for page in w.get_all_pages(namespaces=['Main', 'File', 'Template', 'Help', 'Category']):
       if page.title.startswith('Team Fortress Wiki:Discussion'):
         continue
@@ -147,6 +150,7 @@ def main(w):
       if page.title.startswith('Template:Dictionary/steam ids'):
         continue # Usernames can be literally anything, but commonly include :)
       pages.put(page)
+    """
 
   output = """\
 {{{{DISPLAYTITLE: {count} pages with mismatched parenthesis}}}}
