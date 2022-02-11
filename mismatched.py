@@ -87,7 +87,8 @@ def pagescraper(page, translation_data):
       elif opens[-1][1] + pair_index == 0: # Matching
         opens.pop()
       elif len(opens) > 1 and opens[-2][1] + pair_index == 0: # Incorrect opening tag
-        errors.append(opens.pop()[0])
+        errors.append(opens.pop()[0]) # The mismatched opening tag
+        opens.pop() # The matched opening tag
       else: # Could be a handful of things, but just assume closing tag for simplicity
         errors.append(index)
 
