@@ -11,6 +11,11 @@ class Page:
     self.url_title = title.replace(' ', '_')
     self.raw = raw
 
+    self.basename, _, self.lang = title.rpartition('/')
+    if lang not in 'ar cs da de es fi fr hu it ja ko nl no pl pt pt-br ro ru sv tr zh-hans zh-hant':
+      self.basename = title
+      self.lang = 'en'
+
   def __str__(self):
     return self.title
 

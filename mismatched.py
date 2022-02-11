@@ -79,12 +79,15 @@ def pagescraper(page, translation_data):
     if val == +1:
       opens.append([index, contents])
     elif val == -1:
-      if len(opens) == 0:
-        errors.append(index) # Closing tag without a matching opening
+      if len(opens) == 0: # Closing tag without a matching opening
+        errors.append(index)
       elif [opens[-1][1], contents] not in pairs:
-        errors.append(index) # Mismatched closing tag
-      else:
-        opens.pop() # Matching
+        if [opens[-2][1], contents] in pairs: # It was in fact the fault of the opening tag
+          errors.append(opens.pop()[0])
+        else: # Could be a handful of things, but just assume closing tag for simplicity
+          errors.append(index)
+      else: # Matching
+        opens.pop()
 
   # Check for leftover opening tags that were not properly closed
   for index, contents in opens:
@@ -120,7 +123,7 @@ def pagescraper(page, translation_data):
       extra_width = widths.count('W') # + widths.count('F')
 
       data += '<div class="mw-code"><nowiki>\n'
-      data += text[start:end].replace('<nowiki', '&#60;nowiki') + '\n'
+      data += text[start:end].replace('<', '&#60;') + '\n' # Escape <nowiki> and <onlyinclude> and other problems
       extra_width = int(widths.count('W') * 0.8) # Some padding because non-ascii characters are wide
       data += ' '*(error-start+extra_width) + text[error] + ' '*10 + '\n'
       data += '</nowiki></div>\n'

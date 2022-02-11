@@ -17,8 +17,9 @@ import open_pr_comment
 # Sort missing categories by # pages
 # Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 # images without licensing?
-# Consider running some scripts against the Help: namespace, too
 # Threading for navboxes.py?
+# Report for using {{lang}} and {{if lang}} on non-template pages
+# Report for incorrect language links ([[Classes/hu]] on Scout/fr, e.g.)
 
 def handle_failed_edits(link_map, report_output, report_name):
   missing_languages = [lang for lang in link_map if link_map[lang] is None]

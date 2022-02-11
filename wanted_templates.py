@@ -3,11 +3,18 @@ from wikitools import wiki
 from wikitools.page import Page
 
 verbose = False
+NAMESPACES = ['Main', 'TFW', 'Help', 'File', 'Template', 'Category']
 
 def main(w):
   wanted_templates = []
   for template in w.get_all_wanted_templates():
-    use_count = Page(w, template).get_transclusion_count()
+    use_count = 0
+    for namespace in NAMESPACES:
+      for page in Page(w, template).get_transclusions(namespace=namespace):
+        if page.title.startswith('Team Fortress Wiki:Discussion'):
+          continue
+        use_count += 1
+
     if use_count > 0:
       if verbose:
         print(f'Template {template} has {use_count} uses')
