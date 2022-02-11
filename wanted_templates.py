@@ -3,7 +3,7 @@ from wikitools import wiki
 from wikitools.page import Page
 
 verbose = False
-NAMESPACES = ['Main', 'TFW', 'Help', 'File', 'Template', 'Category']
+NAMESPACES = ['Main', 'TFW', 'Help', 'File', 'Category']
 
 def main(w):
   wanted_templates = []
