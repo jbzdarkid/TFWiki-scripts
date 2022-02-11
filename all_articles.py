@@ -14,7 +14,7 @@ def main(w):
     elif page.lang == 'en':
       all_english_pages.add(page)
     else:
-      all_pages.add(page)
+      all_pages[page.lang].add(page)
 
   outputs = []
   for language in LANGS:

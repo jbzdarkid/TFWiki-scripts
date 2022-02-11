@@ -11,7 +11,7 @@ def main(w):
     if page.lang == 'en':
       all_english_pages.add(page.title)
     else:
-      all_pages[lang].add(page.basename)
+      all_pages[page.lang].add(page.basename)
 
   overtranslated = {language: set() for language in LANGS}
   count = 0
