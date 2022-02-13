@@ -59,8 +59,9 @@ class pagescraper_queue:
 
       try:
         self.thread_func(obj, *self.thread_func_args)
-      except Exception as e:
-        print(e)
+      except:
+        import traceback
+        traceback.print_exc()
 
 if __name__ == '__main__':
   print(f'There are {plural.translations(2)} but only {plural.dogs(1)}')

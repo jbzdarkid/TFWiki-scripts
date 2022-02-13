@@ -29,7 +29,7 @@ def main(w):
   errors = []
   overflow = {}
   with pagescraper_queue(pagescraper, errors, overflow) as pages:
-    for page in w.get_all_pages():
+    for page in w.get_all_pages(namespaces=['Main', 'TFW', 'File', 'Template', 'Help', 'Category']):
       pages.put(page)
 
   if verbose:

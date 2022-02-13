@@ -7,12 +7,11 @@ LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl',
 def main(w):
   all_pages = {language: set() for language in LANGS}
   all_english_pages = set()
-  for page in w.get_all_pages():
-    basename, _, lang = page.title.rpartition('/')
-    if lang in LANGS:
-      all_pages[lang].add(basename)
-    else:
+  for page in w.get_all_pages(namespaces=['Main', 'Help', 'Category']):
+    if page.lang == 'en':
       all_english_pages.add(page.title)
+    else:
+      all_pages[page.lang].add(page.basename)
 
   overtranslated = {language: set() for language in LANGS}
   count = 0

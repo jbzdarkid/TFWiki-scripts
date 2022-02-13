@@ -1,5 +1,5 @@
 # coding: utf-8
-from re import finditer, IGNORECASE
+from re import compile, IGNORECASE
 from unicodedata import east_asian_width as width
 from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
@@ -10,6 +10,7 @@ pairs = [
   ['\\[', '\\]'],
   ['{', '}'],
   ['<!--', '-->'],
+  ['<nowiki>', '</nowiki>'], # Listed separately for escapement purposes
 ]
 html_tags = [
   # HTML standard
@@ -19,7 +20,7 @@ html_tags = [
   'gallery',
   'includeonly',
   'noinclude',
-  'nowiki',
+#  'nowiki',
   'onlyinclude',
   'ref',
 ]
@@ -27,13 +28,15 @@ for tag in html_tags:
   # The tag open match needs to allow for properties, e.g. <div style="foo">
   pairs.append([f'<{tag}(?: [^>/]*)?>', f'</{tag}>'])
 
+pairs = [[compile(pair[0], IGNORECASE), compile(pair[1], IGNORECASE)] for pair in pairs]
+
 # Some pages are expected to have mismatched parenthesis (as they are part of the update history, item description, etc)
 exemptions = {
-  'Linux dedicated server': pairs[0],   # Includes a bash script with case
-  'List of default keys': pairs[2],     # Includes {{Key|]}}
-  'Deathcam': pairs[2],                 # Includes {{Key|[}}
-  'Demoman robot': pairs[0],            # Uses :)
-  'Über Update': pairs[0],              # The update notes include 1) 2)
+  'Linux dedicated server': 0,   # Includes a bash script with case
+  'List of default keys': 2,     # Includes {{Key|]}}
+  'Deathcam': 2,                 # Includes {{Key|[}}
+  'Demoman robot': 0,            # Uses :)
+  'Über Update': 0,              # The update notes include 1) 2)
 }
 
 verbose = False
@@ -47,15 +50,15 @@ def pagescraper(page, translation_data):
     base = page.title
 
   locations = []
-  for pair in pairs:
-    if pair == exemptions.get(base, None):
+  for i, pair in enumerate(pairs):
+    if exemptions.get(base, None) == i:
       continue
 
-    for m in finditer(pair[0], text, IGNORECASE):
-      locations.append([m.start(), +1, pair[0]])
+    for m in pair[0].finditer(text):
+      locations.append([m.start(), +(i+1)])
 
-    for m in finditer(pair[1], text, IGNORECASE):
-      locations.append([m.start(), -1, pair[1]])
+    for m in pair[1].finditer(text):
+      locations.append([m.start(), -(i+1)])
 
   locations.sort()
 
@@ -64,31 +67,34 @@ def pagescraper(page, translation_data):
 
   in_nowiki = False
   in_comment = False
-  for index, val, contents in locations:
-    if '<nowiki' in contents:
+  for index, pair_index in locations:
+    if pair_index == +6:
       in_nowiki = True
-    elif '</nowiki' in contents:
+    elif pair_index == -6:
       in_nowiki = False
-    elif contents == '<!--':
+    elif pair_index == +5:
       in_comment = True
-    elif contents == '-->':
+    elif pair_index == -5:
       in_comment = False
     elif in_nowiki or in_comment:
       continue # Ignore all escaped text (note that this may behave poorly for interleaved escapes)
 
-    if val == +1:
-      opens.append([index, contents])
-    elif val == -1:
-      if len(opens) == 0:
-        errors.append(index) # Closing tag without a matching opening
-      elif [opens[-1][1], contents] not in pairs:
-        errors.append(index) # Mismatched closing tag
-      else:
-        opens.pop() # Matching
+    if pair_index > 0:
+      opens.append([index, pair_index])
+    elif pair_index < 0:
+      if len(opens) == 0: # Closing tag without a matching opening
+        errors.append(index)
+      elif opens[-1][1] + pair_index == 0: # Matching
+        opens.pop()
+      elif len(opens) > 1 and opens[-2][1] + pair_index == 0: # Incorrect opening tag
+        errors.append(opens.pop()[0]) # The mismatched opening tag
+        opens.pop() # The matched opening tag
+      else: # Could be a handful of things, but just assume closing tag for simplicity
+        errors.append(index)
 
   # Check for leftover opening tags that were not properly closed
-  for index, contents in opens:
-    if contents == '<noinclude>' and page.title.startswith('Template:'):
+  for index, pair_index in opens:
+    if pair_index == +6 and page.title.startswith('Template:'):
       if verbose:
         print(f'Ignoring trailing noinclude on {page.title}')
       continue # Templates may leave off the closing </noinclude>, mediawiki figures it out.
@@ -120,7 +126,7 @@ def pagescraper(page, translation_data):
       extra_width = widths.count('W') # + widths.count('F')
 
       data += '<div class="mw-code"><nowiki>\n'
-      data += text[start:end].replace('<nowiki', '&#60;nowiki') + '\n'
+      data += text[start:end].replace('<', '&#60;') + '\n' # Escape <nowiki> and <onlyinclude> and other problems
       extra_width = int(widths.count('W') * 0.8) # Some padding because non-ascii characters are wide
       data += ' '*(error-start+extra_width) + text[error] + ' '*10 + '\n'
       data += '</nowiki></div>\n'

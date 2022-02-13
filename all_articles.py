@@ -8,14 +8,13 @@ LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl',
 def main(w):
   all_pages = {language: set() for language in LANGS}
   all_english_pages = set()
-  for page in w.get_all_pages():
-    basename, _, lang = page.title.rpartition('/')
-    if lang in LANGS:
-      all_pages[lang].add(basename)
-    elif 'OTFWH' in page.title: # ETF2L Highlander Community Challenge/OTFWH
+  for page in w.get_all_pages(namespaces=['Main', 'Help']):
+    if 'OTFWH' in page.title: # ETF2L Highlander Community Challenge/OTFWH
       pass # Do not translate
+    elif page.lang == 'en':
+      all_english_pages.add(page)
     else:
-      all_english_pages.add(page.title)
+      all_pages[page.lang].add(page)
 
   outputs = []
   for language in LANGS:
@@ -38,7 +37,7 @@ All articles in {{{{lang info|{lang}}}}}; '''<onlyinclude>{count}</onlyinclude>'
       output = sub('\n.*?Missing translations/en.*?\n', '\n', output)
 
     for page in sorted(all_pages[language]):
-      output += f'\n# [[{page}/{language}]]'
+      output += f'\n# [[{page.title}]]'
     outputs.append([language, output])
 
   english_output = """\
@@ -51,7 +50,7 @@ List of all English articles; <onlyinclude>{count}</onlyinclude> in total. Data 
     count=len(all_english_pages),
     date=time_and_date())
   for page in sorted(all_english_pages):
-    english_output += f'\n# [[{page}]]'
+    english_output += f'\n# [[{page.title}]]'
 
   outputs.append(['en', english_output])
 

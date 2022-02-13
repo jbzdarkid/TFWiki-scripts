@@ -78,7 +78,7 @@ def main(w):
 
 {{{{TOC limit|2}}}}
 """.format(
-    category_count=len(miscategorized),
+    category_count=sum(len(cats) for cats in miscategorized.values()),
     page_count=len(unique_pages),
     date=time_and_date())
 
