@@ -36,8 +36,8 @@ def main(w):
     for page in w.get_all_pages(namespaces=['Main', 'TFW', 'File', 'Template', 'Help', 'Category']):
       pages.put(page)
 
-  num_pages = sum(len(pages) for pages in errors.values()) +
-              sum(len(pages) for pages in disambig_errors.values()) +
+  num_pages = sum(len(pages) for pages in errors.values()) + \
+              sum(len(pages) for pages in disambig_errors.values()) + \
               len(overflow)
   if verbose:
     print(f'Found {num_pages} pages with errors')
