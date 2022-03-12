@@ -6,18 +6,12 @@ verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 def pagescraper(category, w, miscategorized):
-  cat_lang = category.rpartition('/')[2]
-  if cat_lang not in LANGS:
-    cat_lang = 'en'
-  for page in w.get_all_category_pages(category):
-    page_lang = page.title.rpartition('/')[2]
-    if page_lang not in LANGS:
-      page_lang = 'en'
-    if page_lang != cat_lang:
-      if category not in miscategorized[cat_lang]:
-        miscategorized[cat_lang][category] = [page]
+  for page in w.get_all_category_pages(category.title):
+    if page.lang != category.lang:
+      if category not in miscategorized[category.lang]:
+        miscategorized[category.lang][category.title] = [page]
       else:
-        miscategorized[cat_lang][category].append(page)
+        miscategorized[category.lang][category.title].append(page)
 
 def main(w):
   # TODO: Consider including /lang categories again
@@ -64,8 +58,8 @@ def main(w):
     for category in w.get_all_categories(filter_redirects=False):
       if category.title not in maintanence_categories:
         if verbose:
-          print(f'Processing {category}')
-        categories.put(category.title)
+          print(f'Processing {category.title}')
+        categories.put(category)
 
   unique_pages = set()
   for language in LANGS:
