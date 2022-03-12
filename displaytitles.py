@@ -62,7 +62,7 @@ def main(w):
       for page in sorted(errors[language]):
         output += f'* [[{page.title}]]\n'
     if len(disambig_errors[language]) > 0:
-      output += '=== Disambiguation pages ===\n' % language
+      output += '=== Disambiguation pages ===\n'
       for page in sorted(disambig_errors[language]):
         output += f'* [[{page.title}]]\n'
   return output

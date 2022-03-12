@@ -30,7 +30,11 @@ class Page:
     if cached_text:
       return cached_text
     try:
-      text = self.wiki.get('parse', page=self.url_title, prop='wikitext')['parse']['wikitext']['*']
+      raw = self.wiki.get('parse', page=self.url_title, prop='wikitext')
+      if 'parse' not in raw:
+        print(raw)
+      text = raw['parse']['wikitext']['*']
+      # text = self.wiki.get('parse', page=self.url_title, prop='wikitext')['parse']['wikitext']['*']
       self.wiki.page_text_cache[self.title] = text
       return text
     except RequestException:
