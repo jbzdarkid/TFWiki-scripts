@@ -5,7 +5,7 @@ from wikitools import wiki
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
-def pagescraper(page, errors, overflow):
+def pagescraper(page, errors, disambig_errors, overflow):
   if __name__ != '__main__':
     # When running as part of automation, wiki text will be cached, so it is faster to query the wikitext
     # before making another network call to get the page source.
@@ -21,26 +21,26 @@ def pagescraper(page, errors, overflow):
   if verbose:
     print(f'Page {page.title} has an error: {m.group(0)}')
   if 'Display title' in m.group(0):
-    errors.append(page)
+    if '<a href="/wiki/Category:Disambiguation' in html:
+      disambig_errors[page.lang].append(page)
+    else:
+      errors[page.lang].append(page)
   else:
     overflow[m.group(1)] = page
 
 def main(w):
-  errors = []
+  errors = {lang: [] for lang in LANGS}
+  disambig_errors = {lang: [] for lang in LANGS}
   overflow = {}
-  with pagescraper_queue(pagescraper, errors, overflow) as pages:
+  with pagescraper_queue(pagescraper, errors, disambig_errors, overflow) as pages:
     for page in w.get_all_pages(namespaces=['Main', 'TFW', 'File', 'Template', 'Help', 'Category']):
       pages.put(page)
 
+  num_pages = sum(len(pages) for pages in errors.values()) +
+              sum(len(pages) for pages in disambig_errors.values()) +
+              len(overflow)
   if verbose:
-    print(f'Found {len(errors) + len(overflow)} pages with errors')
-
-  duplicate_errors = {lang: [] for lang in LANGS}
-  for page in errors:
-    lang = page.title.rpartition('/')[2]
-    if lang not in LANGS:
-      lang = 'en'
-    duplicate_errors[lang].append(page)
+    print(f'Found {num_pages} pages with errors')
 
   output = """\
 {{{{DISPLAYTITLE: {count} pages with duplicate DISPLAYTITLEs}}}}
@@ -48,7 +48,7 @@ def main(w):
 {{{{TOC limit|2}}}}
 
 """.format(
-    count=len(errors),
+    count=num_pages,
     date=time_and_date())
 
   if len(overflow) > 0:
@@ -57,9 +57,13 @@ def main(w):
       output += f'=== [[{page.title}]] ===\n{error}\n'
 
   for language in LANGS:
-    if len(duplicate_errors[language]) > 0:
+    if len(errors[language]) > 0:
       output += '== {{lang name|name|%s}} ==\n' % language
-      for page in sorted(duplicate_errors[language]):
+      for page in sorted(errors[language]):
+        output += f'* [[{page.title}]]\n'
+    if len(disambig_errors[language]) > 0:
+      output += '=== Disambiguation pages ===\n' % language
+      for page in sorted(disambig_errors[language]):
         output += f'* [[{page.title}]]\n'
   return output
 
