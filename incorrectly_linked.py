@@ -38,8 +38,8 @@ def main(w):
 
     output += '== {{lang name|name|%s}} ==\n' % language
     for page, links in sorted(mislinked[language]):
-      output += f'* [{page.get_edit_url()} {page.title}] has {len(links)} links to other languages:\n'
-      output += ', '.join('[[{link}]]' for link in links) + '\n'
+      output += f'* [{page.get_edit_url()} {page.title}] has {len(links)} link{"s"[:len(links)^1]} to other languages: '
+      output += ', '.join(f'[[{link}]]' for link in links) + '\n'
 
   return output
 
