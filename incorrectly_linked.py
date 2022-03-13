@@ -6,6 +6,7 @@ verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 link_regex = compile(r'\[\[([^\]|]+)')
 
+
 def pagescraper(page, mislinked):
   links = []
   for link in page.get_links():
