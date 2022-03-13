@@ -21,6 +21,8 @@ def main(w):
   mislinked = {lang: [] for lang in LANGS}
   with pagescraper_queue(pagescraper, mislinked) as pages:
     for page in w.get_all_pages():
+      if page.basename == 'Main Page':
+        continue # Main Page links to all other main pages
       pages.put(page)
 
   page_count = sum(len(pages) for pages in mislinked.values())
