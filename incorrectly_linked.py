@@ -9,7 +9,11 @@ link_regex = compile(r'\[\[([^\]|]+)')
 def pagescraper(page, mislinked):
   links = []
   for link in page.get_links():
-    if link.lang != page.lang and link.lang != 'en':
+    if page.basename == 'Localization files' and link.basename == 'Winger':
+      continue # Used as a cross-language example for localization files
+    elif page.basename == 'Spy' and link.basename in ['Spy responses', 'Spy voice commands']:
+      continue # Used as a piece of trivia
+    elif link.lang != page.lang and link.lang != 'en':
       links.append(link.title)
 
   if len(links) > 0:
@@ -21,7 +25,7 @@ def main(w):
   mislinked = {lang: [] for lang in LANGS}
   with pagescraper_queue(pagescraper, mislinked) as pages:
     for page in w.get_all_pages():
-      if page.basename == 'Main Page':
+      if page.basename in ['Main Page', 'Main Page (Classic)']:
         continue # Main Page links to all other main pages
       pages.put(page)
 
