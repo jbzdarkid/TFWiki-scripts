@@ -4,20 +4,18 @@ from wikitools import wiki
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
-namespaces = ['Main', 'TFW', 'Help', 'Category']
 
 def pagescraper(page, mislinked):
   links = []
-  for namespace in namespaces:
-    for link in page.get_links(namespace=namespace):
-      if page.basename == 'Localization files' and link.basename == 'Winger':
-        continue # Used as a cross-language example for localization files
-      elif page.basename == 'Spy' and link.basename in ['Spy responses', 'Spy voice commands']:
-        continue # Used as a piece of trivia
-      elif link.lang == 'en':
-        continue # There are *countless* places where a link is untranslated. Accounting for all of them is foolish.
-      elif link.lang != page.lang:
-        links.append(link.title)
+  for link in page.get_links():
+    if page.basename == 'Localization files' and link.basename == 'Winger':
+      continue # Used as a cross-language example for localization files
+    elif page.basename == 'Spy' and link.basename in ['Spy responses', 'Spy voice commands']:
+      continue # Used as a piece of trivia
+    elif link.lang == 'en':
+      continue # There are *countless* places where a link is untranslated. Accounting for all of them is foolish.
+    elif link.lang != page.lang:
+      links.append(link.title)
 
   if len(links) > 0:
     if verbose:
@@ -27,7 +25,7 @@ def pagescraper(page, mislinked):
 def main(w):
   mislinked = {lang: [] for lang in LANGS}
   with pagescraper_queue(pagescraper, mislinked) as pages:
-    for page in w.get_all_pages(namespaces=namespaces):
+    for page in w.get_all_pages():
       if page.basename in ['Main Page', 'Main Page (Classic)']:
         continue # Main Page links to all other main pages
       pages.put(page)
