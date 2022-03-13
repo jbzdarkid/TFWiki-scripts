@@ -30,7 +30,11 @@ class Page:
     if cached_text:
       return cached_text
     try:
-      text = self.wiki.get('parse', page=self.url_title, prop='wikitext')['parse']['wikitext']['*']
+      raw = self.wiki.get('parse', page=self.url_title, prop='wikitext')
+      if 'error' in raw:
+        print('Error while fetching {self.url_title} contents: ' + raw['error'])
+        return '' # Unable to fetch page contents, pretend it's empty
+      text = raw['parse']['wikitext']['*']
       self.wiki.page_text_cache[self.title] = text
       return text
     except RequestException:
