@@ -6,7 +6,7 @@ verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 link_regex = compile(r'\[\[([^\]|]+)')
 
-def pagescraper(page, w, mislinked):
+def pagescraper(page, mislinked):
   links = []
   for link in page.get_links():
     if link.lang != page.lang and link.lang != 'en':
@@ -14,20 +14,20 @@ def pagescraper(page, w, mislinked):
 
   if len(links) > 0:
     if verbose:
-      print(f'Found {len(links)} bad links on {page}') 
+      print(f'Found {len(links)} bad links on {page}')
     mislinked[page.lang].append([page, links])
 
 def main(w):
   mislinked = {lang: [] for lang in LANGS}
-  with pagescraper_queue(pagescraper, w, mislinked) as pages:
+  with pagescraper_queue(pagescraper, mislinked) as pages:
     for page in w.get_all_pages():
       pages.put(page)
 
+  page_count = sum(len(pages) for pages in mislinked.values())
   output = f"""\
 {{{{DISPLAYTITLE: {page_count} pages with bad links}}}}
 {page_count} pages link to pages in other languages. Data as of {time_and_date()}.
-""".format(
-    page_count=sum(len(pages) for pages in mislinked.values()))
+"""
 
   for language in LANGS:
     if len(mislinked[language]) == 0:

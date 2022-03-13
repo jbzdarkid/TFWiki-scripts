@@ -45,7 +45,6 @@ def main(w):
   output = """\
 {{{{DISPLAYTITLE: {count} pages with duplicate DISPLAYTITLEs}}}}
 <onlyinclude>{count}</onlyinclude> pages with two (or more) display titles. Data as of {date}.
-{{{{TOC limit|2}}}}
 
 """.format(
     count=num_pages,
@@ -57,10 +56,13 @@ def main(w):
       output += f'=== [[{page.title}]] ===\n{error}\n'
 
   for language in LANGS:
-    if len(errors[language]) > 0:
+    if len(errors[language]) + len(disambig_errors[language]) > 0:
       output += '== {{lang name|name|%s}} ==\n' % language
+
+    if len(errors[language]) > 0:
       for page in sorted(errors[language]):
         output += f'* [[{page.title}]]\n'
+
     if len(disambig_errors[language]) > 0:
       output += '=== Disambiguation pages ===\n'
       for page in sorted(disambig_errors[language]):
