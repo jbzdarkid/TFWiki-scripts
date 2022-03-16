@@ -37,6 +37,7 @@ exemptions = {
   'Deathcam': 2,                 # Includes {{Key|[}}
   'Demoman robot': 0,            # Uses :)
   'Über Update': 0,              # The update notes include 1) 2)
+  'Scripting': 2,                # Includes {{key|]}} and {{key|[}}
 }
 
 verbose = False
@@ -44,14 +45,10 @@ LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko',
 
 def pagescraper(page, translation_data):
   text = page.get_wiki_text()
-  base, _, lang = page.title.rpartition('/')
-  if lang not in LANGS:
-    lang = 'en'
-    base = page.title
 
   locations = []
   for i, pair in enumerate(pairs):
-    if exemptions.get(base, None) == i:
+    if exemptions.get(page.basename, None) == i:
       continue
 
     for m in pair[0].finditer(text):
@@ -151,7 +148,7 @@ def main(w):
       if page.title.startswith('Template:Dictionary/achievements/') and page.title.count('/') == 2: # Dictionary/achievements/medic, e.g.
         continue
       if page.title.startswith('Template:Dictionary/steam ids'):
-        continue # Usernames can be literally anything, but commonly include :)
+        continue # Usernames can be literally anything, but often include :)
       pages.put(page)
 
   output = """\
