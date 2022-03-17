@@ -4,8 +4,14 @@ from unicodedata import east_asian_width as width
 from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
+# Using the first group from https://www.unicode.org/Public/UNIDATA/extracted/DerivedBidiClass.txt
+# which should include all of our arabic text on the wiki.
+RTL = '[\u0600-\u07BF]'
+LTR = '[\u0021-\u05FF\u07C0-\uFFFF]'
+
 pairs = [
-  ['\\(', '\\)'],
+  # Open parenthesis in LTR mode paired with either a closing parenthesis in LTR mode or an opening parenthesis in RTL mode.
+  [f'{LTR} *\\(', f'({LTR}{4}\\)|{RTL} *\\()'],
   ['（', '）'],
   ['\\[', '\\]'],
   ['{', '}'],
@@ -20,7 +26,7 @@ html_tags = [
   'gallery',
   'includeonly',
   'noinclude',
-#  'nowiki',
+#  'nowiki', # Too noisy
   'onlyinclude',
   'ref',
 ]
