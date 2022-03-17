@@ -16,7 +16,7 @@ pairs = [
   ['\\[', '\\]'],
   ['{', '}'],
   ['<!--', '-->'],
-  ['<nowiki>', '</nowiki>'], # Listed separately for escapement purposes
+  ['<noinclude>', '</noinclude>'], # Listed separately for escapement purposes
 ]
 html_tags = [
   # HTML standard
@@ -25,8 +25,8 @@ html_tags = [
   # Mediawiki custom
   'gallery',
   'includeonly',
-  'noinclude',
-#  'nowiki', # Too noisy
+#  'noinclude', # Handled above
+  'nowiki',
   'onlyinclude',
   'ref',
 ]
