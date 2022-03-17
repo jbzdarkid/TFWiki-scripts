@@ -128,7 +128,7 @@ def pagescraper(page, translation_data):
       data += ' '*(error-start+extra_width) + text[error] + ' '*10 + '\n'
       data += '</nowiki></div>\n'
 
-    translation_data[lang].append(data)
+    translation_data[page.lang].append(data)
 
 def main(w):
   translation_data = {lang: [] for lang in LANGS}
