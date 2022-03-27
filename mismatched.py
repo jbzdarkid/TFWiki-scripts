@@ -6,12 +6,11 @@ from wikitools import wiki
 
 # Using the first group from https://www.unicode.org/Public/UNIDATA/extracted/DerivedBidiClass.txt
 # which should include all of our arabic text on the wiki.
-RTL = '[\u0600-\u07BF]'
-LTR = '[\u0021-\u05FF\u07C0-\uFFFF]'
+RTL_PARENS = compile('([\u0600-\u07BF] *)\\(')
+RTL_PARENS_REPL = '\\1)'
 
 pairs = [
-  # Open parenthesis in LTR mode paired with either a closing parenthesis in LTR mode or an opening parenthesis in RTL mode.
-  [f'{LTR} *\\(', f'({LTR}{4}\\)|{RTL} *\\()'],
+  ['\\(', '\\)'],
   ['（', '）'],
   ['\\[', '\\]'],
   ['{', '}'],
@@ -51,6 +50,8 @@ LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko',
 
 def pagescraper(page, translation_data):
   text = page.get_wiki_text()
+
+  text = RTL_PARENS.sub(RTL_PAERENS_REPL, text)
 
   locations = []
   for i, pair in enumerate(pairs):
