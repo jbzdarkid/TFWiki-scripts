@@ -51,7 +51,7 @@ LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko',
 def pagescraper(page, translation_data):
   text = page.get_wiki_text()
 
-  text = RTL_PARENS.sub(RTL_PAERENS_REPL, text)
+  text = RTL_PARENS.sub(RTL_PARENS_REPL, text)
 
   locations = []
   for i, pair in enumerate(pairs):
