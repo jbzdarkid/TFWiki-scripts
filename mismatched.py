@@ -6,7 +6,8 @@ from wikitools import wiki
 
 # Using the first group from https://www.unicode.org/Public/UNIDATA/extracted/DerivedBidiClass.txt
 # which should include all of our arabic text on the wiki.
-RTL_PARENS = compile('([\u0600-\u07BF] *)\\(')
+# Matches an arabic character, followed by any number of 'non separators' (newlines for articles or pipes for templates)
+RTL_PARENS = compile('([\u0600-\u07BF][^\\|\\n]*)\\(')
 RTL_PARENS_REPL = '\\1)'
 
 pairs = [
@@ -51,17 +52,18 @@ LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko',
 def pagescraper(page, translation_data):
   text = page.get_wiki_text()
 
-  text = RTL_PARENS.sub(RTL_PARENS_REPL, text)
+  # For searching purposes only, swap parenthesis which display backwards due to RTL characters
+  search_text = RTL_PARENS.sub(RTL_PARENS_REPL, text)
 
   locations = []
   for i, pair in enumerate(pairs):
     if exemptions.get(page.basename, None) == i:
       continue
 
-    for m in pair[0].finditer(text):
+    for m in pair[0].finditer(search_text):
       locations.append([m.start(), +(i+1)])
 
-    for m in pair[1].finditer(text):
+    for m in pair[1].finditer(search_text):
       locations.append([m.start(), -(i+1)])
 
   locations.sort()
@@ -127,11 +129,10 @@ def pagescraper(page, translation_data):
 
       # Compute additional padding for wide characters
       widths = [width(char) for char in text[start:error]]
-      extra_width = widths.count('W') # + widths.count('F')
+      extra_width = int(widths.count('W') * 0.8) # Some padding because non-ascii characters are wide
 
       data += '<div class="mw-code"><nowiki>\n'
-      data += text[start:end].replace('<', '&#60;') + '\n' # Escape <nowiki> and <onlyinclude> and other problems
-      extra_width = int(widths.count('W') * 0.8) # Some padding because non-ascii characters are wide
+      data += text[start:end].replace('<', '&#60;') + '\n' # Escape <nowiki> and <onlyinclude> and other problem tags
       data += ' '*(error-start+extra_width) + text[error] + ' '*10 + '\n'
       data += '</nowiki></div>\n'
 
