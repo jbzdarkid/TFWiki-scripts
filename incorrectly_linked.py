@@ -4,7 +4,6 @@ from wikitools import wiki
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
-link_regex = compile(r'\[\[([^\]|]+)')
 
 def pagescraper(page, mislinked):
   links = []
@@ -13,7 +12,9 @@ def pagescraper(page, mislinked):
       continue # Used as a cross-language example for localization files
     elif page.basename == 'Spy' and link.basename in ['Spy responses', 'Spy voice commands']:
       continue # Used as a piece of trivia
-    elif link.lang != page.lang and link.lang != 'en':
+    elif link.lang == 'en':
+      continue # There are *countless* places where a link is untranslated. Accounting for all of them is foolish.
+    elif link.lang != page.lang:
       links.append(link.title)
 
   if len(links) > 0:
@@ -32,7 +33,7 @@ def main(w):
   page_count = sum(len(pages) for pages in mislinked.values())
   output = f"""\
 {{{{DISPLAYTITLE: {page_count} pages with bad links}}}}
-{page_count} pages link to pages in other languages. Data as of {time_and_date()}.
+<onlyinclude>{page_count}</onlyinclude> pages link to pages in other (non-english) languages. Data as of {time_and_date()}.
 """
 
   for language in LANGS:
@@ -45,7 +46,8 @@ def main(w):
     output += '== {{lang name|name|%s}} ==\n' % language
     for page, links in sorted(mislinked[language]):
       output += f'* [{page.get_edit_url()} {page.title}] has {len(links)} link{"s"[:len(links)^1]} to other languages: '
-      output += ', '.join(f'[[{link}]]' for link in links) + '\n'
+      bad_links = [f'[[{link}]]' for link in sorted(links)]
+      output += ', '.join(bad_links) + '\n'
 
   return output
 
