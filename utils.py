@@ -32,8 +32,8 @@ class pagescraper_queue:
     self.q = Queue()
     self.done = Event()
     self.threads = []
-    NUM_THREADS = 50
-    for _ in range(NUM_THREADS): # Number of threads
+    self.failures = 0
+    for _ in range(50): # Number of threads
       thread = Thread(target=self.meta_thread_func)
       self.threads.append(thread)
       thread.start()
@@ -46,6 +46,8 @@ class pagescraper_queue:
     self.done.set()
     for thread in self.threads:
       thread.join()
+    if self.failures > 5:
+      raise Exception(f'There were {self.failures} exceptions thrown during execution')
 
   def meta_thread_func(self):
     while True:
@@ -60,6 +62,7 @@ class pagescraper_queue:
       try:
         self.thread_func(obj, *self.thread_func_args)
       except:
+        self.failures += 1
         import traceback
         traceback.print_exc()
 
