@@ -1,4 +1,3 @@
-from re import finditer, DOTALL
 from utils import time_and_date
 from wikitools import wiki
 from wikitools.page import Page

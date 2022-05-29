@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import importlib
 from os import environ
 from subprocess import check_output
-from sys import argv, stdout
+from sys import stdout
 from traceback import print_exc
 from wikitools import wiki
 from wikitools.page import Page

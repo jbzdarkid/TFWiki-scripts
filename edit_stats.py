@@ -84,7 +84,7 @@ def addTimeData(timeSortedList):
        total = runningTotal)
   return output
 
-def addTopUsers(w, sortedList, count):
+def addTopUsers(sortedList, count):
   if verbose:
     print("Adding top", count, "users")
 
@@ -154,7 +154,7 @@ def main(w):
 ! class="header" | Edit count
 ! class="header" | Edits per day
 ! class="header" | Registration date
-""" + addTopUsers(w, sortedList, 100) + """
+""" + addTopUsers(sortedList, 100) + """
 |}"""
 
   return output

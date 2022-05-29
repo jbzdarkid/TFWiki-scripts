@@ -23,12 +23,6 @@ RTL_PAREN_FIND = compile('''
 ''', VERBOSE)
 RTL_PAREN_REPL = '\\1)'
 
-
-RTL_PAREN_L = compile('([\u0600-\u07BF][^\\n\\|]*?)\\(')
-RTL_PAREN_R = compile('([\u0600-\u07BF][^\\n\\|]*?)\\)')
-RTL_PAREN_REPL_L = '\\1('
-RTL_PAREN_REPL_R = '\\1)'
-
 pairs = [
   ['\\(', '\\)'],
   ['（', '）'],
@@ -73,53 +67,6 @@ def pagescraper(page, translation_data):
   text = page.get_wiki_text()
 
   search_text = RTL_PAREN_FIND.sub(RTL_PAREN_REPL, text)
-  """
-  # For searching purposes only, swap parenthesis which display backwards due to RTL characters
-  print('Initial L parens:', text.count('('))
-  for i in range(len(text)):
-    if text[i] == '(':
-      t = text[i-20:i+1].replace('\n', '\\n')
-      print(f'Paren: "{t}"')
-  print('Initial R parens:', text.count(')'))
-  for i in range(len(text)):
-    if text[i] == ')':
-      t = text[i-20:i+1].replace('\n', '\\n')
-      print(f'Paren: "{t}"')
-
-
-
-  print('Regexing...')
-
-  search_text = text
-  line_is_rtl = False
-  for i, char in enumerate(text):
-    if not line_is_rtl and '\u0600' <= char and char <= '\u07BF':
-      line_is_rtl = True
-    if line_is_rtl:
-      if char == '(':
-        search_text = search_text[:i] + ')' + search_text[i+1:]
-        print(len(search_text), len(text))
-      elif char == ')':
-        search_text = search_text[:i] + '(' + search_text[i+1:]
-        print(len(search_text), len(text))
-      elif char == '\n' or char == '|':
-        line_is_rtl = False
-
-
-
-  #search_text = RTL_PAREN_L.sub(RTL_PAREN_REPL_R, text)
-  #search_text = RTL_PAREN_R.sub(RTL_PAREN_REPL_L, search_text)
-  print('Fixed L parens:', search_text.count('('))
-  for i in range(len(search_text)):
-    if search_text[i] == '(':
-      t = search_text[i-20:i+1].replace('\n', '\\n')
-      print(f'Paren: "{t}"')
-  print('Fixed R parens:', search_text.count(')'))
-  for i in range(len(search_text)):
-    if search_text[i] == ')':
-      t = search_text[i-20:i+1].replace('\n', '\\n')
-      print(f'Paren: "{t}"')
-  """
 
   locations = []
   for i, pair in enumerate(pairs):
