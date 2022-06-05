@@ -19,6 +19,7 @@ import open_pr_comment
 # images without licensing?
 # Threading for navboxes.py?
 # Report for using {{lang}} and {{if lang}} on non-template pages
+# Report for incorrectly-sorted {{lang}} templates
 
 def handle_failed_edits(link_map, report_output, report_name):
   missing_languages = [lang for lang in link_map if link_map[lang] is None]
