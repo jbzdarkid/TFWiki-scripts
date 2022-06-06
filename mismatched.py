@@ -9,25 +9,28 @@ from wikitools import wiki
 # Matches an arabic character, followed by any number of non-separators (newlines for articles or pipes for templates)
 # A separator (| or \n) followed by any number of LTR characters, followed by an open paren
 
-RTL_PAREN_FIND = compile('''
+RTL_PAREN_FIND = compile(r'''
   (
-    [\\|\\n]        # A separator character: | for templates and \n for articles. This resets the text to LTR
-    [\u0021-\u05FF\u07C0-\uFFFF]*? # Any number of LTR characters
-    \\(             # An open parenthesis
-    [^\\|\\n]*?     # Any number of non-separator characters, including RTL characters
+    [|\n]           # A separator character: | for {{lang}} or \n for body text. This resets the text to LTR
+    [\u0021-\u0027\u0029-\u05FF\u07C0-\uFFFF]*? # Any number of LTR characters, excluding an open parenthesis
+    \(              # An open parenthesis
+    [^|\n]*?        # Any number of non-separator characters, including RTL characters
     [\u0600-\u07BF] # An RTL character, changing the text to RTL
-    [^\\|\\n]*?     # Any number of non-separator characters, including RTL characters
+    [^|\n]*?        # Any number of non-separator characters, including RTL characters
   )
-  \\(               # A second open parenthesis, but because we're in RTL, the open parenthesis becomes a close.
+  \(                # A second open parenthesis, but because we're in RTL, the open parenthesis becomes a close.
                     # However, we need the parens to be in order for the logic below, so we'll be swapping this one.
 ''', VERBOSE)
-RTL_PAREN_REPL = '\\1)'
+RTL_PAREN_REPL = r'\1)' # The contents of the first capture group, and then the reversed (close) parenthesis.
 
-
-RTL_PAREN_L = compile('([\u0600-\u07BF][^\\n\\|]*?)\\(')
-RTL_PAREN_R = compile('([\u0600-\u07BF][^\\n\\|]*?)\\)')
-RTL_PAREN_REPL_L = '\\1('
-RTL_PAREN_REPL_R = '\\1)'
+OTHER_PARENS_FIND = compile(r'''
+  (
+    :\)|    # Smile
+    :\(|    # Frown
+    \(:|    # Upside-down smile
+    \):|    # Upside-down frown
+    [0-9]\) # List index, occurs in some update notes
+  )''', VERBOSE)
 
 pairs = [
   ['\\(', '\\)'],
@@ -61,8 +64,6 @@ exemptions = {
   'Linux dedicated server': 0,   # Includes a bash script with case
   'List of default keys': 2,     # Includes {{Key|]}}
   'Deathcam': 2,                 # Includes {{Key|[}}
-  'Demoman robot': 0,            # Uses :)
-  'Über Update': 0,              # The update notes include 1) 2)
   'Scripting': 2,                # Includes {{key|]}} and {{key|[}}
 }
 
@@ -73,53 +74,7 @@ def pagescraper(page, translation_data):
   text = page.get_wiki_text()
 
   search_text = RTL_PAREN_FIND.sub(RTL_PAREN_REPL, text)
-  """
-  # For searching purposes only, swap parenthesis which display backwards due to RTL characters
-  print('Initial L parens:', text.count('('))
-  for i in range(len(text)):
-    if text[i] == '(':
-      t = text[i-20:i+1].replace('\n', '\\n')
-      print(f'Paren: "{t}"')
-  print('Initial R parens:', text.count(')'))
-  for i in range(len(text)):
-    if text[i] == ')':
-      t = text[i-20:i+1].replace('\n', '\\n')
-      print(f'Paren: "{t}"')
-
-
-
-  print('Regexing...')
-
-  search_text = text
-  line_is_rtl = False
-  for i, char in enumerate(text):
-    if not line_is_rtl and '\u0600' <= char and char <= '\u07BF':
-      line_is_rtl = True
-    if line_is_rtl:
-      if char == '(':
-        search_text = search_text[:i] + ')' + search_text[i+1:]
-        print(len(search_text), len(text))
-      elif char == ')':
-        search_text = search_text[:i] + '(' + search_text[i+1:]
-        print(len(search_text), len(text))
-      elif char == '\n' or char == '|':
-        line_is_rtl = False
-
-
-
-  #search_text = RTL_PAREN_L.sub(RTL_PAREN_REPL_R, text)
-  #search_text = RTL_PAREN_R.sub(RTL_PAREN_REPL_L, search_text)
-  print('Fixed L parens:', search_text.count('('))
-  for i in range(len(search_text)):
-    if search_text[i] == '(':
-      t = search_text[i-20:i+1].replace('\n', '\\n')
-      print(f'Paren: "{t}"')
-  print('Fixed R parens:', search_text.count(')'))
-  for i in range(len(search_text)):
-    if search_text[i] == ')':
-      t = search_text[i-20:i+1].replace('\n', '\\n')
-      print(f'Paren: "{t}"')
-  """
+  search_text = OTHER_PARENS_FIND.sub('??', search_text)
 
   locations = []
   for i, pair in enumerate(pairs):
