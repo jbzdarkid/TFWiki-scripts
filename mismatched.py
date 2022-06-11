@@ -23,16 +23,6 @@ RTL_PAREN_FIND = compile(r'''
 ''', VERBOSE)
 RTL_PAREN_REPL = r'\1)' # The contents of the first capture group, and then the reversed (close) parenthesis.
 
-# Note the escaped spaces before the smilies. I dislike them.
-OTHER_PARENS_FIND = compile(r'''
-  (
-    \ :\)|   # Smile
-    \ :\(|   # Frown
-    \ \(:|   # Upside-down smile
-    \ \):|   # Upside-down frown
-    .[0-9]\) # List index, occurs in some update notes
-  )''', VERBOSE)
-
 pairs = [
   ['\\(', '\\)'],
   ['（', '）'],
@@ -74,8 +64,18 @@ LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko',
 def pagescraper(page, translation_data):
   text = page.get_wiki_text()
 
-  search_text = RTL_PAREN_FIND.sub(RTL_PAREN_REPL, text)
-  search_text = OTHER_PARENS_FIND.sub('???', search_text)
+  search_text = text
+  if page.lang == 'ar' or page.title.startswith('Template:'):
+    search_text = RTL_PAREN_FIND.sub(RTL_PAREN_REPL, text)
+
+    if text != search_text:
+      for m in RTL_PAREN_FIND.finditer(text):
+        print(m.start(), m.end(), text[m.start()-10:m.end()+10])
+
+  search_text = search_text.replace(':)', '  ')
+  search_text = search_text.replace('1)', '  ')
+  search_text = search_text.replace('2)', '  ')
+  search_text = search_text.replace('3)', '  ')
 
   locations = []
   for i, pair in enumerate(pairs):
@@ -133,9 +133,9 @@ def pagescraper(page, translation_data):
 
     errors.append(index)
 
-  if verbose:
-    print(f'Found {len(errors)} errors for page {page.title}')
   if len(errors) > 0:
+    if verbose:
+      print(f'Found {len(errors)} errors for page {page.title}')
     data = f'<h3> [{page.get_edit_url()} {page.title}] </h3>\n'
     errors.sort()
     for error in errors:
