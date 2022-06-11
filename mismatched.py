@@ -61,21 +61,48 @@ exemptions = {
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
+def do_rtl_fixup(text):
+  output_text = [] # The output will be a list of substrings, to avoid redudnant string manipulation
+  index = 0
+  is_rtl = False
+  in_link = False
+  for i, char in enumerate(text):
+    # Inside of wikilinks, we should ignore | characters, they do not cause a reset to LTR
+    if char == '[' and text[i-1] == '[':
+      in_link = True
+    elif char == ']' and text[i-1] == ']':
+      in_link = False
+
+    if char >= '\u0600' and char <= '\u07BF':
+      is_rtl = True
+    elif char == '\n' or (not in_link and char == '|'):
+      is_rtl = False
+
+    # Swap the parenthesis when in RTL for replacement purposes. We slice the strings to avoid extra mutations.
+    if is_rtl:
+      if char == '(':
+        output_text.append(text[index:i])
+        output_text.append(')') # Reversed, because we were in RTL
+        index = i
+      elif char == ')':
+        output_text.append(text[index:i])
+        output_text.append('(') # Reversed, because we were in RTL
+        index = i
+
+    return ''.join(output_text)
+
+
 def pagescraper(page, translation_data):
   text = page.get_wiki_text()
 
   search_text = text
   if page.lang == 'ar' or page.title.startswith('Template:'):
-    search_text = RTL_PAREN_FIND.sub(RTL_PAREN_REPL, text)
+    search_text = do_rtl_fixup(text)
 
-    if text != search_text:
-      for m in RTL_PAREN_FIND.finditer(text):
-        print(m.start(), m.end(), text[m.start()-10:m.end()+10])
-
-  search_text = search_text.replace(':)', '  ')
-  search_text = search_text.replace('1)', '  ')
-  search_text = search_text.replace('2)', '  ')
-  search_text = search_text.replace('3)', '  ')
+  search_text = search_text.replace(' :)', '   ')
+  search_text = search_text.replace(' 1)', '   ')
+  search_text = search_text.replace(' 2)', '   ')
+  search_text = search_text.replace(' 3)', '   ')
 
   locations = []
   for i, pair in enumerate(pairs):
