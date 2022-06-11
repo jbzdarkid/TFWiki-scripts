@@ -1,5 +1,5 @@
 # coding: utf-8
-from re import compile, IGNORECASE, VERBOSE
+from re import compile, IGNORECASE
 from unicodedata import east_asian_width as width
 from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
@@ -8,20 +8,6 @@ from wikitools import wiki
 # which should include all of our arabic text on the wiki.
 # Matches an arabic character, followed by any number of non-separators (newlines for articles or pipes for templates)
 # A separator (| or \n) followed by any number of LTR characters, followed by an open paren
-
-RTL_PAREN_FIND = compile(r'''
-  (
-    [|\n]           # A separator character: | for {{lang}} or \n for body text. This resets the text to LTR
-    [\u0021-\u0027\u0029-\u05FF\u07C0-\uFFFF]*? # Any number of LTR characters, excluding an open parenthesis
-    \(              # An open parenthesis
-    [^|\n]*?        # Any number of non-separator characters, including RTL characters
-    [\u0600-\u07BF] # An RTL character, changing the text to RTL
-    [^|\n]*?        # Any number of non-separator characters, including RTL characters
-  )
-  \(                # A second open parenthesis, but because we're in RTL, the open parenthesis becomes a close.
-                    # However, we need the parens to be in order for the logic below, so we'll be swapping this one.
-''', VERBOSE)
-RTL_PAREN_REPL = r'\1)' # The contents of the first capture group, and then the reversed (close) parenthesis.
 
 pairs = [
   ['\\(', '\\)'],
@@ -89,7 +75,7 @@ def do_rtl_fixup(text):
         output_text.append('(') # Reversed, because we were in RTL
         index = i
 
-    return ''.join(output_text)
+  return ''.join(output_text)
 
 
 def pagescraper(page, translation_data):
@@ -98,11 +84,6 @@ def pagescraper(page, translation_data):
   search_text = text
   if page.lang == 'ar' or page.title.startswith('Template:'):
     search_text = do_rtl_fixup(text)
-
-  search_text = search_text.replace(' :)', '   ')
-  search_text = search_text.replace(' 1)', '   ')
-  search_text = search_text.replace(' 2)', '   ')
-  search_text = search_text.replace(' 3)', '   ')
 
   locations = []
   for i, pair in enumerate(pairs):
@@ -138,6 +119,9 @@ def pagescraper(page, translation_data):
       opens.append([index, pair_index])
     elif pair_index < 0:
       if len(opens) == 0: # Closing tag without a matching opening
+        if pair_index == -1: # Closing paren:
+          if text[index-1] in [':', '1', '2', '3']:
+            continue # Ignore extraneous parens caused by a smily face or numbered list
         errors.append(index)
       elif opens[-1][1] + pair_index == 0: # Matching
         opens.pop()
@@ -211,7 +195,6 @@ def main(w):
       if page.title.startswith('Template:Dictionary/steam ids'):
         continue # Usernames can be literally anything, but often include :)
       pages.put(page)
-
   output = """\
 {{{{DISPLAYTITLE: {count} pages with mismatched parenthesis}}}}
 <onlyinclude>{count}</onlyinclude> pages with mismatched <nowiki>(), [], and {{}}</nowiki>. Data as of {date}.
