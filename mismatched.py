@@ -10,25 +10,21 @@ from wikitools import wiki
 # A separator (| or \n) followed by any number of LTR characters, followed by an open paren
 
 pairs = [
-  ['\\(', '\\)'],
-  ['（', '）'],
-  ['\\[', '\\]'],
-  ['{', '}'],
-  ['<!--', '-->'],
-  ['<nowiki>', '</nowiki>'], # Listed separately for escapement purposes
-  ['<noinclude>', '</noinclude>'], # Listed separately for end-of-file check
+  [1, '\\(', '\\)'],
+  [1, '（', '）'], # These parens are used interchangably with the ASCII ones.
+  [2, '\\[', '\\]'],
+  [3, '{', '}'],
+  [4, '<!--', '-->'],
+  [5, '<nowiki>', '</nowiki>'],
+  [6, '<noinclude>', '</noinclude>'],
+  [7, '<includeonly>', '</includeonly>'],
+  [8, '<onlyinclude>', '</onlyinclude>'],
 ]
 html_tags = [
-  # HTML standard
   'a', 'b', 'code', 'center', 'em', 'i', 'li', 'ol', 'p', 's', 'small', 'sub', 'sup', 'td', 'th', 'tr', 'tt', 'u', 'ul',
 
   # Mediawiki custom
-  'gallery',
-  'includeonly',
-#  'noinclude', # Handled above
-#  'nowiki',    # Handled above
-  'onlyinclude',
-  'ref',
+  'gallery', 'ref',
 ]
 for tag in html_tags:
   # The tag open match needs to allow for properties, e.g. <div style="foo">
@@ -47,53 +43,19 @@ exemptions = {
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
-def do_rtl_fixup(text):
-  output_text = [] # The output will be a list of substrings, to avoid redudnant string manipulation
-  index = 0
-  is_rtl = False
-  in_link = False
-  for i, char in enumerate(text):
-    # Inside of wikilinks, we should ignore | characters, they do not cause a reset to LTR
-    if char == '[' and text[i-1] == '[':
-      in_link = True
-    elif char == ']' and text[i-1] == ']':
-      in_link = False
-
-    if char >= '\u0600' and char <= '\u07BF':
-      is_rtl = True
-    elif char == '\n' or (not in_link and char == '|'):
-      is_rtl = False
-
-    # Swap the parenthesis when in RTL for replacement purposes. We slice the strings to avoid extra mutations.
-    if is_rtl:
-      if char == '(':
-        output_text.append(text[index:i])
-        output_text.append(')') # Reversed, because we were in RTL
-        index = i
-      elif char == ')':
-        output_text.append(text[index:i])
-        output_text.append('(') # Reversed, because we were in RTL
-        index = i
-
-  return ''.join(output_text)
-
 
 def pagescraper(page, translation_data):
   text = page.get_wiki_text()
 
-  search_text = text
-  if page.lang == 'ar' or page.title.startswith('Template:'):
-    search_text = do_rtl_fixup(text)
-
   locations = []
-  for i, pair in enumerate(pairs):
+  for i, left, right, in enumerate(pairs):
     if exemptions.get(page.basename, None) == i:
       continue
 
-    for m in pair[0].finditer(search_text):
+    for m in left.finditer(search_text):
       locations.append([m.start(), +(i+1)])
 
-    for m in pair[1].finditer(search_text):
+    for m in right.finditer(search_text):
       locations.append([m.start(), -(i+1)])
 
   locations.sort()
@@ -104,13 +66,13 @@ def pagescraper(page, translation_data):
   in_nowiki = False
   in_comment = False
   for index, pair_index in locations:
-    if pair_index == +6:
+    if pair_index == +5:
       in_nowiki = True
-    elif pair_index == -6:
-      in_nowiki = False
-    elif pair_index == +5:
-      in_comment = True
     elif pair_index == -5:
+      in_nowiki = False
+    elif pair_index == +4:
+      in_comment = True
+    elif pair_index == -4:
       in_comment = False
     elif in_nowiki or in_comment:
       continue # Ignore all escaped text (note that this may behave poorly for interleaved escapes)
