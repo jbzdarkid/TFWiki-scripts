@@ -28,9 +28,11 @@ html_tags = [
 ]
 for tag in html_tags:
   # The tag open match needs to allow for properties, e.g. <div style="foo">
-  pairs.append([f'<{tag}(?: [^>/]*)?>', f'</{tag}>'])
+  pairs.append([len(pairs), f'<{tag}(?: [^>/]*)?>', f'</{tag}>'])
 
-pairs = [[compile(pair[0], IGNORECASE), compile(pair[1], IGNORECASE)] for pair in pairs]
+for pair in pairs:
+  pair[1] = compile(pair[1], IGNORECASE)
+  pair[2] = compile(pair[2], IGNORECASE)
 
 # Some pages are expected to have mismatched parenthesis (as they are part of the update history, item description, etc)
 exemptions = {
