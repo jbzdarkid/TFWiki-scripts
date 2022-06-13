@@ -50,14 +50,14 @@ def pagescraper(page, translation_data):
   text = page.get_wiki_text()
 
   locations = []
-  for i, left, right, in enumerate(pairs):
+  for i, left, right, in pairs:
     if exemptions.get(page.basename, None) == i:
       continue
 
-    for m in left.finditer(search_text):
+    for m in left.finditer(text):
       locations.append([m.start(), +(i+1)])
 
-    for m in right.finditer(search_text):
+    for m in right.finditer(text):
       locations.append([m.start(), -(i+1)])
 
   locations.sort()
