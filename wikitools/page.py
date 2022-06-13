@@ -32,7 +32,7 @@ class Page:
     try:
       raw = self.wiki.get('parse', page=self.url_title, prop='wikitext')
       if 'error' in raw:
-        print(f'Error while fetching {self.url_title} contents: {raw["error"]}')
+        print(f'Error while fetching {self.url_title} contents: ' + str(raw['error']))
         return '' # Unable to fetch page contents, pretend it's empty
       text = raw['parse']['wikitext']['*']
       self.wiki.page_text_cache[self.title] = text
