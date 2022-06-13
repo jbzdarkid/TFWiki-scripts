@@ -31,6 +31,7 @@ def handle_failed_edits(link_map, report_output, report_name):
   else:
     for lang, output in report_output:
       if lang in missing_languages:
+        link_map[lang] = '## "Upload failed"' # Hover text in markdown
         with open(f'wiki_{report_name}_{lang}.txt', 'w', encoding='utf-8') as f:
           f.write(output)
 
@@ -97,7 +98,7 @@ if __name__ == '__main__':
       file = row.replace('.py', '').strip()
       if file in all_reports:
         modules_to_run.append(file)
-      elif file in ['wikitools/wiki', 'wikitools/page', 'utils']:
+      elif file in ['wikitools/wiki', 'utils']:
         modules_to_run = all_reports.keys()
         break
 

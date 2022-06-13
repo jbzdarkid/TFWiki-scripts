@@ -1,5 +1,5 @@
 # coding: utf-8
-from re import compile, IGNORECASE, VERBOSE
+from re import compile, IGNORECASE
 from unicodedata import east_asian_width as width
 from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
@@ -9,127 +9,55 @@ from wikitools import wiki
 # Matches an arabic character, followed by any number of non-separators (newlines for articles or pipes for templates)
 # A separator (| or \n) followed by any number of LTR characters, followed by an open paren
 
-RTL_PAREN_FIND = compile('''
-  (
-    [\\|\\n]        # A separator character: | for templates and \n for articles. This resets the text to LTR
-    [\u0021-\u05FF\u07C0-\uFFFF]*? # Any number of LTR characters
-    \\(             # An open parenthesis
-    [^\\|\\n]*?     # Any number of non-separator characters, including RTL characters
-    [\u0600-\u07BF] # An RTL character, changing the text to RTL
-    [^\\|\\n]*?     # Any number of non-separator characters, including RTL characters
-  )
-  \\(               # A second open parenthesis, but because we're in RTL, the open parenthesis becomes a close.
-                    # However, we need the parens to be in order for the logic below, so we'll be swapping this one.
-''', VERBOSE)
-RTL_PAREN_REPL = '\\1)'
-
-
-RTL_PAREN_L = compile('([\u0600-\u07BF][^\\n\\|]*?)\\(')
-RTL_PAREN_R = compile('([\u0600-\u07BF][^\\n\\|]*?)\\)')
-RTL_PAREN_REPL_L = '\\1('
-RTL_PAREN_REPL_R = '\\1)'
-
 pairs = [
-  ['\\(', '\\)'],
-  ['（', '）'],
-  ['\\[', '\\]'],
-  ['{', '}'],
-  ['<!--', '-->'],
-  ['<nowiki>', '</nowiki>'], # Listed separately for escapement purposes
-  ['<noinclude>', '</noinclude>'], # Listed separately for end-of-file check
+  [1, '\\(', '\\)'],
+  [1, '（', '）'], # These parens are used interchangably with the ASCII ones.
+  [2, '\\[', '\\]'],
+  [3, '{', '}'],
+  [4, '<!--', '-->'],
+  [5, '<nowiki>', '</nowiki>'],
+  [6, '<noinclude>', '</noinclude>'],
+  [7, '<includeonly>', '</includeonly>'],
+  [8, '<onlyinclude>', '</onlyinclude>'],
 ]
 html_tags = [
-  # HTML standard
   'a', 'b', 'code', 'center', 'em', 'i', 'li', 'ol', 'p', 's', 'small', 'sub', 'sup', 'td', 'th', 'tr', 'tt', 'u', 'ul',
 
   # Mediawiki custom
-  'gallery',
-  'includeonly',
-#  'noinclude', # Handled above
-#  'nowiki',    # Handled above
-  'onlyinclude',
-  'ref',
+  'gallery', 'ref',
 ]
 for tag in html_tags:
   # The tag open match needs to allow for properties, e.g. <div style="foo">
-  pairs.append([f'<{tag}(?: [^>/]*)?>', f'</{tag}>'])
+  pairs.append([len(pairs), f'<{tag}(?: [^>/]*)?>', f'</{tag}>'])
 
-pairs = [[compile(pair[0], IGNORECASE), compile(pair[1], IGNORECASE)] for pair in pairs]
+for pair in pairs:
+  pair[1] = compile(pair[1], IGNORECASE)
+  pair[2] = compile(pair[2], IGNORECASE)
 
 # Some pages are expected to have mismatched parenthesis (as they are part of the update history, item description, etc)
 exemptions = {
   'Linux dedicated server': 0,   # Includes a bash script with case
   'List of default keys': 2,     # Includes {{Key|]}}
   'Deathcam': 2,                 # Includes {{Key|[}}
-  'Demoman robot': 0,            # Uses :)
-  'Über Update': 0,              # The update notes include 1) 2)
   'Scripting': 2,                # Includes {{key|]}} and {{key|[}}
 }
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
+
 def pagescraper(page, translation_data):
   text = page.get_wiki_text()
 
-  search_text = RTL_PAREN_FIND.sub(RTL_PAREN_REPL, text)
-  """
-  # For searching purposes only, swap parenthesis which display backwards due to RTL characters
-  print('Initial L parens:', text.count('('))
-  for i in range(len(text)):
-    if text[i] == '(':
-      t = text[i-20:i+1].replace('\n', '\\n')
-      print(f'Paren: "{t}"')
-  print('Initial R parens:', text.count(')'))
-  for i in range(len(text)):
-    if text[i] == ')':
-      t = text[i-20:i+1].replace('\n', '\\n')
-      print(f'Paren: "{t}"')
-
-
-
-  print('Regexing...')
-
-  search_text = text
-  line_is_rtl = False
-  for i, char in enumerate(text):
-    if not line_is_rtl and '\u0600' <= char and char <= '\u07BF':
-      line_is_rtl = True
-    if line_is_rtl:
-      if char == '(':
-        search_text = search_text[:i] + ')' + search_text[i+1:]
-        print(len(search_text), len(text))
-      elif char == ')':
-        search_text = search_text[:i] + '(' + search_text[i+1:]
-        print(len(search_text), len(text))
-      elif char == '\n' or char == '|':
-        line_is_rtl = False
-
-
-
-  #search_text = RTL_PAREN_L.sub(RTL_PAREN_REPL_R, text)
-  #search_text = RTL_PAREN_R.sub(RTL_PAREN_REPL_L, search_text)
-  print('Fixed L parens:', search_text.count('('))
-  for i in range(len(search_text)):
-    if search_text[i] == '(':
-      t = search_text[i-20:i+1].replace('\n', '\\n')
-      print(f'Paren: "{t}"')
-  print('Fixed R parens:', search_text.count(')'))
-  for i in range(len(search_text)):
-    if search_text[i] == ')':
-      t = search_text[i-20:i+1].replace('\n', '\\n')
-      print(f'Paren: "{t}"')
-  """
-
   locations = []
-  for i, pair in enumerate(pairs):
+  for i, left, right, in pairs:
     if exemptions.get(page.basename, None) == i:
       continue
 
-    for m in pair[0].finditer(search_text):
+    for m in left.finditer(text):
       locations.append([m.start(), +(i+1)])
 
-    for m in pair[1].finditer(search_text):
+    for m in right.finditer(text):
       locations.append([m.start(), -(i+1)])
 
   locations.sort()
@@ -140,13 +68,13 @@ def pagescraper(page, translation_data):
   in_nowiki = False
   in_comment = False
   for index, pair_index in locations:
-    if pair_index == +6:
+    if pair_index == +5:
       in_nowiki = True
-    elif pair_index == -6:
-      in_nowiki = False
-    elif pair_index == +5:
-      in_comment = True
     elif pair_index == -5:
+      in_nowiki = False
+    elif pair_index == +4:
+      in_comment = True
+    elif pair_index == -4:
       in_comment = False
     elif in_nowiki or in_comment:
       continue # Ignore all escaped text (note that this may behave poorly for interleaved escapes)
@@ -155,6 +83,9 @@ def pagescraper(page, translation_data):
       opens.append([index, pair_index])
     elif pair_index < 0:
       if len(opens) == 0: # Closing tag without a matching opening
+        if pair_index == -1: # Closing paren:
+          if text[index-1] in [':', '1', '2', '3']:
+            continue # Ignore extraneous parens caused by a smily face or numbered list
         errors.append(index)
       elif opens[-1][1] + pair_index == 0: # Matching
         opens.pop()
@@ -228,7 +159,6 @@ def main(w):
       if page.title.startswith('Template:Dictionary/steam ids'):
         continue # Usernames can be literally anything, but often include :)
       pages.put(page)
-
   output = """\
 {{{{DISPLAYTITLE: {count} pages with mismatched parenthesis}}}}
 <onlyinclude>{count}</onlyinclude> pages with mismatched <nowiki>(), [], and {{}}</nowiki>. Data as of {date}.
