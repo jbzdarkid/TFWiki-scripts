@@ -101,7 +101,7 @@ class Page:
           sleep(30)
         else:
           print(f'Failed to edit {self.title}:\n{e}')
-          return
+          return None
 
     if 'error' in data:
       print(f'Failed to edit {self.title}:')
