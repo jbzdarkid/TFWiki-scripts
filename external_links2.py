@@ -1,5 +1,6 @@
 from re import compile, VERBOSE
-from utils import pagescraper_queue, pagescraper_queue_single, time_and_date
+from time import sleep
+from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 import requests
 
@@ -65,9 +66,13 @@ def domain_verifier(domain, dead_domains, dangerous_domains):
   # if reason := safely_request('HEAD', domain, timeout=60):
   #   dead_domains[domain] = reason
 
-def link_verifier(link, dead_links):
-  if reason := safely_request('GET', link):
-    dead_links[link] = reason
+def link_verifier(domain_links, dead_links):
+  for link in domain_links:
+    if reason := safely_request('GET', link):
+      dead_links[link] = reason
+      if '429' in reason:
+        sleep(4)
+    sleep(1)
 
 def main(w):
   # First, scrape all the links from all of the pages
@@ -90,7 +95,7 @@ def main(w):
   # Then, process the overall domains to see if they're dead or dangerous
   dead_domains = {}
   dangerous_domains = {}
-  with pagescraper_queue_single(domain_verifier, dead_domains, dangerous_domains) as domains:
+  with pagescraper_queue(domain_verifier, dead_domains, dangerous_domains) as domains:
     for domain in all_domains:
       domains.put(domain)
 
@@ -114,10 +119,10 @@ def main(w):
     print('Starting linkscrapers')
 
   # Finally, process the remaining links to check for individual page 404s, redirects, etc.
-  with pagescraper_queue_single(link_verifier, dead_links) as links:
+  with pagescraper_queue(link_verifier, dead_links) as links:
+    # We give each scraper a single domain's links, so that we can avoid getting throttled too hard.
     for domain_links in all_links.values():
-      for link in domain_links:
-        links.put(link)
+      links.put(domain_links)
 
   page_count = 0
   for page, links in page_links.items():
@@ -143,24 +148,28 @@ __NOFOLLOW__ <!-- We do not want to improve these links' SEO, so don't follow li
 
   # Working around the page blacklist, mebe
   def link_escape(link):
-    if 'tinyurl' in link:
-      return link.replace('/', '&#47;')
-    return link
+    do_escape = (
+      'tinyurl' in link or
+      link.endswith('.png') or
+      link.endswith('.jpg')
+    )
+      
+    link.replace('/', '&#47;') if do_escape else link
 
   if len(dangerous_links) > 0:
     output += '= Dangerous links =\n'
-    for link in sorted(dangerous_links.keys(), key=lambda link:dangerous_links[link]):
-      output += f'== {link_escape(link)}: {dangerous_links[link]} ==\n'
-      for page, links in page_links.items():
-        if link in links:
+    for dangerous_link in sorted(dangerous_links.keys(), key=lambda link:dangerous_links[link]):
+      output += f'== {link_escape(dangerous_link)}: {dangerous_links[dangerous_link]} ==\n'
+      for page in sorted(page_links.keys()):
+        if dangerous_link in page_links[page]:
           output += f'* [{page.get_edit_url()} {page.title}]\n'
 
   if len(dead_links) > 0:
     output += '= Broken links =\n'
-    for link in sorted(dead_links.keys(), key=lambda link:dead_links[link]):
-      output += f'== {link_escape(link)}: {dead_links[link]} ==\n'
-      for page, links in page_links.items():
-        if link in links:
+    for dead_link in sorted(dead_links.keys(), key=lambda link:dead_links[link]):
+      output += f'== {link_escape(dead_link)}: {dead_links[dead_link]} ==\n'
+      for page in sorted(page_links.keys()):
+        if dead_link in page_links[page]:
           output += f'* [{page.get_edit_url()} {page.title}]\n'
 
   return output
