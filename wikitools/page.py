@@ -41,7 +41,11 @@ class Page:
       return '' # Unable to fetch page contents, pretend it's empty
 
   def get_raw_html(self):
+    cached_html = self.wiki.page_html_cache.get(self.title, None)
+    if cached_html:
+      return cached_html
     r = requests.get(self.wiki.wiki_url, allow_redirects=True, params={'title': self.url_title})
+    self.wiki.page_html_cache[self.title] = r.text
     return r.text
 
   def get_edit_url(self):

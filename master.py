@@ -9,10 +9,6 @@ from wikitools.page import Page
 
 import open_pr_comment
 
-# Write a replacement script for broken external links -> WindBOT filter
-#   forums.tfmaps.net?t=# -> tf2maps.net/threads/#
-# Sort external links by domain (with sub-headers)
-# External links is a mess. It needs a modern eye.
 # update readme (again)
 # Sort missing categories by # pages
 # Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
@@ -68,7 +64,7 @@ all_reports = {
   'unused_files': 'Unused files',
   'undocumented_templates': 'Undocumented templates',
   'edit_stats': 'Users by edit count',
-  'external_links': 'External links',
+  'external_links2': 'External links',
   'mismatched': 'Mismatched parenthesis',
   'displaytitles': 'Duplicate displaytitles',
 }
