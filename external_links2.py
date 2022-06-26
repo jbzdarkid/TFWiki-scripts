@@ -62,9 +62,8 @@ def domain_verifier(domain, dead_domains, dangerous_domains):
   if False:
     dangerous_domains[domain] = 'reason'
 
-  if reason := safely_request('HEAD', domain, timeout=60):
-    dead_domains[domain] = reason
-    return
+  # if reason := safely_request('HEAD', domain, timeout=60):
+  #   dead_domains[domain] = reason
 
 def link_verifier(link, dead_links):
   if reason := safely_request('GET', link):
