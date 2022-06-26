@@ -144,7 +144,7 @@ __NOFOLLOW__ <!-- We do not want to improve these links' SEO, so don't follow li
     output += '= Dangerous links =\n'
     for link in sorted(dangerous_links.keys(), key=lambda link:dangerous_links[link]):
       output += f'== {link_escape(link)}: {dangerous_links[link]} ==\n'
-      for page, links in page_links:
+      for page, links in page_links.items():
         if link in links:
           output += f'* [{page.get_edit_url()} {page.title}]\n'
 
