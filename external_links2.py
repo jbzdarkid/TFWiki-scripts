@@ -3,7 +3,7 @@ from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 import requests
 
-verbose = False
+verbose = True
 
 # Within the HTML source code, all links should be href="()". Internal links start with /wiki/foo, so this find all external links.
 LINK_REGEX = compile('''
@@ -80,7 +80,7 @@ def main(w):
     for page in w.get_all_pages():
       pages.put(page)
       i += 1
-      if i >= 100:
+      if i >= 1000:
         break
 
   # For reporting purposes
