@@ -52,6 +52,8 @@ def safely_request(verb, url, timeout=20):
   if r.is_redirect:
     return '508 LOOP DETECTED'
   elif not r.ok:
+    if verbose:
+      print(f'Error while accessing {r.request.url}: {r.status_code}\n{r.text}')
     return f'{r.status_code} {r.reason.upper()}'
   return None # no error
 
@@ -74,8 +76,12 @@ def main(w):
   all_domains = set()
   all_links = {} # Map of domain: {links}
   with pagescraper_queue(pagescraper, page_links, all_domains, all_links) as pages:
+    i = 0
     for page in w.get_all_pages():
       pages.put(page)
+      i += 1
+      if i >= 100:
+        break
 
   # For reporting purposes
   link_count = sum(len(links) for links in all_links)

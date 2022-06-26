@@ -12,7 +12,7 @@ class Page:
     self.raw = raw
 
     self.basename, _, self.lang = title.rpartition('/')
-    if self.lang not in 'ar cs da de es fi fr hu it ja ko nl no pl pt pt-br ro ru sv tr zh-hans zh-hant':
+    if self.lang not in 'ar cs da de es fi fr hu it ja ko nl no pl pt pt-br ro ru sv tr zh-hans zh-hant'.split(' '):
       self.basename = title
       self.lang = 'en'
 
@@ -44,9 +44,12 @@ class Page:
     cached_html = self.wiki.page_html_cache.get(self.title, None)
     if cached_html:
       return cached_html
-    r = requests.get(self.wiki.wiki_url, allow_redirects=True, params={'title': self.url_title})
-    self.wiki.page_html_cache[self.title] = r.text
-    return r.text
+    try:
+      r = requests.get(self.wiki.wiki_url, allow_redirects=True, params={'title': self.url_title})
+      self.wiki.page_html_cache[self.title] = r.text
+      return r.text
+    except RequestException:
+      return '' # Unable to fetch page contents, pretend it's empty
 
   def get_edit_url(self):
     return f'{self.wiki.wiki_url}?title={self.url_title}&action=edit'
