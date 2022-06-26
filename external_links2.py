@@ -144,7 +144,9 @@ __NOFOLLOW__ <!-- We do not want to improve these links' SEO, so don't follow li
 
   # Working around the page blacklist, mebe
   def link_escape(link):
-    return link #.replace('/', '&#47;')
+    if 'tinyurl' in link:
+      return link.replace('/', '&#47;')
+    return link
 
   if len(dangerous_links) > 0:
     output += '= Dangerous links =\n'
