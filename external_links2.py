@@ -1,5 +1,5 @@
 from re import compile, VERBOSE
-from utils import pagescraper_queue, time_and_date
+from utils import pagescraper_queue, pagescraper_queue_single, time_and_date
 from wikitools import wiki
 import requests
 
@@ -53,7 +53,7 @@ def safely_request(verb, url, timeout=20):
     return '508 LOOP DETECTED'
   elif not r.ok:
     if verbose:
-      print(f'Error while accessing {r.request.url}: {r.status_code}\n{r.text}')
+      print(f'Error while accessing {url}: {r.status_code}\n{r.text}')
     return f'{r.status_code} {r.reason.upper()}'
   return None # no error
 
@@ -80,7 +80,7 @@ def main(w):
     for page in w.get_all_pages():
       pages.put(page)
       i += 1
-      if i >= 1000:
+      if i >= 200:
         break
 
   # For reporting purposes
@@ -91,7 +91,7 @@ def main(w):
   # Then, process the overall domains to see if they're dead or dangerous
   dead_domains = {}
   dangerous_domains = {}
-  with pagescraper_queue(domain_verifier, dead_domains, dangerous_domains) as domains:
+  with pagescraper_queue_single(domain_verifier, dead_domains, dangerous_domains) as domains:
     for domain in all_domains:
       domains.put(domain)
 
@@ -115,7 +115,7 @@ def main(w):
     print('Starting linkscrapers')
 
   # Finally, process the remaining links to check for individual page 404s, redirects, etc.
-  with pagescraper_queue(link_verifier, dead_links) as links:
+  with pagescraper_queue_single(link_verifier, dead_links) as links:
     for domain_links in all_links.values():
       for link in domain_links:
         links.put(link)
