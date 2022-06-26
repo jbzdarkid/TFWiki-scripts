@@ -52,8 +52,8 @@ def safely_request(verb, url, timeout=20):
   if r.is_redirect:
     return '508 LOOP DETECTED'
   elif not r.ok:
-    if verbose:
-      print(f'Error while accessing {url}: {r.status_code}\n{r.text}')
+    if verbose and r.status_code == 403:
+      print(f'Error while accessing {url}: {r.status_code}\n{r.text[:500]}')
     return f'{r.status_code} {r.reason.upper()}'
   return None # no error
 
@@ -80,7 +80,7 @@ def main(w):
     for page in w.get_all_pages():
       pages.put(page)
       i += 1
-      if i >= 200:
+      if i >= 1000:
         break
 
   # For reporting purposes
