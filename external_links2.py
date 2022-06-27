@@ -83,12 +83,8 @@ def main(w):
   all_domains = set()
   all_links = {} # Map of domain: {links}
   with pagescraper_queue(pagescraper, page_links, all_domains, all_links) as pages:
-    i = 0
     for page in w.get_all_pages():
       pages.put(page)
-      i += 1
-      if i >= 2000:
-        break
 
   # For reporting purposes
   link_count = sum(len(links) for links in all_links)
