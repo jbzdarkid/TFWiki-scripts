@@ -53,8 +53,6 @@ def safely_request(verb, url, timeout=20):
   if r.is_redirect:
     return '508 LOOP DETECTED'
   elif not r.ok:
-    if verbose and r.status_code == 403:
-      print(f'Error while accessing {url}: {r.status_code}\n{r.text[:500]}')
     return f'{r.status_code} {r.reason.upper()}'
   return None # no error
 
@@ -89,7 +87,7 @@ def main(w):
     for page in w.get_all_pages():
       pages.put(page)
       i += 1
-      if i >= 1000:
+      if i >= 2000:
         break
 
   # For reporting purposes
@@ -141,7 +139,6 @@ def main(w):
 
   output = """\
 {{{{DISPLAYTITLE: {page_count} pages with broken or dangerous external links}}}}
-__NOFOLLOW__ <!-- We do not want to improve these links' SEO, so don't follow links on this page. -->
 <onlyinclude>{page_count}</onlyinclude> pages have a broken or dangerous-looking external links. Processed {link_count} over {domain_count} domains. Data as of {date}.
 
 {{{{TOC limit|2}}}}
