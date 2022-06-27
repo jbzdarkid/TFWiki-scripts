@@ -68,11 +68,16 @@ def domain_verifier(domain, dead_domains, dangerous_domains):
 
 def link_verifier(domain_links, dead_links):
   for link in domain_links:
-    if reason := safely_request('GET', link):
-      dead_links[link] = reason
-      if '429' in reason:
-        sleep(4)
-    sleep(1)
+    for i in range(5):
+      reason = safely_request('GET', link)
+      if reason and '429' in reason:
+        sleep(5) # 5 seconds per request per URL
+        continue
+      break
+    sleep(1) # 1 second per request per domain
+
+  if reason:
+    dead_links[link] = reason
 
 def main(w):
   # First, scrape all the links from all of the pages
