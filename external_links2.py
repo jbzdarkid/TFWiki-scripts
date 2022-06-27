@@ -159,7 +159,7 @@ __NOFOLLOW__ <!-- We do not want to improve these links' SEO, so don't follow li
       link.endswith('.jpg')
     )
       
-    link.replace('/', '&#47;') if do_escape else link
+    return link.replace('/', '&#47;') if do_escape else link
 
   if len(dangerous_links) > 0:
     output += '= Dangerous links =\n'
