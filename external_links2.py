@@ -65,7 +65,7 @@ def domain_verifier(domains, dead_domains, dangerous_domains):
         'threatTypes': ['MALWARE', 'SOCIAL_ENGINEERING', 'UNWANTED_SOFTWARE', 'POTENTIALLY_HARMFUL_APPLICATION'],
         'platformTypes': ['ANY_PLATFORM'],
         'threatEntryTypes': ['URL'],
-        'threatEntries': [{'url': domain} for domain in domains[i:i+500],
+        'threatEntries': [{'url': domain} for domain in domains[i:i+500]],
       }
     }
 
