@@ -1,3 +1,4 @@
+from os import environ
 from re import compile, VERBOSE
 from time import sleep
 from utils import pagescraper_queue, time_and_date
@@ -56,17 +57,29 @@ def safely_request(verb, url, timeout=20):
     return f'{r.status_code} {r.reason.upper()}'
   return None # no error
 
-def domain_verifier(domain, dead_domains, dangerous_domains):
-  # TODO: https://developers.google.com/safe-browsing/v4/lookup-api
-  if False:
-    dangerous_domains[domain] = 'reason'
+def domain_verifier(domains, dead_domains, dangerous_domains):
+  assert (len(domains) < 500)
+  json = {
+    'client': {'clientId': 'github.com/jbzdarkid/TFWiki-scripts', 'clientVersion': '1.0'},
+    'threatInfo': {
+      'threatTypes': ['MALWARE', 'SOCIAL_ENGINEERING', 'UNWANTED_SOFTWARE', 'POTENTIALLY_HARMFUL_APPLICATION'],
+      'platformTypes': ['ANY_PLATFORM'],
+      'threatEntryTypes': ['URL'],
+      'threatEntries': [{'url': domain} for domain in domains],
+    }
+  }
 
-  # if reason := safely_request('HEAD', domain, timeout=60):
-  #   dead_domains[domain] = reason
+  r = requests.post('https://safebrowsing.googleapis.com/v4/threatMatches:find?key=' + environ['API_KEY'], json=json)
+  print(r.text)
+  j = r.json()
+  if matches := j.get('matches'):
+    for match in matches:
+      domain = match['threat']['url']
+      dangerous_domains[domain] = match['threatType'].replace('_', ' ').title()
 
 def link_verifier(domain_links, dead_links):
   for link in domain_links:
-    for i in range(5):
+    for _ in range(5):
       reason = safely_request('GET', link)
       if reason and '429' in reason:
         sleep(5) # 5 seconds per request per URL
@@ -74,8 +87,8 @@ def link_verifier(domain_links, dead_links):
       break
     sleep(1) # 1 second per request per domain
 
-  if reason:
-    dead_links[link] = reason
+    if reason:
+      dead_links[link] = reason
 
 def main(w):
   # First, scrape all the links from all of the pages
@@ -94,9 +107,10 @@ def main(w):
   # Then, process the overall domains to see if they're dead or dangerous
   dead_domains = {}
   dangerous_domains = {}
-  with pagescraper_queue(domain_verifier, dead_domains, dangerous_domains) as domains:
-    for domain in all_domains:
-      domains.put(domain)
+  domain_verifier(all_domains, dead_domains, dangerous_domains)
+  #with pagescraper_queue(domain_verifier, dead_domains, dangerous_domains) as domains:
+  #  for domain in all_domains:
+  #    domains.put(domain)
 
   if verbose:
     print(f'Found a total of {len(dead_domains)} dead domains and {len(dangerous_domains)} dangerous domains')
@@ -151,7 +165,7 @@ def main(w):
       link.endswith('.png') or
       link.endswith('.jpg')
     )
-      
+
     return link.replace('/', '&#47;') if do_escape else link
 
   if len(dangerous_links) > 0:
@@ -160,7 +174,7 @@ def main(w):
       output += f'== {link_escape(dangerous_link)}: {dangerous_links[dangerous_link]} ==\n'
       for page in sorted(page_links.keys()):
         if dangerous_link in page_links[page]:
-          output += f'* [{page.get_edit_url()} {page.title}]\n'
+          output += f'* [[{page.title}]]\n'
 
   if len(dead_links) > 0:
     output += '= Broken links =\n'
@@ -168,7 +182,7 @@ def main(w):
       output += f'== {link_escape(dead_link)}: {dead_links[dead_link]} ==\n'
       for page in sorted(page_links.keys()):
         if dead_link in page_links[page]:
-          output += f'* [{page.get_edit_url()} {page.title}]\n'
+          output += f'* [[{page.title}]]\n'
 
   return output
 
