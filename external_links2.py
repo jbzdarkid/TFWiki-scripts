@@ -50,6 +50,8 @@ def safely_request(verb, url, timeout=20):
     return '504 GATEWAY TIMEOUT'
   except requests.exceptions.TooManyRedirects:
     return '508 LOOP DETECTED'
+  except requests.exceptions.ChunkedEncodingError:
+    return '418 I'M A TEAPOT'
 
   if r.is_redirect:
     return '508 LOOP DETECTED'
@@ -88,6 +90,8 @@ def link_verifier(domain_links, dead_links):
 
     if reason:
       dead_links[link] = reason
+  if verbose:
+    print(f'Done with domain {domain_links[0]}'
 
 def main(w):
   # First, scrape all the links from all of the pages
@@ -109,9 +113,6 @@ def main(w):
   domains = list(all_domains)
   for i in range(0, len(domains), 500): # We can only request 500 domains at a time.
     domain_verifier(domains[i:i+500], dead_domains, dangerous_domains)
-  #with pagescraper_queue(domain_verifier, dead_domains, dangerous_domains) as domains:
-  #  for domain in all_domains:
-  #    domains.put(domain)
 
   if verbose:
     print(f'Found a total of {len(dead_domains)} dead domains and {len(dangerous_domains)} dangerous domains')
@@ -137,6 +138,9 @@ def main(w):
     # We give each scraper a single domain's links, so that we can avoid getting throttled too hard.
     for domain_links in all_links.values():
       links.put(domain_links)
+
+  if verbose:
+    print('Generating report')
 
   page_count = 0
   for page, links in page_links.items():
