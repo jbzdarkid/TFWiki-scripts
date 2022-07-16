@@ -58,24 +58,23 @@ def safely_request(verb, url, timeout=20):
   return None # no error
 
 def domain_verifier(domains, dead_domains, dangerous_domains):
-  for i in range(0, len(domains), 500): # We can only request 500 domains at a time.
-    json = {
-      'client': {'clientId': 'github.com/jbzdarkid/TFWiki-scripts', 'clientVersion': '1.0'},
-      'threatInfo': {
-        'threatTypes': ['MALWARE', 'SOCIAL_ENGINEERING', 'UNWANTED_SOFTWARE', 'POTENTIALLY_HARMFUL_APPLICATION'],
-        'platformTypes': ['ANY_PLATFORM'],
-        'threatEntryTypes': ['URL'],
-        'threatEntries': [{'url': domain} for domain in domains[i:i+500]],
-      }
+  json = {
+    'client': {'clientId': 'github.com/jbzdarkid/TFWiki-scripts', 'clientVersion': '1.0'},
+    'threatInfo': {
+      'threatTypes': ['MALWARE', 'SOCIAL_ENGINEERING', 'UNWANTED_SOFTWARE', 'POTENTIALLY_HARMFUL_APPLICATION'],
+      'platformTypes': ['ANY_PLATFORM'],
+      'threatEntryTypes': ['URL'],
+      'threatEntries': [{'url': domain} for domain in domains],
     }
+  }
 
-    r = requests.post('https://safebrowsing.googleapis.com/v4/threatMatches:find?key=' + environ['API_KEY'], json=json)
-    print(r.text)
-    j = r.json()
-    if matches := j.get('matches'):
-      for match in matches:
-        domain = match['threat']['url']
-        dangerous_domains[domain] = match['threatType'].replace('_', ' ').title()
+  r = requests.post('https://safebrowsing.googleapis.com/v4/threatMatches:find?key=' + environ['API_KEY'], json=json)
+  print(r.text)
+  j = r.json()
+  if matches := j.get('matches'):
+    for match in matches:
+      domain = match['threat']['url']
+      dangerous_domains[domain] = match['threatType'].replace('_', ' ').title()
 
 def link_verifier(domain_links, dead_links):
   for link in domain_links:
@@ -107,7 +106,9 @@ def main(w):
   # Then, process the overall domains to see if they're dead or dangerous
   dead_domains = {}
   dangerous_domains = {}
-  domain_verifier(all_domains, dead_domains, dangerous_domains)
+  domains = list(all_domains)
+  for i in range(0, len(domains), 500): # We can only request 500 domains at a time.
+    domain_verifier(domains[i:i+500], dead_domains, dangerous_domains)
   #with pagescraper_queue(domain_verifier, dead_domains, dangerous_domains) as domains:
   #  for domain in all_domains:
   #    domains.put(domain)
