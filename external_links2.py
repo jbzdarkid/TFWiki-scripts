@@ -51,7 +51,7 @@ def safely_request(verb, url, timeout=20):
   except requests.exceptions.TooManyRedirects:
     return '508 LOOP DETECTED'
   except requests.exceptions.ChunkedEncodingError:
-    return '418 I'M A TEAPOT'
+    return '418 I\'M A TEAPOT'
 
   if r.is_redirect:
     return '508 LOOP DETECTED'
