@@ -91,7 +91,7 @@ def link_verifier(domain_links, dead_links):
     if reason:
       dead_links[link] = reason
   if verbose:
-    print(f'Done with domain {domain_links[0]}'
+    print(f'Done with domain {domain_links[0]}')
 
 def main(w):
   # First, scrape all the links from all of the pages
