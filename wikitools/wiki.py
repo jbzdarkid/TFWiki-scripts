@@ -103,7 +103,8 @@ class Wiki:
     ):
       namespaces[namespace['*']] = namespace['id']
     namespaces['Main'] = namespaces['']
-    namespaces['TFW'] = namespaces['Team Fortress Wiki']
+    if 'Team Fortress Wiki' in namespaces:
+      namespaces['TFW'] = namespaces['Team Fortress Wiki']
     return namespaces
 
   def get_all_templates(self):
