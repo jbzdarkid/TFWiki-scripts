@@ -148,15 +148,18 @@ class Wiki:
     ):
       yield Page(self, entry['title'], entry)
 
-  def get_all_category_pages(self, category):
-    for entry in self.get_with_continue('query', 'categorymembers',
-      list='categorymembers',
-      cmlimit=500,
-      cmtitle=category,
-      cmprop='title', # Only return page titles, not page IDs
-      cmnamespace=self.namespaces['Main'],
-    ):
-      yield Page(self, entry['title'], entry)
+  def get_all_category_pages(self, category, *, namespaces=None):
+    if namespaces is None:
+      namespaces = ['Main']
+    for namespace in namespaces:
+      for entry in self.get_with_continue('query', 'categorymembers',
+        list='categorymembers',
+        cmlimit=500,
+        cmtitle=category,
+        cmprop='title', # Only return page titles, not page IDs
+        cmnamespace=self.namespaces[namespace],
+      ):
+        yield Page(self, entry['title'], entry)
 
   def get_all_files(self):
     for entry in self.get_with_continue('query', 'pages',
