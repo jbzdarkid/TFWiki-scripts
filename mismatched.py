@@ -4,11 +4,6 @@ from unicodedata import east_asian_width as width
 from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
-# Using the first group from https://www.unicode.org/Public/UNIDATA/extracted/DerivedBidiClass.txt
-# which should include all of our arabic text on the wiki.
-# Matches an arabic character, followed by any number of non-separators (newlines for articles or pipes for templates)
-# A separator (| or \n) followed by any number of LTR characters, followed by an open paren
-
 pairs = [
   [1, '\\(', '\\)'],
   [1, '（', '）'], # These parens are used interchangably with the ASCII ones.
@@ -30,7 +25,7 @@ for tag in html_tags:
   # The tag open match needs to allow for properties, e.g. <div style="foo">
   pairs.append([len(pairs), f'<{tag}(?: [^>/]*)?>', f'</{tag}>'])
 
-pairs = [[pair[0], compile(pair[1], IGNORECASE), compile(pair[1], IGNORECASE)] for pair in pairs]
+pairs = [[pair[0], compile(pair[1], IGNORECASE), compile(pair[2], IGNORECASE)] for pair in pairs]
 
 # Some pages are expected to have mismatched parenthesis (as they are part of the update history, item description, etc)
 exemptions = {
@@ -53,10 +48,10 @@ def pagescraper(page, translation_data):
       continue
 
     for m in left.finditer(text):
-      locations.append([m.start(), +(i+1)])
+      locations.append([m.start(), +i])
 
     for m in right.finditer(text):
-      locations.append([m.start(), -(i+1)])
+      locations.append([m.start(), -i])
 
   locations.sort()
 
