@@ -16,9 +16,12 @@ LANG_TEMPLATE_START = compile("""\
 LANG_TEMPLATE_ARGS = compile("""\
   \|        # Start of a parameter
   (
-    [^|=]*?  # Key name
+    [^|=]*? # Parameter
   )
   =         # Start of a value
+  (
+    [^|]*   # Value
+  )
 """, VERBOSE)
 
 def pagescraper(page, translations, usage_counts):
@@ -65,31 +68,36 @@ def pagescraper(page, translations, usage_counts):
   if verbose:
     print(page.title, 'contains', len(buffer), 'pairs of braces')
 
-  missing_languages = []
-  # Finally, search through for lang templates using regex
-  for match in LANG_TEMPLATE_START.finditer(page_text):
 
-    this_missing_languages = set(LANGS)
-    for match2 in LANG_TEMPLATE_ARGS.finditer(buffer[match.start() + 2]):
+  # Finally, search through for lang templates using regex
+  missing_translations = {[] for lang in LANGS}
+
+  for match in LANG_TEMPLATE_START.finditer(page_text):
+    english_text = 'Line ' + (page_text[:match.start()].count('\n') + 1)
+
+    missing_languages = set(LANGS)
+    for match2 in LANG_TEMPLATE_ARGS.finditer(buffer[match.start() + 2]): # Skip the opening {{
       language = match2.group(1).strip().lower()
-      this_missing_languages.discard(language)
-    missing_languages += this_missing_languages
+      if language == 'en':
+        english_text += ': ' + match2.group(2).strip().split('\n', 1)[0]
+      missing_languages.discard(language)
+
+    for language in missing_languages:
+      missing_translations[language].append(english_text)
 
     if verbose:
       line = page_text[:match.start()].count('\n') + 1
-      print(f'Lang template at line {line} is missing translations for', ', '.join(sorted(this_missing_languages)))
+      print(f'Lang template at line {line} is missing translations for', ', '.join(sorted(missing_languages)))
 
-  if len(missing_languages) > 0:
-    if verbose:
-      actually_missing = sorted(set(missing_languages))
-      print(f'{page.title} is not translated into {len(actually_missing)} languages:', ', '.join(actually_missing))
+  usage_count = page.get_transclusion_count()
+  if usage_count == 0:
+    return # Who cares, if it's not being used.
 
-    usage_count = page.get_transclusion_count()
-    if usage_count > 0:
-      usage_counts[page.title] =  usage_count
-      for lang in LANGS:
-        if lang in missing_languages:
-          translations[lang].append((page, missing_languages.count(lang)))
+  usage_counts[page.title] =  usage_count
+
+  for lang, lang_missing_translations in missing_translations:
+    if len(lang_missing_translations) > 0:
+      translations[lang].append((page, lang_missing_translations))
 
 def main(w):
   translations = {lang: [] for lang in LANGS}
@@ -122,7 +130,9 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
 
     for template, missing in sorted(translations[language], key=lambda elem: (-usage_counts[elem[0].title], elem[0].title)):
       count = usage_counts[template.title]
-      output += f'\n# [{template.get_edit_url()} {template.title}] has [{whatlinkshere(template.title, count)} {plural.uses(count)}] and is missing {plural.translations(missing)}'
+      output += f'\n# [{template.get_edit_url()} {template.title}] has [{whatlinkshere(template.title, count)} {plural.uses(count)}] and is missing {plural.translations(len(missing))}'
+      for english_text in missing:
+        output += f'\n:{english_text}'
     outputs.append([language, output])
   return outputs
 
