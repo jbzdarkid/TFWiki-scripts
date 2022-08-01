@@ -73,17 +73,21 @@ def pagescraper(page, translations, usage_counts):
   missing_translations = {lang:[] for lang in LANGS}
 
   for match in LANG_TEMPLATE_START.finditer(page_text):
-    english_text = 'Line ' + str(page_text[:match.start()].count('\n') + 1)
+    line_no = str(page_text[:match.start()].count('\n') + 1)
+    english_text = ''
 
     missing_languages = set(LANGS)
     for match2 in LANG_TEMPLATE_ARGS.finditer(buffer[match.start() + 2]): # Skip the opening {{
       language = match2.group(1).strip().lower()
       if language == 'en':
-        english_text += ': ' + match2.group(2).strip().split('\n', 1)[0]
+        english_text = match2.group(2).strip().split('\n', 1)[0].strip()
       missing_languages.discard(language)
 
+    location = f"''Line {line_no}''"
+    if english_text:
+      location += f': <nowiki>{english_text}</nowiki>'
     for language in missing_languages:
-      missing_translations[language].append(english_text)
+      missing_translations[language].append(location)
 
     if verbose:
       line = page_text[:match.start()].count('\n') + 1
@@ -97,7 +101,6 @@ def pagescraper(page, translations, usage_counts):
 
   for lang, lang_missing_translations in missing_translations.items():
     if len(lang_missing_translations) > 0:
-      print(lang)
       translations[lang].append((page, lang_missing_translations))
 
 def main(w):
@@ -132,8 +135,8 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
     for template, missing in sorted(translations[language], key=lambda elem: (-usage_counts[elem[0].title], elem[0].title)):
       count = usage_counts[template.title]
       output += f'\n# [{template.get_edit_url()} {template.title}] has [{whatlinkshere(template.title, count)} {plural.uses(count)}] and is missing {plural.translations(len(missing))}'
-      for english_text in missing:
-        output += f'\n:{english_text}'
+      for location in missing:
+        output += f'\n#:{location}'
     outputs.append([language, output])
   return outputs
 
