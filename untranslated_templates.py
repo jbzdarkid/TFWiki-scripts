@@ -73,7 +73,7 @@ def pagescraper(page, translations, usage_counts):
   missing_translations = {lang:[] for lang in LANGS}
 
   for match in LANG_TEMPLATE_START.finditer(page_text):
-    english_text = 'Line ' + (page_text[:match.start()].count('\n') + 1)
+    english_text = 'Line ' + str(page_text[:match.start()].count('\n') + 1)
 
     missing_languages = set(LANGS)
     for match2 in LANG_TEMPLATE_ARGS.finditer(buffer[match.start() + 2]): # Skip the opening {{
@@ -97,6 +97,7 @@ def pagescraper(page, translations, usage_counts):
 
   for lang, lang_missing_translations in missing_translations:
     if len(lang_missing_translations) > 0:
+      print(lang)
       translations[lang].append((page, lang_missing_translations))
 
 def main(w):
