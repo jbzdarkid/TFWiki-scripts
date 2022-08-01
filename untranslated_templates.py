@@ -70,7 +70,7 @@ def pagescraper(page, translations, usage_counts):
 
 
   # Finally, search through for lang templates using regex
-  missing_translations = {[] for lang in LANGS}
+  missing_translations = {lang:[] for lang in LANGS}
 
   for match in LANG_TEMPLATE_START.finditer(page_text):
     english_text = 'Line ' + (page_text[:match.start()].count('\n') + 1)
