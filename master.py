@@ -9,16 +9,21 @@ from wikitools.page import Page
 
 import open_pr_comment
 
-# Write a replacement script for broken external links -> WindBOT filter
-#   forums.tfmaps.net?t=# -> tf2maps.net/threads/#
-# Sort external links by domain (with sub-headers)
-# External links is a mess. It needs a modern eye.
-# update readme (again)
-# Sort missing categories by # pages
+# Reports I want:
 # Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 # images without licensing?
+# Quotations which use quote characters
+# external links is basically a whole new report FWIW
+# Using {{lang}} and {{if lang}} on non-template pages
+
+# Reports I want to improve:
+# update readme (again)
+# Consider running some scripts against the Help: namespace, too
+# (like what? miscategorized, mismatched, uhhh)
+# Sort missing categories by # pages
+# Sort the output from mismatched
+# Sort the output from displaytitles
 # Threading for navboxes.py?
-# Report for using {{lang}} and {{if lang}} on non-template pages
 
 def handle_failed_edits(link_map, report_output, report_name):
   missing_languages = [lang for lang in link_map if link_map[lang] is None]
@@ -98,9 +103,6 @@ if __name__ == '__main__':
       file = row.replace('.py', '').strip()
       if file in all_reports:
         modules_to_run.append(file)
-      elif file in ['wikitools/wiki', 'utils']:
-        modules_to_run = all_reports.keys()
-        break
 
   elif event == 'workflow_dispatch':
     root = 'User:Darkid/Reports'
