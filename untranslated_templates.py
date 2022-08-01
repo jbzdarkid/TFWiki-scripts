@@ -95,7 +95,7 @@ def pagescraper(page, translations, usage_counts):
 
   usage_counts[page.title] =  usage_count
 
-  for lang, lang_missing_translations in missing_translations:
+  for lang, lang_missing_translations in missing_translations.items():
     if len(lang_missing_translations) > 0:
       print(lang)
       translations[lang].append((page, lang_missing_translations))
