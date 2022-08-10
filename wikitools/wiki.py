@@ -210,4 +210,7 @@ class Wiki:
     return True
 
   def email_user(self, user, title, message):
-    return self.post_with_csrf('emailuser', target=user, subject=title, text=message)
+    data = self.post_with_csrf('emailuser', target=user, subject=title, text=message)
+    if 'error' in data:
+      print(data['error'])
+    return data
