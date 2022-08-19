@@ -15,6 +15,7 @@ import open_pr_comment
 # Quotations which use quote characters
 # external links is basically a whole new report FWIW
 # Using {{lang}} and {{if lang}} on non-template pages
+# Direct links to disambig pages
 
 # Reports I want to improve:
 # update readme (again)
