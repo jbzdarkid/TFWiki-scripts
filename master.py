@@ -9,12 +9,23 @@ from wikitools.page import Page
 
 import open_pr_comment
 
-# update readme (again)
-# Sort missing categories by # pages
+# Reports I want:
 # Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 # images without licensing?
+# Quotations which use quote characters
+# external links is basically a whole new report FWIW
+# Using {{lang}} and {{if lang}} on non-template pages
+# Direct links to disambig pages
+
+# Reports I want to improve:
+# update readme (again)
+# Consider running some scripts against the Help: namespace, too
+# (like what? miscategorized, mismatched, uhhh)
+# Sort missing categories by # pages
+# Sort the output from mismatched
+# Sort the output from displaytitles
 # Threading for navboxes.py?
-# Report for using {{lang}} and {{if lang}} on non-template pages
+# Ensure that PRs which add files also touch readme.md
 
 def handle_failed_edits(link_map, report_output, report_name):
   missing_languages = [lang for lang in link_map if link_map[lang] is None]
