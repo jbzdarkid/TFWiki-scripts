@@ -96,28 +96,6 @@ class pagescraper_queue:
         import traceback
         traceback.print_exc()
 
-class pagescraper_queue_single:
-  def __init__(self, thread_func, *args):
-    self.thread_func = thread_func
-    self.thread_func_args = args
-
-  def __enter__(self):
-    self.failures = 0
-    return self
-
-  def put(self, obj):
-    try:
-      self.thread_func(obj, *self.thread_func_args)
-    except KeyboardInterrupt:
-      raise
-    except:
-      self.failures += 1
-      import traceback
-      traceback.print_exc()
-
-  def __exit__(self, exc_type, exc_val, traceback):
-    if self.failures > 5:
-      raise Exception(f'There were {self.failures} exceptions thrown during execution')
 
 if __name__ == '__main__':
   print(f'There are {plural.translations(2)} but only {plural.dogs(1)}')
