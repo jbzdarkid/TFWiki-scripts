@@ -41,7 +41,7 @@ def pagescraper(page, page_links, all_domains, all_links):
   if verbose:
     print(f'Scraped a total of {len(links)} unique links from {page.title}')
 
-def safely_request(verb, url, timeout=20):
+def safely_request(verb, url, *, timeout=20, retry=True):
   try:
     r = requests.request(verb, url, timeout=timeout)
   except requests.exceptions.ConnectionError:
@@ -55,9 +55,12 @@ def safely_request(verb, url, timeout=20):
 
   if r.is_redirect:
     return '508 LOOP DETECTED'
+  elif r.status_code == 429 and retry:
+    sleep(5) # There are more precise options but this should be fine for a single retry.
+    return safely_request(verb, url, timeout=timeout, retry=False)
   elif not r.ok:
     return f'{r.status_code} {r.reason.upper()}'
-  return None # no error
+  return None # no error, we don't actually care about the response text
 
 def domain_verifier(domains, dead_domains, dangerous_domains):
   json = {
@@ -71,27 +74,22 @@ def domain_verifier(domains, dead_domains, dangerous_domains):
   }
 
   r = requests.post('https://safebrowsing.googleapis.com/v4/threatMatches:find?key=' + environ['API_KEY'], json=json)
-  print(r.text)
+  print('safebrowsing response:\n', r.text)
   j = r.json()
   if matches := j.get('matches'):
     for match in matches:
       domain = match['threat']['url']
       dangerous_domains[domain] = match['threatType'].replace('_', ' ').title()
 
-def link_verifier(domain_links, dead_links):
-  for link in domain_links:
-    for _ in range(5):
-      reason = safely_request('GET', link)
-      if reason and '429' in reason:
-        sleep(5) # 5 seconds per request per URL
-        continue
-      break
-    sleep(1) # 1 second per request per domain
+  # TODO: Also search ICANN for unregistered domains:
+  # https://help.opendatasoft.com/apis/ods-search-v1/
 
-    if reason:
+def link_verifier(links, dead_links):
+  for link in links:
+    if reason := safely_request('GET', link):
       dead_links[link] = reason
   if verbose:
-    print(f'Done with domain {list(domain_links)[0]}')
+    print(f'Done with domain {list(links)[0]}')
 
 def main(w):
   # First, scrape all the links from all of the pages
@@ -117,13 +115,14 @@ def main(w):
   if verbose:
     print(f'Found a total of {len(dead_domains)} dead domains and {len(dangerous_domains)} dangerous domains')
 
+  # If we found any domains that are dead, replicate that discovery to any links on the same domain
   dead_links = {}
-  # To avoid threading issues (although python should handle them fine), reprocess domains in the main thread.
   for domain, reason in dead_domains.items():
     for link in all_links[domain]:
       dead_links[link] = reason
     del all_links[domain]
 
+  # If we found any domains that are dangerous, replicate that discovery to any links on the same domain
   dangerous_links = {}
   for domain, reason in dangerous_domains.items():
     for link in all_links[domain]:
@@ -138,6 +137,7 @@ def main(w):
     # We give each scraper a single domain's links, so that we can avoid getting throttled too hard.
     for domain_links in all_links.values():
       links.put(domain_links)
+    print('[main thread] All links put')
 
   if verbose:
     print('Generating report')
