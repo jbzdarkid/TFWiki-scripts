@@ -135,7 +135,10 @@ def main(w):
   # Finally, process the remaining links to check for individual page 404s, redirects, etc.
   with pagescraper_queue(link_verifier, dead_links) as links:
     # We give each scraper a single domain's links, so that we can avoid getting throttled too hard.
-    for domain_links in all_links.values():
+    # Start with the domains that have the most links
+    domains = [(len(domain_links), domain_links) for domain_links in all_links.values()]
+    domains.sort(reverse=True)
+    for _, domain_links in domains:
       links.put(domain_links)
     print('[main thread] All links put')
 
