@@ -138,7 +138,7 @@ def main(w):
     # Start with the domains that have the most links
     domains = [(len(domain_links), domain_links) for domain_links in all_links.values()]
     domains.sort(reverse=True)
-    for _, domain_links in domains:
+    for _, domain_links in domains[:1000]: # Limit to 1000 domains because otherwise we take too long and time out
       links.put(domain_links)
     print('[main thread] All links put')
 
