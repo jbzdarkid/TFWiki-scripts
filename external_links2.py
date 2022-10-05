@@ -136,8 +136,10 @@ def main(w):
   # Start with the domains that have the most links
   domains = [(len(domain_links), domain_links) for domain_links in all_links.values()]
   domains.sort(reverse=True)
-  for count, dom in domains:
-    print(f'{dom.ljust(30)} {count}')
+  for count, domain_links in domains:
+    parts = domain_links[0].split('/')
+    guess = '/'.join(domain_links[:3])
+    print(f'{guess} {count}')
   exit()
 
   # Finally, process the remaining links to check for individual page 404s, redirects, etc.
