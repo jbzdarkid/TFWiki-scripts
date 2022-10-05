@@ -24,16 +24,17 @@ def whatlinkshere(title, count, **kwargs):
 
 
 class pagescraper_queue:
-  def __init__(self, thread_func, *args):
+  def __init__(self, thread_func, *args, num_threads=50):
     self.thread_func = thread_func
     self.thread_func_args = args
+    self.num_threads = num_threads
 
   def __enter__(self):
     self.q = Queue()
     self.done = Event()
     self.threads = []
     self.failures = 0
-    for _ in range(50): # Number of threads
+    for _ in range(self.num_threads):
       thread = Thread(target=self.meta_thread_func)
       self.threads.append(thread)
       thread.start()
