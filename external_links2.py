@@ -81,8 +81,8 @@ def domain_verifier(domains, dead_domains, dangerous_domains):
       domain = match['threat']['url']
       dangerous_domains[domain] = match['threatType'].replace('_', ' ').title()
 
-  # TODO: Also search ICANN for unregistered domains:
-  # https://help.opendatasoft.com/apis/ods-search-v1/
+  # TODO: WHOIS lookups for domains.
+  # https://www.iana.org/domains/root/db
 
 def link_verifier(links, dead_links):
   for link in links:
@@ -132,13 +132,17 @@ def main(w):
   if verbose:
     print('Starting linkscrapers')
 
+  # We give each scraper a single domain's links, so that we can avoid getting throttled too hard.
+  # Start with the domains that have the most links
+  domains = [(len(domain_links), domain_links) for domain_links in all_links.values()]
+  domains.sort(reverse=True)
+  for count, dom in domains:
+    print(f'{dom.ljust(30)} {count}')
+  exit()
+
   # Finally, process the remaining links to check for individual page 404s, redirects, etc.
   with pagescraper_queue(link_verifier, dead_links) as links:
-    # We give each scraper a single domain's links, so that we can avoid getting throttled too hard.
-    # Start with the domains that have the most links
-    domains = [(len(domain_links), domain_links) for domain_links in all_links.values()]
-    domains.sort(reverse=True)
-    for _, domain_links in domains[:800]: # Limited domains because otherwise we take too long and time out
+    for _, domain_links in domains[:100]: # Limited domains because otherwise we take too long and time out
       links.put(domain_links)
     print('[main thread] All links put')
 
