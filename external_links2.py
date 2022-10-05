@@ -137,7 +137,7 @@ def main(w):
   domains = [(len(domain_links), domain_links) for domain_links in all_links.values()]
   domains.sort(reverse=True)
   for count, domain_links in domains:
-    parts = domain_links[0].split('/')
+    parts = list(domain_links)[0].split('/')
     guess = '/'.join(domain_links[:3])
     print(f'{guess} {count}')
   exit()
