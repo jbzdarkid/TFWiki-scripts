@@ -7,7 +7,7 @@ import requests
 
 verbose = True
 
-# Within the HTML source code, all links should be href="()". Internal links start with /wiki/foo, so this find all external links.
+# Within the HTML source code, all links should be href="()". Internal links start with /wiki/foo, so this will find all external links.
 LINK_REGEX = compile('''
   href="(       # Within the HTML source code, all links start with href=
     (           # Start inner capture group (for just the domain name)
@@ -18,7 +18,7 @@ LINK_REGEX = compile('''
   )"
 ''', VERBOSE)
 
-# Domains which cannot be malware or phishing or otherwise inappropriate content. Hopefully.
+# Domains which cannot be malware or phishing or broken links. Hopefully.
 safe_domains = [
   'http://en.wikipedia.org',
   'http://steamcommunity.com',
@@ -52,7 +52,7 @@ def pagescraper(page, page_links, all_domains, all_links):
 
 def safely_request(verb, url, *, timeout=20, retry=True):
   try:
-    r = requests.request(verb, url, timeout=timeout)
+    r = requests.request(verb, url, timeout=timeout, headers={'User-Agent': 'TFWiki-scripts/0.1 (https://wiki.tf/u/DarkBOT; https://github.com/jbzdarkid/TFWiki-scripts/issues)'})
   except requests.exceptions.ConnectionError:
     return '404 NOT FOUND'
   except requests.exceptions.Timeout:
