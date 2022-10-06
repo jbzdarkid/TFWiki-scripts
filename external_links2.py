@@ -18,6 +18,18 @@ LINK_REGEX = compile('''
   )"
 ''', VERBOSE)
 
+# Domains which cannot be malware or phishing or otherwise inappropriate content. Hopefully.
+safe_domains = [
+  'http://en.wikipedia.org',
+  'http://steamcommunity.com',
+  'http://store.steampowered.com',
+  'http://www.teamfortress.com',
+  'https://en.wikipedia.org',
+  'https://steamcommunity.com',
+  'https://wiki.teamfortress.com',
+  'https://www.teamfortress.com',
+]
+
 def pagescraper(page, page_links, all_domains, all_links):
   if verbose:
     print(f'Processing {page.title}')
@@ -27,8 +39,8 @@ def pagescraper(page, page_links, all_domains, all_links):
   links = set()
   for m in LINK_REGEX.finditer(text):
     domain = m.group(2)
-    if domain == 'https://wiki.teamfortress.com':
-      continue # We don't need to worry about direct links into the wiki (which often come from {{Navbar float}})
+    if domain in safe_domains:
+      continue
     link = m.group(1)
 
     links.add(link)
@@ -136,15 +148,10 @@ def main(w):
   # Start with the domains that have the most links
   domains = [(len(domain_links), domain_links) for domain_links in all_links.values()]
   domains.sort(reverse=True)
-  for count, domain_links in domains:
-    parts = list(domain_links)[0].split('/')
-    guess = '/'.join(parts[:3])
-    print(f'{guess} {count}')
-  exit()
 
   # Finally, process the remaining links to check for individual page 404s, redirects, etc.
   with pagescraper_queue(link_verifier, dead_links) as links:
-    for _, domain_links in domains[:100]: # Limited domains because otherwise we take too long and time out
+    for _, domain_links in domains:
       links.put(domain_links)
     print('[main thread] All links put')
 
