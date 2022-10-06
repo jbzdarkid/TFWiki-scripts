@@ -186,7 +186,7 @@ def main(w):
       if len(dead_domain_links) > 0:
         output += f'== {domain} ==\n'
         for link in sorted(dead_domain_links):
-          output += f'== {link_escape(link)}: {dead_links[dead_link]} ==\n'
+          output += f'== {link_escape(link)}: {dead_links[link]} ==\n'
           for page in sorted(page_links.keys()):
             if link in page_links[page]:
               output += f'* [[{page.title}]]\n'
