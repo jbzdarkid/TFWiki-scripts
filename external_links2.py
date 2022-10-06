@@ -148,7 +148,7 @@ def main(w):
       links.put(all_links[domain])
 
   if verbose:
-    print(f'Finished linkscrapers, found {link_count} total bad pages')
+    print(f'Finished linkscrapers, found {len(dead_links)} total dead pages')
 
   output = """\
 {{{{DISPLAYTITLE: {bad_links} broken or dangerous external links}}}}
