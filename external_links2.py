@@ -31,9 +31,6 @@ safe_domains = [
 ]
 
 def pagescraper(page, page_links, all_domains, all_links):
-  if verbose:
-    print(f'Processing {page.title}')
-
   text = page.get_raw_html()
 
   links = set()
@@ -86,7 +83,6 @@ def domain_verifier(domains, dead_domains, dangerous_domains):
   }
 
   r = requests.post('https://safebrowsing.googleapis.com/v4/threatMatches:find?key=' + environ['API_KEY'], json=json)
-  print('safebrowsing response:\n', r.text)
   j = r.json()
   if matches := j.get('matches'):
     for match in matches:
@@ -100,8 +96,6 @@ def link_verifier(links, dead_links):
   for link in links:
     if reason := safely_request('GET', link):
       dead_links[link] = reason
-  if verbose:
-    print(f'Done with domain {list(links)[0]}: {len(links)}')
 
 def main(w):
   # First, scrape all the links from all of the pages
@@ -112,10 +106,9 @@ def main(w):
     for page in w.get_all_pages():
       pages.put(page)
 
-  # For reporting purposes
-  link_count = sum(len(links) for links in all_links)
+  total_links = sum(len(links) for links in all_links)
   if verbose:
-    print(f'Found a total of {link_count} links')
+    print(f'Found a total of {total_links} total links')
 
   # Then, process the overall domains to see if they're dead or dangerous
   dead_domains = {}
@@ -146,40 +139,28 @@ def main(w):
 
   # We give each scraper a single domain's links, so that we can avoid getting throttled too hard.
   # Start with the domains that have the most links
-  domains = [(len(domain_links), domain_links) for domain_links in all_links.values()]
-  domains.sort(reverse=True)
+  sorted_domains = list(all_links.keys())
+  sorted_domains.sort(key=lambda domain: len(all_links[domain]), reverse=True)
 
   # Finally, process the remaining links to check for individual page 404s, redirects, etc.
   with pagescraper_queue(link_verifier, dead_links) as links:
-    for _, domain_links in domains:
-      links.put(domain_links)
-    print('[main thread] All links put')
+    for domain in sorted_domains:
+      links.put(all_links[domain])
 
   if verbose:
-    print('Generating report')
-
-  page_count = 0
-  for page, links in page_links.items():
-    if any((link in dead_links) for link in links):
-      page_count += 1
-    elif any((link in dangerous_links) for link in links):
-      page_count += 1
-
-  if verbose:
-    print(f'Finished linkscrapers, found {page_count} total bad pages')
+    print(f'Finished linkscrapers, found {link_count} total bad pages')
 
   output = """\
-{{{{DISPLAYTITLE: {page_count} pages with broken or dangerous external links}}}}
-<onlyinclude>{page_count}</onlyinclude> pages have a broken or dangerous-looking external links. Processed {link_count} over {domain_count} domains. Data as of {date}.
+{{{{DISPLAYTITLE: {bad_links} broken or dangerous external links}}}}
+<onlyinclude>{bad_links}</onlyinclude> out of {total_links} external links go to broken or dangerous-looking webpages. Data as of {date}.
 
 {{{{TOC limit|2}}}}
 """.format(
-    page_count=page_count,
-    link_count=link_count,
-    domain_count=len(all_domains),
+    bad_links=len(dead_links) + len(dangerous_links),
+    total_links=total_links,
     date=time_and_date())
 
-  # Working around the page blacklist, mebe
+  # Avoid rendering images inline
   def link_escape(link):
     do_escape = (
       'tinyurl' in link or
@@ -199,11 +180,16 @@ def main(w):
 
   if len(dead_links) > 0:
     output += '= Broken links =\n'
-    for dead_link in sorted(dead_links.keys(), key=lambda link:dead_links[link]):
-      output += f'== {link_escape(dead_link)}: {dead_links[dead_link]} ==\n'
-      for page in sorted(page_links.keys()):
-        if dead_link in page_links[page]:
-          output += f'* [[{page.title}]]\n'
+
+    for domain in sorted_domains:
+      dead_domain_links = [link for link in all_links[domain] if link in dead_links]
+      if len(dead_domain_links) > 0:
+        output += f'== {domain} ==\n'
+        for link in sorted(dead_domain_links):
+          output += f'== {link_escape(link)}: {dead_links[dead_link]} ==\n'
+          for page in sorted(page_links.keys()):
+            if link in page_links[page]:
+              output += f'* [[{page.title}]]\n'
 
   return output
 

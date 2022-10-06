@@ -14,7 +14,6 @@ This version of the scripts has been updated to python3, which unfortunately bro
 - `incorrectly_categorized.py`: Searches all language pages for links to other languages (e.g. /es linking to /pt).
 - `navboxes.py`: Looks for navboxes (display-only templates which crosslink many articles) that are not present on all of their article pages.
 - `wanted_templates.py`: Searches for template transclusions which don't exist, usually indicative of a typo.
-modules_to_run += [ 'navboxes', 'overtranslated', 'missing_categories']
 
 ## Monthly reports
 - `displaytitles.py`: Searches for pages with duplicate displaytitles, which show a gross-looking error message.
