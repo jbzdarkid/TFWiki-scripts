@@ -155,7 +155,7 @@ def main(w):
 
   output = """\
 {{{{DISPLAYTITLE: {bad_links} broken or dangerous external links}}}}
-<onlyinclude>{bad_links}</onlyinclude> out of {total_links} external links go to broken or dangerous-looking webpages across {dead_domains} domains. Data as of {date}.
+<onlyinclude>{bad_links}</onlyinclude> out of {total_links} external links go to broken or dangerous-looking webpages across {bad_domains} domains. Data as of {date}.
 
 {{{{TOC limit|3}}}}
 """.format(
