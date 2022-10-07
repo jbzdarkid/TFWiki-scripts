@@ -28,9 +28,7 @@ import open_pr_comment
 # Ensure that PRs which add files also touch readme.md
 
 def handle_failed_edits(link_map, report_output, report_name):
-  print(link_map)
   missing_languages = [lang for lang in link_map if link_map[lang] is None]
-  print(missing_languages)
   if len(missing_languages) == 0:
     return
   report_name = report_name.lower().replace(' ', '_')

@@ -67,7 +67,7 @@ def safely_request(verb, url, *, timeout=20, retry=True):
   elif r.status_code == 429 and retry:
     sleep(5) # There are more precise options but this should be fine for a single retry.
     return safely_request(verb, url, timeout=timeout, retry=False)
-  elif r.status_code == 503 and '://amazon.com' in url:
+  elif r.status_code == 503 and 'amazon.com' in url:
     # Amazon has some pretty heavy rate-limiting (for anti-compete reasons) when we scrape their pages.
     return None # So don't report these as failures.
   elif not r.ok:
