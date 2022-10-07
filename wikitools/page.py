@@ -119,14 +119,14 @@ class Page:
       print(data['edit'])
       return None
     elif 'new' in data['edit']:
-      print(f'Successfully created {self.title}.')
-      return 'https://wiki.tf/d/' + str(data['edit']['newrevid'])
+      print(f'Successfully created {self.title}')
+      return self.wiki.wiki_url + '?diff=' + str(data['edit']['newrevid'])
     elif 'nochange' in data['edit']:
       print(f'No change to {self.title}')
       return None
     else:
       print(f'Successfully edited {self.title}')
-      return 'https://wiki.tf/d/' + str(data['edit']['newrevid'])
+      return self.wiki.wiki_url + '?diff=' + str(data['edit']['newrevid'])
 
   def upload(self, fileobj, comment=''):
     if fileobj.mode != 'rb':
