@@ -5,7 +5,7 @@ from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 import requests
 
-verbose = True
+verbose = False
 
 # Within the HTML source code, all links should be href="()". Internal links start with /wiki/foo, so this will find all external links.
 LINK_REGEX = compile('''
@@ -67,6 +67,9 @@ def safely_request(verb, url, *, timeout=20, retry=True):
   elif r.status_code == 429 and retry:
     sleep(5) # There are more precise options but this should be fine for a single retry.
     return safely_request(verb, url, timeout=timeout, retry=False)
+  elif r.status_code == 503 and '://amazon.com' in url:
+    # Amazon has some pretty heavy rate-limiting (for anti-compete reasons) when we scrape their pages.
+    return None # So don't report these as failures.
   elif not r.ok:
     return f'{r.status_code} {r.reason.upper()}'
   return None # no error, we don't actually care about the response text
@@ -186,7 +189,7 @@ def main(w):
       if len(dead_domain_links) > 0:
         output += f'== {domain} ==\n'
         for link in sorted(dead_domain_links):
-          output += f'== {link_escape(link)}: {dead_links[link]} ==\n'
+          output += f'=== {link_escape(link)}: {dead_links[link]} ===\n'
           for page in sorted(page_links.keys()):
             if link in page_links[page]:
               output += f'* [[{page.title}]]\n'

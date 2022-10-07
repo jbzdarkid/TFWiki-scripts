@@ -28,11 +28,14 @@ import open_pr_comment
 # Ensure that PRs which add files also touch readme.md
 
 def handle_failed_edits(link_map, report_output, report_name):
+  print(link_map)
   missing_languages = [lang for lang in link_map if link_map[lang] is None]
+  print(missing_languages)
   if len(missing_languages) == 0:
     return
   report_name = report_name.lower().replace(' ', '_')
   if isinstance(report_output, str):
+    link_map['en'] = '## "Upload failed"' # Hover text in markdown
     with open(f'wiki_{report_name}.txt', 'w', encoding='utf-8') as f:
       f.write(report_output)
   else:
