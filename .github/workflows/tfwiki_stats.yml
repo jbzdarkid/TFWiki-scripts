@@ -28,6 +28,7 @@ jobs:
         WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
         PULL_REQUEST_ID: ${{ github.event.pull_request.number }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        API_KEY: ${{ secrets.API_KEY }}
     - uses: actions/upload-artifact@v2
       with:
         name: Failed uploads
