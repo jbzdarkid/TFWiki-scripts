@@ -155,13 +155,12 @@ def main(w):
 
   output = """\
 {{{{DISPLAYTITLE: {bad_links} broken or dangerous external links}}}}
-<onlyinclude>{bad_links}</onlyinclude> out of {total_links} external links go to broken or dangerous-looking webpages across {bad_domains} domains. Data as of {date}.
+<onlyinclude>{bad_links}</onlyinclude> out of {total_links} external links go to broken or dangerous-looking webpages. Data as of {date}.
 
 {{{{TOC limit|3}}}}
 """.format(
     bad_links=len(dead_links) + len(dangerous_links),
     total_links=total_links,
-    bad_domains=len(dead_domains) + len(dangerous_domains),
     date=time_and_date())
 
   # Avoid rendering images inline
@@ -169,7 +168,8 @@ def main(w):
     if (
       'tinyurl' in link or
       link.endswith('.png') or
-      link.endswith('.jpg')
+      link.endswith('.jpg') or
+      link.endswith('.gif')
     ):
       return link.replace('/', '&#47;')
     return link
@@ -196,7 +196,11 @@ def main(w):
     for domain in sorted_domains:
       dead_domain_links = [link for link in all_links[domain] if link in dead_links]
       if len(dead_domain_links) > 0:
-        output += f'== {domain} ({len(dead_domain_links)}) ==\n'
+        total_page_links = 0
+        for link in dead_domain_links:
+          total_page_links += sum(1 for links in page_links.values() if link in links)
+        output += f'== {domain} ({len(total_page_links)} links) ==\n'
+
         for link in sorted(dead_domain_links):
           output += f'=== {link_escape(link)}: {dead_links[link]} ===\n'
           for page in sorted(page_links.keys()):

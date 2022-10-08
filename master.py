@@ -13,9 +13,9 @@ import open_pr_comment
 # Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 # images without licensing?
 # Quotations which use quote characters
-# external links is basically a whole new report FWIW
 # Using {{lang}} and {{if lang}} on non-template pages
 # Direct links to disambig pages
+# Just... a summary of every single external link. Maybe just 'count per domain' and then list the top 10 pages? I'm finding a LOT of sus links, and it's only the ones that are *broken*.
 
 # Reports I want to improve:
 # update readme (again)
