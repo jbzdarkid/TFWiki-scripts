@@ -28,18 +28,13 @@ import open_pr_comment
 # Ensure that PRs which add files also touch readme.md
 
 def handle_failed_edits(link_map, report_output, report_name):
-  missing_languages = [lang for lang in link_map if link_map[lang] is None]
-  if len(missing_languages) == 0:
-    return
   report_name = report_name.lower().replace(' ', '_')
-  if isinstance(report_output, str):
-    link_map['en'] = '## "Upload failed"' # Hover text in markdown
+  if isinstance(report_output, str) and link_map['en'] is None:
     with open(f'wiki_{report_name}.txt', 'w', encoding='utf-8') as f:
       f.write(report_output)
   else:
     for lang, output in report_output:
-      if lang in missing_languages:
-        link_map[lang] = '## "Upload failed"' # Hover text in markdown
+      if link_map[lang] is None:
         with open(f'wiki_{report_name}_{lang}.txt', 'w', encoding='utf-8') as f:
           f.write(output)
 
@@ -144,7 +139,11 @@ if __name__ == '__main__':
       comment += f'- [ ] {report_name} succeeded in {duration}:'
       languages = sorted(link_map.keys(), key=lambda lang: (lang != 'en', lang)) # Sort languages, keeping english first
       for language in languages:
-        comment += f' [{language}]({link_map[language]})'
+        link = link_map.get(language, None)
+        if link:
+          comment += f' [{language}]({link_map[language]})'
+        else:
+          comment += f' ~~[{language}](## "Upload failed")~~'
       comment += '\n'
 
   if event == 'pull_request':
