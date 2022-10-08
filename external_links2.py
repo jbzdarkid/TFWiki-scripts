@@ -199,7 +199,7 @@ def main(w):
         total_page_links = 0
         for link in dead_domain_links:
           total_page_links += sum(1 for links in page_links.values() if link in links)
-        output += f'== {domain} ({len(total_page_links)} links) ==\n'
+        output += f'== {domain} ({total_page_links} links) ==\n'
 
         for link in sorted(dead_domain_links):
           output += f'=== {link_escape(link)}: {dead_links[link]} ===\n'
