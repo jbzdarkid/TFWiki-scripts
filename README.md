@@ -2,7 +2,7 @@
 
 A collection of scripts used to generate reports for the [TF2 Wiki](https://wiki.teamfortress.com/wiki/Team_Fortress_Wiki:Reports)
 
-This version of the scripts has been updated to python3, which unfortunately broke wikitools.  A stripped-down, python3-compatible version is checked in to this repo.
+This version of the scripts has been updated to python3, which unfortunately broke wikitools. I have thus written my own version (in the wikitools/ folder).
 
 ## Daily reports
 - `all_articles.py`: Generates the complete list of translated articles for each language, which is used by the translator's noticeboard
@@ -16,6 +16,7 @@ This version of the scripts has been updated to python3, which unfortunately bro
 - `wanted_templates.py`: Searches for template transclusions which don't exist, usually indicative of a typo.
 
 ## Monthly reports
+- `bad_fragments`: Searches for pages which link to other pages but to incorrect section headers.
 - `displaytitles.py`: Searches for pages with duplicate displaytitles, which show a gross-looking error message.
 - `duplicate_files.py`: Finds all identical files, and sorts them by usage count.
 - `edit_stats.py`: Provides some statistics about user editing habits on the wiki, along with a list of the top 100 editors by edit count
