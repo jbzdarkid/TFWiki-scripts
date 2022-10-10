@@ -7,11 +7,11 @@ verbose = False
 # Within the HTML source code, all links should be href="()". Internal links start with /wiki/foo, so this will find all external links.
 LINK_REGEX = compile('''
   href="       # Within the HTML source code, all links are href="..."
-    ([^:]*://)  # 1: Scheme
-    ([^/?#"]+)  # 2: Domain
-    (/[^?#"]*)  # 3: Path
-    (\?[^#"]*)? # 4: Query (optional)
-    (#[^"]*)?   # 5: Fragment (optional)
+  ([^:]*://)   # 1: Scheme
+  ([^/?#"]+)   # 2: Domain
+  (/[^?#"]*)   # 3: Path
+  (\\?[^#"]*)? # 4: Query (optional)
+  (\\#[^"]*)?    # 5: Fragment (optional)
   "
 ''', VERBOSE)
 

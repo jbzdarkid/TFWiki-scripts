@@ -29,7 +29,7 @@ def pagescraper(page, all_links):
       all_links[domain][link].append(page) 
 
 def main(w):
-  page_links = {} # Map of page: {links}
+  all_links = {}
   with pagescraper_queue(pagescraper, all_links) as pages:
     for page in w.get_all_pages():
       pages.put(page)
