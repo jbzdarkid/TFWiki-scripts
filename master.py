@@ -10,7 +10,6 @@ from wikitools.page import Page
 import open_pr_comment
 
 # Reports I want:
-# Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 # images without licensing?
 # Quotations which use quote characters
 # Using {{lang}} and {{if lang}} on non-template pages
@@ -72,6 +71,7 @@ all_reports = {
   'undocumented_templates': 'Undocumented templates',
   'edit_stats': 'Users by edit count',
   'external_links2': 'External links',
+  'bad_fragments': 'Redirects to nonexistant sections',
   'mismatched': 'Mismatched parenthesis',
   'displaytitles': 'Duplicate displaytitles',
 }
