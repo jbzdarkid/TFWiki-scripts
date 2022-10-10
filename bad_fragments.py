@@ -82,7 +82,7 @@ Found <onlyinclude>{total_bad_links}</onlyinclude> links from {bad_pages} which 
   for page in sorted(bad_links.keys()):
     output += f'== {page} ==\n'
     for target_page, target_section in sorted(bad_links[page]):
-      output += f'* {page} links to {target_page}#{target_section}, which doesn't exist.\n'
+      output += f'* {page} links to {target_page}#{target_section}, which doesn\'t exist.\n'
 
   return output
 
