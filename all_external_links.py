@@ -19,7 +19,7 @@ def pagescraper(page, all_links):
   text = page.get_raw_html()
 
   for m in LINK_REGEX.finditer(text):
-    domain = m[2]
+    domain = '.'.join(m[2].split('.')[-2:])
     link = m[1]
     if domain not in all_links:
       if domain not in all_links:

@@ -6,30 +6,13 @@ verbose = False
 
 # Within the HTML source code, all links should be href="()". Internal links start with /wiki/foo, so this will find all external links.
 LINK_REGEX = compile('''
-  href="       # Within the HTML source code, all links are href="..."
-  ([^:]*://)   # 1: Scheme
-  ([^/?#"]+)   # 2: Domain
-  (/[^?#"]*)   # 3: Path
-  (\\?[^#"]*)? # 4: Query (optional)
-  (\\#[^"]*)?    # 5: Fragment (optional)
+  href="/wiki/ # Within the HTML source code, all wiki links are href="/wiki/..."
+  ([^?#"]*)    # 1: Title
+  (\\#[^"]*)   # 2: Fragment
   "
 ''', VERBOSE)
 
 ANCHOR_REGEX = compile('<span class="mw-headline" id="([^"]*)">')
-
-def get_wiki_link(m):
-  domain = m[1]
-  if domain == 'wiki.teamfortress.com':
-    fragment = m[5]
-    if fragment:
-      query = m[4]
-      for part in query[1:].split('&'):
-        key, value = part.split('=', 1)
-        if key == 'title':
-          return (value, fragment)
-
-  return None, None
-
 
 def pagescraper(page, links, sections):
   text = page.get_raw_html()
@@ -38,9 +21,7 @@ def pagescraper(page, links, sections):
   page_sections = []
 
   for m in LINK_REGEX.finditer(text):
-    link_title, fragment = get_wiki_link(m)
-    if link_title:
-      page_links.append((link_title, fragment))
+    page_links.append((m[1], m[2]))
 
   for m in ANCHOR_REGEX.finditer(text):
     anchor = m[1]
