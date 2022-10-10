@@ -26,7 +26,7 @@ def get_wiki_link(m):
       for part in query[1:].split('&'):
         key, value = part.split('=', 1)
         if key == 'title':
-          return (key, fragment)
+          return (value, fragment)
 
   return None, None
 

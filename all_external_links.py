@@ -41,7 +41,7 @@ def main(w):
     for link in sorted(all_links[domain].keys()):
       output += f'=== {link} ===\n'
       for page in sorted(all_links[domain][link])[:10]:
-        output += f'* [[page]]\n'
+        output += f'* [[{page}]]\n'
 
   return output
 
@@ -51,4 +51,3 @@ if __name__ == '__main__':
   with open('wiki_all_external_links.txt', 'w') as f:
     f.write(main(w))
   print(f'Article written to {f.name}')
-
