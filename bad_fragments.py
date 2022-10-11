@@ -44,7 +44,7 @@ def main(w):
   for page, page_links in links.items():
     bad_page_links = []
     for target_page, target_section in page_links:
-      if target_section not in sections[target_page]:
+      if target_page in sections and target_section not in sections[target_page]:
         bad_page_links.append((target_page, target_section))
         total_bad_links += 1
     if len(bad_page_links) > 0:
