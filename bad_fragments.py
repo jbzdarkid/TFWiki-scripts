@@ -8,7 +8,7 @@ verbose = False
 LINK_REGEX = compile('''
   href="/wiki/ # Within the HTML source code, all wiki links are href="/wiki/..."
   ([^?#"]*)    # 1: Title
-  (\\#[^"]*)   # 2: Fragment
+  \\#([^"]*)   # 2: Fragment
   "
 ''', VERBOSE)
 
@@ -52,7 +52,7 @@ def main(w):
 
   output = """\
 {{{{DISPLAYTITLE: {total_bad_links} links to nonexistant section headings}}}}
-Found <onlyinclude>{total_bad_links}</onlyinclude> links from {bad_pages} which do not link to valid . Data as of {date}.
+Found <onlyinclude>{total_bad_links}</onlyinclude> links from {bad_pages} which do not link to valid subsections. Data as of {date}.
 
 {{{{TOC limit|3}}}}
 """.format(
@@ -61,9 +61,9 @@ Found <onlyinclude>{total_bad_links}</onlyinclude> links from {bad_pages} which 
     date=time_and_date())
 
   for page in sorted(bad_links.keys()):
-    output += f'== {page} ==\n'
+    output += f'== [[{page}]] ==\n'
     for target_page, target_section in sorted(bad_links[page]):
-      output += f'* {page} links to {target_page}#{target_section}, which doesn\'t exist.\n'
+      output += f'* [[{target_page}#{target_section}]]\n'
 
   return output
 

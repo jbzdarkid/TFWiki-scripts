@@ -14,7 +14,6 @@ import open_pr_comment
 # Quotations which use quote characters
 # Using {{lang}} and {{if lang}} on non-template pages
 # Direct links to disambig pages
-# Just... a summary of every single external link. Maybe just 'count per domain' and then list the top 10 pages? I'm finding a LOT of sus links, and it's only the ones that are *broken*.
 
 # Reports I want to improve:
 # update readme (again)
@@ -28,6 +27,7 @@ import open_pr_comment
 
 def handle_failed_edits(link_map, report_output, report_name):
   report_name = report_name.lower().replace(' ', '_')
+  print(report_name, type(report_output))
   if isinstance(report_output, str) and link_map['en'] is None:
     with open(f'wiki_{report_name}.txt', 'w', encoding='utf-8') as f:
       f.write(report_output)

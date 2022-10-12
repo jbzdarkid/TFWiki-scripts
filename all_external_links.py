@@ -36,11 +36,30 @@ def main(w):
 
   output = '{{DISPLAYTITLE: TEST ONLY REPORT}}\n{{TOC limit|2}}\n'
 
-  for domain in sorted(all_links.keys()):
+  # Avoid rendering images inline
+  def link_escape(link):
+    if (
+      'tinyurl' in link or
+      link.endswith('.png') or
+      link.endswith('.jpg') or
+      link.endswith('.gif')
+    ):
+      return link.replace('/', '&#47;')
+    return link
+
+  # Sort domains by the total number of links on all pages.
+  domains = list(all_links.keys())
+  domains.sort(key=lambda domain: sum(len(links) for links in all_links[domain].values()))
+
+  for domain in domains:
     output += f'== {domain} ==\n'
     for link in sorted(all_links[domain].keys()):
-      output += f'=== {link} ===\n'
-      for page in sorted(all_links[domain][link])[:10]:
+      output += f'=== {link_escape(link)} ===\n'
+
+      # Deduplicate, sort, and truncate the list of pages
+      pages = list(set(all_links[domain][link]))
+      pages.sort()
+      for page in pages[:10]:
         output += f'* [[{page}]]\n'
 
   return output
