@@ -41,18 +41,23 @@ def publish_report(w, module, report_name, root, summary):
   link_map = {}
   try:
     report_output = importlib.import_module(module).main(w)
+  except Exception:
+    print(f'Failed to run report "{report_name}"')
+    print_exc(file=stdout)
+    return # No output was generated, no reason to try and upload anything.
 
+  try:
     if isinstance(report_output, list):
       for lang, output in report_output:
         link_map[lang] = Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary)
     else:
       link_map['en'] = Page(w, f'{root}/{report_name}').edit(report_output, bot=True, summary=summary)
-
-    handle_failed_edits(link_map, report_output, report_name)
-
   except Exception:
-    print(f'Failed to update {report_name}')
+    print(f'Failed to upload report "{report_name}"')
     print_exc(file=stdout)
+    # Here we can continue so that the output is still saved.
+
+  handle_failed_edits(link_map, report_output, report_name)
 
   return link_map
 

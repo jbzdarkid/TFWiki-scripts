@@ -1,3 +1,4 @@
+from json import loads
 from requests.exceptions import RequestException
 from time import sleep
 import functools
@@ -105,8 +106,11 @@ class Page:
         print(f'Attempt {i} failed:\n{e}')
 
         # We can actually self-correct for blacklisted URLs by replacing their periods with commas.
-        if 'spamblacklist' in e:
-          for site in e['spamblacklist'].split('|'):
+        import traceback
+        traceback.print_exc()
+        message = loads(e.args[0])
+        if 'spamblacklist' in message:
+          for site in message['spamblacklist'].split('|'):
             text = text.replace(site, site.replace('.', ','))
 
         if i < 5:

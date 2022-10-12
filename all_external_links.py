@@ -26,7 +26,7 @@ def pagescraper(page, all_links):
         all_links[domain] = {}
       if link not in all_links[domain]:
         all_links[domain][link] = []
-      all_links[domain][link].append(page) 
+      all_links[domain][link].append(page)
 
 def main(w):
   all_links = {}
