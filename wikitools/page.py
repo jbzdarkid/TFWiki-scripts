@@ -104,15 +104,6 @@ class Page:
         break
       except Exception as e:
         print(f'Attempt {i} failed:\n{e}')
-
-        # We can actually self-correct for blacklisted URLs by replacing their periods with commas.
-        import traceback
-        traceback.print_exc()
-        message = loads(e.args[0])
-        if 'spamblacklist' in message:
-          for site in message['spamblacklist'].split('|'):
-            text = text.replace(site, site.replace('.', ','))
-
         if i < 5:
           i += 1
           sleep(30)
