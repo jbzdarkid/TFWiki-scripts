@@ -8,15 +8,15 @@ NAMESPACES = ['Main', 'TFW', 'Help', 'File', 'Template']
 
 excluded_templates = [
   # Class navs have way too many items in them to be useful
-  'Template:Scout Nav',
-  'Template:Soldier Nav',
-  'Template:Pyro Nav',
-  'Template:Demoman Nav',
-  'Template:Heavy Nav',
-  'Template:Engineer Nav',
-  'Template:Medic Nav',
-  'Template:Sniper Nav',
-  'Template:Spy Nav',
+  # 'Template:Scout Nav',
+  # 'Template:Soldier Nav',
+  # 'Template:Pyro Nav',
+  # 'Template:Demoman Nav',
+  # 'Template:Heavy Nav',
+  # 'Template:Engineer Nav',
+  # 'Template:Medic Nav',
+  # 'Template:Sniper Nav',
+  # 'Template:Spy Nav',
   # The class hat tables aren't really navboxes, even though they call {{Navbox}}
   'Template:Scout class hat table',
   'Template:Soldier class hat table',
