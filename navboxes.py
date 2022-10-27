@@ -80,7 +80,7 @@ def pagescraper(navbox, navbox_templates):
     set(trans.title for trans in transclusions),
   ]
   if verbose:
-    print(f'Navbox {navbox.title} links to {len(links))} pages and is transcluded by {len(transclusions)} pages')
+    print(f'Navbox {navbox.title} links to {len(links)} pages and is transcluded by {len(transclusions)} pages')
 
 def main(w):
   navbox_templates = {}
