@@ -7,16 +7,6 @@ LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko',
 NAMESPACES = ['Main', 'TFW', 'Help', 'File', 'Template']
 
 excluded_templates = [
-  # Class navs have way too many items in them to be useful
-  # 'Template:Scout Nav',
-  # 'Template:Soldier Nav',
-  # 'Template:Pyro Nav',
-  # 'Template:Demoman Nav',
-  # 'Template:Heavy Nav',
-  # 'Template:Engineer Nav',
-  # 'Template:Medic Nav',
-  # 'Template:Sniper Nav',
-  # 'Template:Spy Nav',
   # The class hat tables aren't really navboxes, even though they call {{Navbox}}
   'Template:Scout class hat table',
   'Template:Soldier class hat table',
@@ -130,8 +120,8 @@ def main(w):
           page_missing_navboxes.append(template)
 
       # Each page that transcludes the navbox should be linked from the navbox
-      if basename in transclusions:
-        if page.title not in links:
+      if page.title in transclusions:
+        if basename not in links:
           page_extra_navboxes.append(template)
 
     # Some pages are too generic, and are linked to by many navboxes. If a page would have more than 5 navboxes,
