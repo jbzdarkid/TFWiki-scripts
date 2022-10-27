@@ -1,4 +1,4 @@
-from utils import time_and_date
+from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 from wikitools.page import Page
 
@@ -73,9 +73,9 @@ def pagescraper(navbox, navbox_templates):
   links = []
   transclusions = []
   for namespace in NAMESPACES:
-    links.extend(page.get_links(namespace=namespace))
-    transclusions.extend(page.get_transclusions(namespace=namespace))
-  navbox_templates[page.title] = [
+    links.extend(navbox.get_links(namespace=namespace))
+    transclusions.extend(navbox.get_transclusions(namespace=namespace))
+  navbox_templates[navbox.title] = [
     set(link.title for link in links),
     set(trans.title for trans in transclusions),
   ]
