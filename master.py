@@ -46,7 +46,7 @@ def publish_report(w, module, report_name, root, summary):
       for lang, output in report_output:
         link_map[lang] = edit_or_save(f'{root}/{report_name}/{lang}', f'wiki_{report_name}_{lang}.txt', output)
     else:
-      link_map['en'] = edit_or_save(f'{root}/{report_name}', f'wiki_{report_name}.txt', output)
+      link_map['en'] = edit_or_save(f'{root}/{report_name}', f'wiki_{report_name}.txt', report_output)
 
   except Exception:
     print(f'Failed to update {report_name}')
