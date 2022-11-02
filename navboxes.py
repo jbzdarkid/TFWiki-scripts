@@ -53,9 +53,12 @@ excluded_pages = {
   'Template:Two Cities Update Nav': ['Mann vs. Machievements', 'Obtaining Mann vs. Machievements'],
 
   # The major updates which had new soundtracks aren't really topical.
-  'Template:Scream Fortress Nav': 'Team Fortress 2 Official Soundtrack',
-  'Template:Meet Your Match Update Nav': 'Team Fortress 2 Official Soundtrack',
-  'Template:Jungle Inferno Update Nav': 'Team Fortress 2 Official Soundtrack',
+  'Template:Scream Fortress Nav': ['Team Fortress 2 Official Soundtrack'],
+  'Template:Meet Your Match Update Nav': ['Team Fortress 2 Official Soundtrack'],
+  'Template:Jungle Inferno Update Nav': ['Team Fortress 2 Official Soundtrack'],
+
+  # "Hats that you can wear in Portal 2 and TF2" isn't actually a useful link from the Portal 2 page
+  'Template:Portal 2 crossover cosmetics': ['Portal 2'],
 }
 
 
