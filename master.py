@@ -26,6 +26,7 @@ import open_pr_comment
 # Sort the output from displaytitles
 # Threading for navboxes.py?
 # Ensure that PRs which add files also touch readme.md
+# Templates which link to redirects
 
 def edit_or_save(page_name, file_name, output, summary):
   wiki_diff_url = Page(w, page_name).edit(output, bot=True, summary=summary)
