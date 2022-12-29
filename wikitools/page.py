@@ -52,8 +52,14 @@ class Page:
     except RequestException:
       return '' # Unable to fetch page contents, pretend it's empty
 
+  def get_page_url(self, **kwargs):
+    params = ''.join([f'&{key}={value}' for key, value in kwargs.items()])
+    url = f'{self.wiki.wiki_url}?title={self.url_title}{params}'
+    url = url.replace(' ', '%20')
+    return url
+
   def get_edit_url(self):
-    return f'{self.wiki.wiki_url}?title={self.url_title}&action=edit'
+    return self.get_page_url(action='edit')
 
   def get_transclusion_count(self):
     return sum(1 for _ in self.get_transclusions())
