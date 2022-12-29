@@ -29,6 +29,7 @@ def main(w):
     'Template:Sniper class hat table',
     'Template:Spy class hat table',
     'Template:All class hat table',
+    'Template:Misc items table',
     # These are also not navboxes
     'Template:Information',
     'Template:Main Page (Classic) layout',
@@ -47,7 +48,7 @@ def main(w):
     'Template:Haunted Halloween Special Nav': ['Non-player characters'],
     'Template:Scream Fortress Nav': ['Non-player characters'],
 
-    # Just because there *were* arena maps in this update doesn't mean we should link it from [[Arena]]
+    # Just because there *were* arena/koth/5cp maps in an update doesn't mean we should link it from [[Arena]]
     'Template:Halloween Map Nav': ['Arena', 'King of the Hill', 'Payload', 'Player Destruction', 'Special Delivery (game mode)'],
     'Template:Two Cities Update Nav': ['Control Point (game mode)', 'Items'],
     'Template:Smissmas Map Nav': ['Capture the Flag', 'Control Point (game mode)', 'King of the Hill', 'Payload', 'Player Destruction'],
@@ -62,7 +63,7 @@ def main(w):
     'Template:Sniper Vs Spy Update Nav': ['Sniper achievements', 'Obtaining Sniper achievements', 'Spy achievements', 'Obtaining Spy achievements'],
     'Template:Two Cities Update Nav': ['Mann vs. Machievements', 'Obtaining Mann vs. Machievements'],
 
-    # Similarly for major updates which had new soundtracks.
+    # The major updates which had new soundtracks aren't really topical.
     'Template:Scream Fortress Nav': 'Team Fortress 2 Official Soundtrack',
     'Template:Meet Your Match Update Nav': 'Team Fortress 2 Official Soundtrack',
     'Template:Jungle Inferno Update Nav': 'Team Fortress 2 Official Soundtrack',
@@ -136,7 +137,7 @@ There are <onlyinclude>{count}</onlyinclude> pages which are part of a navbox bu
     if len(missing_navboxes[template]) == 0:
       continue
 
-    output += '== {{tl|%s}} ==\n' % template.replace('Template:', '')
+    output += '== {{tl|%s}} (%d) ==\n' % (template.replace('Template:', ''), len(missing_navboxes[template])
     for page in sorted(missing_navboxes[template]):
       output += f'* [{page.get_edit_url()} {page.title}] does not transclude {template}\n'
 
