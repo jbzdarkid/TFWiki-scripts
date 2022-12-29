@@ -24,41 +24,32 @@ import open_pr_comment
 # Sort the output from displaytitles
 # Threading for navboxes.py?
 # Ensure that PRs which add files also touch readme.md
-# Remove files which transclude {{ExternalyLinked}} from Special:UnusedFiles
 
-def handle_failed_edits(link_map, report_output, report_name):
-  report_name = report_name.lower().replace(' ', '_')
-  print(report_name, type(report_output))
-  if isinstance(report_output, str) and link_map['en'] is None:
-    with open(f'wiki_{report_name}.txt', 'w', encoding='utf-8') as f:
-      f.write(report_output)
-  else:
-    for lang, output in report_output:
-      if link_map[lang] is None:
-        with open(f'wiki_{report_name}_{lang}.txt', 'w', encoding='utf-8') as f:
-          f.write(output)
+def edit_or_save(page_name, file_name, output):
+  wiki_diff_url = Page(w, page_name).edit(output, bot=True, summary=summary)
+  if wiki_diff_url:
+    return wiki_diff_url
+
+  # Edit failed, fall back to saving to file (will be attached as a build artifact)
+  with open(file_name, 'w', encoding='utf-8') as f:
+    f.write(report_output)
+
+  return None
 
 def publish_report(w, module, report_name, root, summary):
   link_map = {}
   try:
     report_output = importlib.import_module(module).main(w)
-  except Exception:
-    print(f'Failed to run report "{report_name}"')
-    print_exc(file=stdout)
-    return # No output was generated, no reason to try and upload anything.
 
-  try:
     if isinstance(report_output, list):
       for lang, output in report_output:
-        link_map[lang] = Page(w, f'{root}/{report_name}/{lang}').edit(output, bot=True, summary=summary)
+        link_map[lang] = edit_or_save(f'{root}/{report_name}/{lang}', f'wiki_{report_name}_{lang}.txt', output)
     else:
-      link_map['en'] = Page(w, f'{root}/{report_name}').edit(report_output, bot=True, summary=summary)
-  except Exception:
-    print(f'Failed to upload report "{report_name}"')
-    print_exc(file=stdout)
-    # Here we can continue so that the output is still saved.
+      link_map['en'] = edit_or_save(f'{root}/{report_name}', f'wiki_{report_name}.txt', output)
 
-  handle_failed_edits(link_map, report_output, report_name)
+  except Exception:
+    print(f'Failed to update {report_name}')
+    print_exc(file=stdout)
 
   return link_map
 
