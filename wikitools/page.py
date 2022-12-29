@@ -1,4 +1,3 @@
-from json import loads
 from requests.exceptions import RequestException
 from time import sleep
 import functools

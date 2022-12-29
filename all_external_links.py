@@ -29,7 +29,7 @@ def pagescraper(page, all_links):
       all_links[domain][link].append(page)
 
 def main(w):
-  all_links = {}
+  all_links = {} # Map of {domain: {link: [pages]}}
   with pagescraper_queue(pagescraper, all_links) as pages:
     for page in w.get_all_pages():
       pages.put(page)
@@ -47,17 +47,21 @@ def main(w):
       return link.replace('/', '&#47;')
     return link
 
-  # Sort domains by the total number of links on all pages.
-  domains = [(
-    sum(len(links) for links in domain_links.values()),
-    domain, 
-  ) for domain, domain_links in all_links.values()]
-  for total_links, domain in sorted(domains):
-    output += f'== {domain} ({total_links}) ==\n'
+  # Sort domains by the total number pages which link to that domain (i.e. the blast radius)
+  domains = []
+  for domain in all_links:
+    domain_pages = set()
+    for link in all_links[domain]:
+      for page in all_links[domain][link]:
+        domain_pages.add(page.title)
+    domains.append((len(domain_pages), domain))
+  domains.sort()
+
+  for total_pages, domain in domains:
+    output += f'== {domain} ({total_pages}) ==\n'
+    # Print out each link, and the count of pages that use it
     for link in sorted(all_links[domain].keys()):
-      # Only print one link, but list the count
-      output += f'=== {link_escape(link)} ({len(all_links[domain][link])}) ===\n'
-      output += f'* [[{all_links[domain][link][0]}]]\n'
+      output += f'* {link_escape(link)} ({len(all_links[domain][link])})\n'
 
   return output
 
