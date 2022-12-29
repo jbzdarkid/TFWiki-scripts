@@ -109,6 +109,7 @@ def main(w):
   for page in w.get_all_pages(namespaces=NAMESPACES):
     expected_navboxes = 0
     page_missing_navboxes = []
+    page_extra_navboxes = []
 
     for template in navbox_templates:
       links, transclusions = navbox_templates[template]
