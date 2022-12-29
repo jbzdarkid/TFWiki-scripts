@@ -52,7 +52,7 @@ def main(w):
 
   output = """\
 {{{{DISPLAYTITLE: {total_bad_links} links to nonexistant section headings}}}}
-Found <onlyinclude>{total_bad_links}</onlyinclude> links from {bad_pages} which do not link to valid subsections. Data as of {date}.
+There are <onlyinclude>{total_bad_links}</onlyinclude> links from {bad_pages} pages which do not link to valid subsections. Data as of {date}.
 
 {{{{TOC limit|3}}}}
 """.format(

@@ -48,19 +48,16 @@ def main(w):
     return link
 
   # Sort domains by the total number of links on all pages.
-  domains = list(all_links.keys())
-  domains.sort(key=lambda domain: sum(len(links) for links in all_links[domain].values()))
-
-  for domain in domains:
-    output += f'== {domain} ==\n'
+  domains = [(
+    sum(len(links) for links in domain_links.values()),
+    domain, 
+  ) for domain, domain_links in all_links.values()]
+  for total_links, domain in sorted(domains):
+    output += f'== {domain} ({total_links}) ==\n'
     for link in sorted(all_links[domain].keys()):
-      output += f'=== {link_escape(link)} ===\n'
-
-      # Deduplicate, sort, and truncate the list of pages
-      pages = list(set(all_links[domain][link]))
-      pages.sort()
-      for page in pages[:10]:
-        output += f'* [[{page}]]\n'
+      # Only print one link, but list the count
+      output += f'=== {link_escape(link)} ({len(all_links[domain][link])}) ===\n'
+      output += f'* [[{all_links[domain][link][0]}]]\n'
 
   return output
 

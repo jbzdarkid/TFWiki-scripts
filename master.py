@@ -24,6 +24,7 @@ import open_pr_comment
 # Sort the output from displaytitles
 # Threading for navboxes.py?
 # Ensure that PRs which add files also touch readme.md
+# Remove files which transclude {{ExternalyLinked}} from Special:UnusedFiles
 
 def handle_failed_edits(link_map, report_output, report_name):
   report_name = report_name.lower().replace(' ', '_')
