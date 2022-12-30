@@ -1,5 +1,5 @@
 from re import compile, VERBOSE
-from utils import pagescraper_queue_single, plural
+from utils import pagescraper_queue, plural
 from wikitools import wiki
 
 verbose = False
@@ -30,7 +30,7 @@ def pagescraper(page, all_links):
 
 def main(w):
   all_links = {} # Map of {domain: {link: [pages]}}
-  with pagescraper_queue_single(pagescraper, all_links) as pages:
+  with pagescraper_queue(pagescraper, all_links) as pages:
     for page in w.get_all_pages():
       pages.put(page)
 
@@ -54,7 +54,6 @@ def main(w):
     for link in all_links[domain]:
       for page in all_links[domain][link]:
         domain_pages.add(page.title)
-    print(domain, domain_pages)
     domains.append((len(domain_pages), domain))
   domains.sort()
 
