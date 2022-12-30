@@ -24,15 +24,16 @@ import open_pr_comment
 # Sort the output from displaytitles
 # Threading for navboxes.py?
 # Ensure that PRs which add files also touch readme.md
+# Templates which link to redirects
 
-def edit_or_save(page_name, file_name, output):
+def edit_or_save(page_name, file_name, output, summary):
   wiki_diff_url = Page(w, page_name).edit(output, bot=True, summary=summary)
   if wiki_diff_url:
     return wiki_diff_url
 
   # Edit failed, fall back to saving to file (will be attached as a build artifact)
   with open(file_name, 'w', encoding='utf-8') as f:
-    f.write(report_output)
+    f.write(output)
 
   return None
 
@@ -44,9 +45,9 @@ def publish_report(w, module, report_name, root, summary):
 
     if isinstance(report_output, list):
       for lang, output in report_output:
-        link_map[lang] = edit_or_save(f'{root}/{report_name}/{lang}', f'{report_file_name}_{lang}.txt', output)
+        link_map[lang] = edit_or_save(f'{root}/{report_name}/{lang}', f'{report_file_name}_{lang}.txt', output, summary)
     else:
-      link_map['en'] = edit_or_save(f'{root}/{report_name}', f'{report_file_name}.txt', output)
+      link_map['en'] = edit_or_save(f'{root}/{report_name}', f'{report_file_name}.txt', report_output, summary)
 
   except Exception:
     print(f'Failed to update {report_name}')
