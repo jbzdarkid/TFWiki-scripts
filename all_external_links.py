@@ -1,5 +1,5 @@
 from re import compile, VERBOSE
-from utils import pagescraper_queue
+from utils import pagescraper_queue_single, plural
 from wikitools import wiki
 
 verbose = False
@@ -7,8 +7,8 @@ verbose = False
 # Within the HTML source code, all links should be href="()". Internal links start with /wiki/foo, so this will find all external links.
 LINK_REGEX = compile('''
   href="(       # Within the HTML source code, all links start with href=
+    https?://   # Match http/https scheme (internal wiki links start with /wiki)
     (           # Start inner capture group (for just the domain name)
-      https?:// # Match http/https scheme (internal wiki links start with /wiki)
       [^/"]+    # The domain
     )
     [^"]*       # The rest of the URL
@@ -21,16 +21,16 @@ def pagescraper(page, all_links):
   for m in LINK_REGEX.finditer(text):
     domain = '.'.join(m[2].split('.')[-2:])
     link = m[1]
+
     if domain not in all_links:
-      if domain not in all_links:
-        all_links[domain] = {}
-      if link not in all_links[domain]:
-        all_links[domain][link] = []
-      all_links[domain][link].append(page)
+      all_links[domain] = {}
+    if link not in all_links[domain]:
+      all_links[domain][link] = []
+    all_links[domain][link].append(page)
 
 def main(w):
   all_links = {} # Map of {domain: {link: [pages]}}
-  with pagescraper_queue(pagescraper, all_links) as pages:
+  with pagescraper_queue_single(pagescraper, all_links) as pages:
     for page in w.get_all_pages():
       pages.put(page)
 
@@ -54,14 +54,16 @@ def main(w):
     for link in all_links[domain]:
       for page in all_links[domain][link]:
         domain_pages.add(page.title)
+    print(domain, domain_pages)
     domains.append((len(domain_pages), domain))
   domains.sort()
 
   for total_pages, domain in domains:
-    output += f'== {domain} ({total_pages}) ==\n'
+    output += f'== {domain} ({plural.pages(total_pages)}) ==\n'
     # Print out each link, and the count of pages that use it
     for link in sorted(all_links[domain].keys()):
-      output += f'* {link_escape(link)} ({len(all_links[domain][link])})\n'
+      pages_per_link = len(all_links[domain][link])
+      output += f'* {link_escape(link)} ({plural.pages(pages_per_link)})\n'
 
   return output
 
