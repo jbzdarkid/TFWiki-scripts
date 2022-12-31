@@ -15,23 +15,37 @@ LINK_REGEX = compile('''
   )"
 ''', VERBOSE)
 
+# Domains which cannot be malware or phishing or broken links. Hopefully.
+safe_hosts = [
+  'wikipedia.org',
+  'steamcommunity.com',
+  'steampowered.com',
+  'teamfortress.com',
+]
+
 def pagescraper(page, all_links):
   text = page.get_raw_html()
 
   for m in LINK_REGEX.finditer(text):
-    domain = '.'.join(m[2].split('.')[-2:])
+    hostname = '.'.join(m[2].split('.')[-2:])
+    if hostname in safe_hosts:
+      continue
     link = m[1]
 
-    if domain not in all_links:
-      all_links[domain] = {}
-    if link not in all_links[domain]:
-      all_links[domain][link] = []
-    all_links[domain][link].append(page)
+    if hostname not in all_links:
+      all_links[hostname] = {}
+    if link not in all_links[hostname]:
+      all_links[hostname][link] = []
+    all_links[hostname][link].append(page)
 
 def main(w):
   all_links = {} # Map of {domain: {link: [pages]}}
   with pagescraper_queue(pagescraper, all_links) as pages:
+    i = 0
     for page in w.get_all_pages():
+      i += 1
+      if i > 1000:
+        break
       pages.put(page)
 
   output = '{{DISPLAYTITLE: TEST ONLY REPORT}}\n{{TOC limit|2}}\n'

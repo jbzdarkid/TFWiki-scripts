@@ -10,8 +10,8 @@ verbose = False
 # Within the HTML source code, all links should be href="()". Internal links start with /wiki/foo, so this will find all external links.
 LINK_REGEX = compile('''
   href="(       # Within the HTML source code, all links start with href=
+    https?://   # Match http/https scheme (internal wiki links start with /wiki)
     (           # Start inner capture group (for just the domain name)
-      https?:// # Match http/https scheme (internal wiki links start with /wiki)
       [^/"]+    # The domain
     )
     [^"]*       # The rest of the URL
@@ -20,14 +20,10 @@ LINK_REGEX = compile('''
 
 # Domains which cannot be malware or phishing or broken links. Hopefully.
 safe_domains = [
-  'http://en.wikipedia.org',
-  'http://steamcommunity.com',
-  'http://store.steampowered.com',
-  'http://www.teamfortress.com',
-  'https://en.wikipedia.org',
-  'https://steamcommunity.com',
-  'https://wiki.teamfortress.com',
-  'https://www.teamfortress.com',
+  'en.wikipedia.org',
+  'steamcommunity.com',
+  'store.steampowered.com',
+  'www.teamfortress.com',
 ]
 
 def pagescraper(page, page_links, all_domains, all_links):
