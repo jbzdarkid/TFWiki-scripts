@@ -41,11 +41,7 @@ def pagescraper(page, all_links):
 def main(w):
   all_links = {} # Map of {domain: {link: [pages]}}
   with pagescraper_queue(pagescraper, all_links) as pages:
-    i = 0
     for page in w.get_all_pages():
-      i += 1
-      if i > 1000:
-        break
       pages.put(page)
 
   output = '{{DISPLAYTITLE: TEST ONLY REPORT}}\n{{TOC limit|2}}\n'
