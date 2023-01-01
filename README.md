@@ -2,7 +2,7 @@
 
 A collection of scripts used to generate reports for the [TF2 Wiki](https://wiki.teamfortress.com/wiki/Team_Fortress_Wiki:Reports)
 
-This version of the scripts has been updated to python3, which unfortunately broke wikitools.  A stripped-down, python3-compatible version is checked in to this repo.
+This version of the scripts has been updated to python3, which unfortunately broke wikitools. I have thus written my own version (in the wikitools/ folder).
 
 ## Daily reports
 - `all_articles.py`: Generates the complete list of translated articles for each language, which is used by the translator's noticeboard
