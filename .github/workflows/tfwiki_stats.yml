@@ -22,7 +22,7 @@ jobs:
         python-version: '3.x'
     - run: pip install -r requirements.txt
     - run: python -u master.py
-      timeout-minutes: 180
+      timeout-minutes: 300
       env:
         WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
         WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
