@@ -33,6 +33,7 @@ def edit_or_save(page_name, file_name, output, summary):
   if wiki_diff_url:
     return wiki_diff_url
 
+  # Edit failed, fall back to saving to file (will be attached as a build artifact)
   with open(file_name, 'w', encoding='utf-8') as f:
     f.write(output)
 
@@ -40,14 +41,15 @@ def edit_or_save(page_name, file_name, output, summary):
 
 def publish_report(w, module, report_name, root, summary):
   link_map = {}
+  report_file_name = 'wiki_' + report_name.lower().replace(' ', '_')
   try:
     report_output = importlib.import_module(module).main(w)
 
     if isinstance(report_output, list):
       for lang, output in report_output:
-        link_map[lang] = edit_or_save(f'{root}/{report_name}/{lang}', f'wiki_{report_name}_{lang}.txt', output, summary)
+        link_map[lang] = edit_or_save(f'{root}/{report_name}/{lang}', f'{report_file_name}_{lang}.txt', output, summary)
     else:
-      link_map['en'] = edit_or_save(f'{root}/{report_name}', f'wiki_{report_name}.txt', report_output, summary)
+      link_map['en'] = edit_or_save(f'{root}/{report_name}', f'{report_file_name}.txt', report_output, summary)
 
   except Exception:
     print(f'Failed to update {report_name}')

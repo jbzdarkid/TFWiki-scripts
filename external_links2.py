@@ -10,24 +10,27 @@ verbose = False
 # Within the HTML source code, all links should be href="()". Internal links start with /wiki/foo, so this will find all external links.
 LINK_REGEX = compile('''
   href="(       # Within the HTML source code, all links start with href=
+    https?://   # Match http/https scheme (internal wiki links start with /wiki)
     (           # Start inner capture group (for just the domain name)
-      https?:// # Match http/https scheme (internal wiki links start with /wiki)
       [^/"]+    # The domain
     )
     [^"]*       # The rest of the URL
   )"
 ''', VERBOSE)
 
-# Domains which cannot be malware or phishing or broken links. Hopefully.
+# Domains which cannot be malware or phishing, and broken links are intentional.
+# These domains are not expected to go down, but host wikis (or other language-specific content) which may be a redlink.
 safe_domains = [
-  'http://en.wikipedia.org',
-  'http://steamcommunity.com',
-  'http://store.steampowered.com',
-  'http://www.teamfortress.com',
-  'https://en.wikipedia.org',
-  'https://steamcommunity.com',
-  'https://wiki.teamfortress.com',
-  'https://www.teamfortress.com',
+  'archive.org',
+  'combineoverwiki.net',
+  'spiralknights.com',
+  'steamcommunity.com',
+  'steampowered.com',
+  'teamfortress.com',
+  'theportalwiki.com',
+  'valvesoftware.com',
+  'wikia.org',
+  'wikipedia.org',
 ]
 
 def pagescraper(page, page_links, all_domains, all_links):
@@ -35,7 +38,7 @@ def pagescraper(page, page_links, all_domains, all_links):
 
   links = set()
   for m in LINK_REGEX.finditer(text):
-    domain = m.group(2)
+    domain = '.'.join(m[2].split('.')[-2:])
     if domain in safe_domains:
       continue
     link = m.group(1)
