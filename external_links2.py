@@ -20,10 +20,10 @@ LINK_REGEX = compile('''
 
 # Domains which cannot be malware or phishing or broken links. Hopefully.
 safe_domains = [
-  'en.wikipedia.org',
+  'wikipedia.org',
   'steamcommunity.com',
-  'store.steampowered.com',
-  'www.teamfortress.com',
+  'steampowered.com',
+  'teamfortress.com',
 ]
 
 def pagescraper(page, page_links, all_domains, all_links):
@@ -31,7 +31,7 @@ def pagescraper(page, page_links, all_domains, all_links):
 
   links = set()
   for m in LINK_REGEX.finditer(text):
-    domain = m.group(2)
+    domain = '.'.join(m[2].split('.')[-2:])
     if domain in safe_domains:
       continue
     link = m.group(1)
