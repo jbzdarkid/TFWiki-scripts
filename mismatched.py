@@ -5,8 +5,8 @@ from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
 pairs = [
-  [1, '\\(', '\\)'],
-  [1, '（', '）'], # These parens are used interchangably with the ASCII ones.
+#  [1, '\\(', '\\)'],
+#  [1, '（', '）'], # These parens are used interchangably with the ASCII ones.
   [2, '\\[', '\\]'],
   [3, '{', '}'],
   [4, '<!--', '-->'],
@@ -28,12 +28,19 @@ for tag in html_tags:
 pairs = [[pair[0], compile(pair[1], IGNORECASE), compile(pair[2], IGNORECASE)] for pair in pairs]
 
 # Some pages are expected to have mismatched parenthesis (as they are part of the update history, item description, etc)
-exemptions = {
-  'Linux dedicated server': 0,   # Includes a bash script with case
-  'List of default keys': 2,     # Includes {{Key|]}}
-  'Deathcam': 2,                 # Includes {{Key|[}}
-  'Scripting': 2,                # Includes {{key|]}} and {{key|[}}
-}
+exemptions = [
+  None, # 0 index doesn't exist
+  [], # 1
+
+  # 2, aka []
+  ['List of default keys', 'Deathcam', 'Scripting'],
+  
+  # 3, aka {}
+  [
+    'Template:Cite web',
+    'Template:Class weapons table', # All of these have a header template
+  ],
+]
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
@@ -44,7 +51,7 @@ def pagescraper(page, translation_data):
 
   locations = []
   for i, left, right, in pairs:
-    if exemptions.get(page.basename, None) == i:
+    if i < len(exemptions) and any(page.basename.startswith(e) for e in exemptions[i]):
       continue
 
     for m in left.finditer(text):
@@ -94,7 +101,7 @@ def pagescraper(page, translation_data):
 
   # Check for leftover opening tags that were not properly closed
   for index, pair_index in opens:
-    if pair_index == +7 and page.title.startswith('Template:'):
+    if pair_index == +6 and page.title.startswith('Template:'):
       if verbose:
         print(f'Ignoring trailing noinclude on {page.title}')
       continue # Templates may leave off the closing </noinclude>, mediawiki figures it out.
@@ -144,13 +151,16 @@ def main(w):
         continue
       if page.title.startswith('Template:PatchDiff'):
         continue
+      # Ignore sandbox pages, where things can and will be broken
+      if page.title.lower().endswith('sandbox'):
+        continue
       # Don't analyze the main dictionary pages, in case there's a mismatch which evens out between two strings
       if page.title.startswith('Template:Dictionary') and page.title.count('/') == 1: # Dictionary/items, e.g.
         continue
       if page.title.startswith('Template:Dictionary/achievements/') and page.title.count('/') == 2: # Dictionary/achievements/medic, e.g.
         continue
       if page.title.startswith('Template:Dictionary/steam ids'):
-        continue # Usernames can be literally anything, but often include :)
+        continue # Usernames can be literally anything, and thus have no "matching" requirements
       pages.put(page)
   output = """\
 {{{{DISPLAYTITLE: {count} pages with mismatched parenthesis}}}}
