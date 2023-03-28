@@ -16,7 +16,8 @@ pairs = [
   [8, '<onlyinclude>', '</onlyinclude>'],
 ]
 html_tags = [
-  'a', 'b', 'code', 'center', 'em', 'i', 'li', 'ol', 'p', 's', 'small', 'sub', 'sup', 'td', 'th', 'tr', 'tt', 'u', 'ul',
+  # This list does not include all html tags because we definitely cheat and don't close some of them, regularly.
+  'a', 'b', 'code', 'center', 'em', 'li', 'ol', 'p', 's', 'small', 'sub', 'sup', 'td', 'th', 'tr', 'tt', 'u', 'ul',
 
   # Mediawiki custom
   'gallery', 'ref',
@@ -33,13 +34,23 @@ exemptions = [
   [], # 1
 
   # 2, aka []
-  ['List of default keys', 'Deathcam', 'Scripting'],
-  
-  # 3, aka {}
+  ['List of default keys', 'Deathcam', 'Scripting', 'Vector', 'Linux dedicated server'],
+
+  # 3, {} often don't align because template pages are using a header or footer for tables.
   [
     'Template:Cite web',
-    'Template:Class weapons table', # All of these have a header template
+    'Template:Class speed table',
+    'Template:Class weapons table',
+    'Template:Userboxbottom',
+    'Template:Userboxtop',
+    'Template:Wqc',
   ],
+
+  [], # 4
+
+  # 5 <nowiki> and # 6 <noinclude> are often used to make template code *appear* correct, while still transcluding properly.
+  ['Help:Images', 'Help:Editing', 'Help:Translation switching'],
+  ['Help:Images'],
 ]
 
 verbose = False
