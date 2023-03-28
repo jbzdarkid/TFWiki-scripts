@@ -44,13 +44,22 @@ exemptions = [
     'Template:Userboxbottom',
     'Template:Userboxtop',
     'Template:Wqc',
+    'Template:Contracts',
+    'Template:Cqc',
+    'Template:List of item attributes',
   ],
 
-  [], # 4
+  # 4, <!-- --> is often messed up by The Heartsman, who has an >>--arrow---> through their name.
+  ['Monster Mash-Up Pack', 'Night of the Living Update'],
 
   # 5 <nowiki> and # 6 <noinclude> are often used to make template code *appear* correct, while still transcluding properly.
   ['Help:Images', 'Help:Editing', 'Help:Translation switching'],
   ['Help:Images'],
+
+  [], # 6
+
+  # 7, <includeonly> is used for subst-only templates, so that they do not show an error on the template page itself.
+  ['Template:Sp'],
 ]
 
 verbose = False
@@ -162,6 +171,8 @@ def main(w):
         continue
       if page.title.startswith('Template:PatchDiff'):
         continue
+      if page.title == 'Template:Navbox':
+        continue # Just too complex, mixes <td><tr> and templates, which results in hard-to-parse stuff.
       # Ignore sandbox pages, where things can and will be broken
       if page.title.lower().endswith('sandbox'):
         continue
