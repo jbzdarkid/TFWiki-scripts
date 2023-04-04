@@ -24,7 +24,7 @@ html_tags = [
 ]
 for tag in html_tags:
   # The tag open match needs to allow for properties, e.g. <div style="foo">
-  pairs.append([len(pairs), f'<{tag}(?: [^>/]*)?>', f'</{tag}>'])
+  pairs.append([len(pairs), f'<{tag}(?: [^>/]*)?(?:"[^"]+")>', f'</{tag}>'])
 
 pairs = [[pair[0], compile(pair[1], IGNORECASE), compile(pair[2], IGNORECASE)] for pair in pairs]
 
