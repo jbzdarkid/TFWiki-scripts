@@ -1,5 +1,5 @@
 from re import compile, VERBOSE
-from utils import pagescraper_queue, plural
+from utils import pagescraper_queue, plural, time_and_date
 from wikitools import wiki
 
 verbose = False
@@ -30,13 +30,10 @@ def pagescraper(page, all_links):
     hostname = '.'.join(m[2].split('.')[-2:])
     if hostname in safe_hosts:
       continue
-    link = m[1]
 
     if hostname not in all_links:
-      all_links[hostname] = {}
-    if link not in all_links[hostname]:
-      all_links[hostname][link] = []
-    all_links[hostname][link].append(page)
+      all_links[hostname] = set()
+    all_links[hostname].add(page)
 
 def main(w):
   all_links = {} # Map of {domain: {link: [pages]}}
@@ -44,41 +41,26 @@ def main(w):
     for page in w.get_all_pages():
       pages.put(page)
 
-  output = '{{DISPLAYTITLE: TEST ONLY REPORT}}\n{{TOC limit|2}}\n'
+  output = """\
+{{{{DISPLAYTITLE: {domain_count} external domains}}}}
+There are external links to <onlyinclude>{domain_count}</onlyinclude> different domains from the wiki. Data as of {date}.
 
-  # Avoid rendering images inline
-  def link_escape(link):
-    if (
-      'tinyurl' in link or
-      link.endswith('.png') or
-      link.endswith('.jpg') or
-      link.endswith('.gif')
-    ):
-      return link.replace('/', '&#47;')
-    return link
+{{{{TOC limit|2}}}}
+""".format(
+    domain_count=len(all_links),
+    date=time_and_date())
 
-  # Sort domains by the total number pages which link to that domain (i.e. the blast radius)
-  domains = []
-  for domain in all_links:
-    domain_pages = set()
-    for link in all_links[domain]:
-      for page in all_links[domain][link]:
-        domain_pages.add(page.title)
-    domains.append((len(domain_pages), domain))
-  domains.sort()
-
-  for total_pages, domain in domains:
-    output += f'== {domain} ({plural.pages(total_pages)}) ==\n'
-    # Print out each link, and the count of pages that use it
-    for link in sorted(all_links[domain].keys()):
-      pages_per_link = len(all_links[domain][link])
-      output += f'* {link_escape(link)} ({plural.pages(pages_per_link)})\n'
+  for domain in sorted(all_links.keys()):
+    pages = sorted(all_links[domain])
+    output += f'== {domain} ({plural.pages(len(pages))}) ==\n'
+    for page in pages[:10]:
+      output += f'* [[{page.title}]]\n'
 
   return output
 
 if __name__ == '__main__':
   verbose = True
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
-  with open('wiki_all_external_links.txt', 'w') as f:
+  with open('wiki_all_external_links.txt', 'w', encoding='utf-8') as f:
     f.write(main(w))
   print(f'Article written to {f.name}')
