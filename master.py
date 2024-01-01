@@ -17,6 +17,7 @@ import open_pr_comment
 # Direct links to disambig pages
 # Just... a summary of every single external link. Maybe just 'count per domain' and then list the top 10 pages? I'm finding a LOT of sus links, and it's only the ones that are *broken*.
 # Lang template mis-ordering and lang-template duplicate keys
+# Templates sorted by usage and protect status
 
 # Reports I want to improve:
 # update readme (again)
