@@ -103,7 +103,10 @@ if __name__ == '__main__':
     changed_files = set(check_output(['git', 'diff', '--name-only', merge_base, '--diff-filter=M'], text=True).strip().split('\n'))
     added_files   = set(check_output(['git', 'diff', '--name-only', merge_base, '--diff-filter=A'], text=True).strip().split('\n'))
 
-    if added_files and 'README.md' not in changed_files:
+    print('Changed files:', changed_files)
+    print('Added files:', added_files)
+
+    if len(added_files) > 0 and 'README.md' not in changed_files:
       raise ValueError('When adding a new report, you must update the readme.')
 
     changed_files |= added_files
