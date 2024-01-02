@@ -6,13 +6,15 @@ verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 def pagescraper(page, errors, disambig_errors, overflow):
+  """
   if __name__ != '__main__':
     # When running as part of automation, wiki text will be cached, so it is faster to query the wikitext
     # before making another network call to get the page source.
     # ... but this prevents finding other errors
-    # wikitext = page.get_wiki_text()
-    # if 'DISPLAYTITLE' not in wikitext:
-    #   return
+    wikitext = page.get_wiki_text()
+    if 'DISPLAYTITLE' not in wikitext:
+      return
+  """
 
   html = page.get_raw_html()
   m = search('<span class="error">(.*?)</span>', html)
