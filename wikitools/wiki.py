@@ -170,6 +170,20 @@ class Wiki:
     ):
       yield Page(self, entry['title'], entry)
 
+  def get_recent_changes(self, starttime, *, namespaces=None):
+    if namespaces is None:
+      namespaces = ['*']
+    for entry in self.get_with_continue('query', 'recentchanges',
+      list='recentchanges',
+      rcstart=starttime.isoformat(),
+      rcend='now',
+      rcdir='newer',
+      rcshow='!bot', # Ignore bot changes by default
+      rctoponly='true', # Only show changes which are the most recent edit to avoid listing pages twice
+      rcnamespace='|'.join(str(self.namespaces[namespace]) for namespace in namespaces),
+    ):
+      yield Page(self, entry['title'], entry)
+
   def get_all_unused_files(self):
     for html in self.get_html_with_continue('Special:UnusedFiles'):
       for m in finditer('<img alt="(.*?)"', html):
