@@ -5,16 +5,14 @@ from wikitools.page import Page
 verbose = True
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
-signal = object()
-def is_empty(w, category):
-  return next(w.get_all_category_pages(category), signal) == signal
-
 def main(w):
   non_article_categories = set()
   for page in Page(w, 'Template:Non-article category').get_transclusions(namespace='Category'):
     non_article_categories.add(page.title)
   if verbose:
     print(f'Found {len(non_article_categories)} non-article categories')
+
+  signal = object()
 
   lang_cats = {lang: set() for lang in LANGS}
   english_cats = set()
@@ -26,7 +24,12 @@ def main(w):
     if lang in LANGS:
       lang_cats[lang].add(basename)
     else:
-      english_cats.add(page.title)
+      is_empty = next(w.get_all_category_pages(category), signal) == signal
+      if is_empty:
+        if verbose:
+          print(f'English category {category} is empty, skipping')
+      else:
+        english_cats.add(page.title)
 
   if verbose:
     print(f'Found {len(english_cats)} english article categories')
@@ -38,7 +41,7 @@ def main(w):
   if verbose:
     print(f'Found {len(english_only_cats)} english-only categories')
 
-  missing_cats = [category for category in english_only_cats if not is_empty(w, category)]
+  # english_only_cats = [category for category in english_only_cats if not is_empty(w, category)]
 
   if verbose:
     print(f'Found {len(english_only_cats)} english-only categories (after filtering)')
@@ -61,7 +64,7 @@ There are <onlyinclude>{count}</onlyinclude> categories which are not translated
     if verbose:
       print(f'{language} is missing {len(missing_cats)} categories')
 
-    missing_cats = [category for category in missing_cats if not is_empty(w, category)]
+    # missing_cats = [category for category in missing_cats if not is_empty(w, category)]
 
     if verbose:
       print(f'{language} is missing {len(missing_cats)} categories (after filtering)')
