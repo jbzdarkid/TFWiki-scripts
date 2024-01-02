@@ -100,10 +100,13 @@ if __name__ == '__main__':
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
 
     merge_base = check_output(['git', 'merge-base', 'HEAD', 'origin/' + environ['GITHUB_BASE_REF']], text=True).strip()
-    changed_files = set(check_output(['git', 'diff', '--name-only', merge_base, '--diff-filter=M'], text=True).strip().split('\n'))
-    added_files   = set(check_output(['git', 'diff', '--name-only', merge_base, '--diff-filter=A'], text=True).strip().split('\n'))
+    changed_files = {f for f in check_output(['git', 'diff', '--name-only', merge_base, '--diff-filter=M'], text=True).split('\n') if f}
+    added_files   = {f for f in check_output(['git', 'diff', '--name-only', merge_base, '--diff-filter=A'], text=True).split('\n') if f}
 
-    if added_files and 'README.md' not in changed_files:
+    print('Changed files:', changed_files)
+    print('Added files:', added_files)
+
+    if len(added_files) > 0 and 'README.md' not in changed_files:
       raise ValueError('When adding a new report, you must update the readme.')
 
     changed_files |= added_files
