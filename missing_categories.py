@@ -13,13 +13,13 @@ def main(w):
     print(f'Found {len(non_article_categories)} non-article categories')
 
   image_categories = set()
-  for page in w.get_all_category_pages('Category:Images', *, namespaces=['Category']):
+  for page in w.get_all_category_pages('Category:Images', namespaces=['Category']):
     image_categories.add(page.title)
   if verbose:
     print(f'Found {len(image_categories)} image categories')
 
   audio_categories = set()
-  for page in w.get_all_category_pages('Category:Audio responses', *, namespaces=['Category']):
+  for page in w.get_all_category_pages('Category:Audio responses', namespaces=['Category']):
     audio_categories.add(page.title)
   if verbose:
     print(f'Found {len(audio_categories)} audio categories')
