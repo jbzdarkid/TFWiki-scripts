@@ -110,10 +110,10 @@ if __name__ == '__main__':
 
     if 'mismatched.py' in changed_files:
       changed_files.remove('mismatched.py')
-      changed_files.append('mismatched_weekly.py')
+      changed_files.add('mismatched_weekly.py')
     if 'displaytitles.py' in changed_files:
       changed_files.remove('displaytitles.py')
-      changed_files.append('displaytitles_weekly.py')
+      changed_files.add('displaytitles_weekly.py')
 
     for row in changed_files:
       file = row.replace('.py', '').strip()
