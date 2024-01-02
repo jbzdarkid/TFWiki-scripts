@@ -5,6 +5,10 @@ from wikitools.page import Page
 verbose = True
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
+signal = object()
+def is_empty(category):
+  return next(w.get_all_category_pages(category), signal) == signal
+
 def main(w):
   non_article_categories = set()
   for page in Page(w, 'Template:Non-article category').get_transclusions(namespace='Category'):
@@ -34,11 +38,7 @@ def main(w):
   if verbose:
     print(f'Found {len(english_only_cats)} english-only categories')
 
-  def filter(category):
-    signal = object()
-    is_empty = next(w.get_all_category_pages(category), signal) == signal
-    return not is_empty
-  missing_cats = [category for category in english_only_cats if filter(category)]
+  missing_cats = [category for category in english_only_cats if not is_empty(category)]
 
   if verbose:
     print(f'Found {len(english_only_cats)} english-only categories (after filtering)')
@@ -61,13 +61,7 @@ There are <onlyinclude>{count}</onlyinclude> categories which are not translated
     if verbose:
       print(f'{language} is missing {len(missing_cats)} categories')
 
-    def filter(category):
-      if 'image' in category:
-        signal = object()
-        is_empty = next(w.get_all_category_pages(category), signal) == signal
-        return not is_empty
-      return True
-    missing_cats = [category for category in missing_cats if filter(category)]
+    missing_cats = [category for category in missing_cats if not is_empty(category)]
 
     if verbose:
       print(f'{language} is missing {len(missing_cats)} categories (after filtering)')
