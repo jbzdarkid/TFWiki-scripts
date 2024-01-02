@@ -106,7 +106,7 @@ if __name__ == '__main__':
     if added_files and 'README.md' not in changed_files:
       raise ValueError('When adding a new report, you must update the readme.')
 
-    changed_files += added_files
+    changed_files |= added_files
 
     if 'mismatched.py' in changed_files:
       changed_files.remove('mismatched.py')
