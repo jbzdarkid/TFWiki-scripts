@@ -2,7 +2,7 @@ from utils import time_and_date
 from wikitools import wiki
 from wikitools.page import Page
 
-verbose = True
+verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 def main(w):
@@ -41,11 +41,6 @@ def main(w):
   if verbose:
     print(f'Found {len(english_only_cats)} english-only categories')
 
-  # english_only_cats = [category for category in english_only_cats if not is_empty(w, category)]
-
-  if verbose:
-    print(f'Found {len(english_only_cats)} english-only categories (after filtering)')
-
   outputs = []
   output = """\
 {{{{DISPLAYTITLE: {count} categories which are probably non-article categories}}}}
@@ -63,11 +58,6 @@ There are <onlyinclude>{count}</onlyinclude> categories which are not translated
     missing_cats = english_cats - lang_cats[language] - english_only_cats
     if verbose:
       print(f'{language} is missing {len(missing_cats)} categories')
-
-    # missing_cats = [category for category in missing_cats if not is_empty(w, category)]
-
-    if verbose:
-      print(f'{language} is missing {len(missing_cats)} categories (after filtering)')
 
     output = """\
 {{{{DISPLAYTITLE: {count} categories missing {{{{lang name|name|{lang}}}}} translation}}}}
