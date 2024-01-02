@@ -6,7 +6,7 @@ verbose = True
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 signal = object()
-def is_empty(category):
+def is_empty(w, category):
   return next(w.get_all_category_pages(category), signal) == signal
 
 def main(w):
@@ -38,7 +38,7 @@ def main(w):
   if verbose:
     print(f'Found {len(english_only_cats)} english-only categories')
 
-  missing_cats = [category for category in english_only_cats if not is_empty(category)]
+  missing_cats = [category for category in english_only_cats if not is_empty(w, category)]
 
   if verbose:
     print(f'Found {len(english_only_cats)} english-only categories (after filtering)')
@@ -61,7 +61,7 @@ There are <onlyinclude>{count}</onlyinclude> categories which are not translated
     if verbose:
       print(f'{language} is missing {len(missing_cats)} categories')
 
-    missing_cats = [category for category in missing_cats if not is_empty(category)]
+    missing_cats = [category for category in missing_cats if not is_empty(w, category)]
 
     if verbose:
       print(f'{language} is missing {len(missing_cats)} categories (after filtering)')
