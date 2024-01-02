@@ -12,11 +12,27 @@ def main(w):
   if verbose:
     print(f'Found {len(non_article_categories)} non-article categories')
 
+  image_categories = set()
+  for page in w.get_all_category_pages('Category:Images', *, namespaces=['Category']):
+    image_categories.add(page.title)
+  if verbose:
+    print(f'Found {len(image_categories)} image categories')
+
+  audio_categories = set()
+  for page in w.get_all_category_pages('Category:Audio responses', *, namespaces=['Category']):
+    audio_categories.add(page.title)
+  if verbose:
+    print(f'Found {len(audio_categories)} audio categories')
+
   lang_cats = {lang: set() for lang in LANGS}
   english_cats = set()
   for page in w.get_all_categories():
     if page.title in non_article_categories:
       continue # Tracking/maintenance/user categories
+    if page.title in image_categories:
+      continue # Image-only (not usually translated)
+    if page.title in audio_categories:
+      continue # Audio-only (not usually translated)
 
     basename, _, lang = page.title.rpartition('/')
     if lang in LANGS:
