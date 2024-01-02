@@ -24,10 +24,10 @@ def main(w):
     if lang in LANGS:
       lang_cats[lang].add(basename)
     else:
-      is_empty = next(w.get_all_category_pages(category), signal) == signal
+      is_empty = next(w.get_all_category_pages(page.title), signal) == signal
       if is_empty:
         if verbose:
-          print(f'English category {category} is empty, skipping')
+          print(f'English category {page.title} is empty, skipping')
       else:
         english_cats.add(page.title)
 
