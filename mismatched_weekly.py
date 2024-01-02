@@ -10,9 +10,12 @@ def page_iter(w):
 
 mismatched.page_iter = page_iter
 
+def main(w):
+  return mismatched.main(w)
+
 if __name__ == '__main__':
   verbose = True
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   with open('wiki_mismatched_parenthesis.txt', 'w', encoding='utf-8') as f:
-    f.write(mismatched.main(w))
+    f.write(main(w))
   print(f'Article written to {f.name}')
