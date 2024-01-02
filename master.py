@@ -106,6 +106,11 @@ if __name__ == '__main__':
     if added_files and 'README.md' not in changed_files:
       raise ValueError('When adding a new report, you must update the readme.')
 
+    if 'mismatched.py' in changed_files:
+      changed_files.remove('mismatched.py')
+    if 'displaytitles.py' in changed_files:
+      changed_files.remove('displaytitles.py')
+
     for row in changed_files:
       file = row.replace('.py', '').strip()
       if file in all_reports:
