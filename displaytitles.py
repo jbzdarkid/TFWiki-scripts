@@ -6,6 +6,7 @@ verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 def pagescraper(page, errors, disambig_errors, overflow):
+  """
   if __name__ != '__main__':
     # When running as part of automation, wiki text will be cached, so it is faster to query the wikitext
     # before making another network call to get the page source.
@@ -13,6 +14,7 @@ def pagescraper(page, errors, disambig_errors, overflow):
     wikitext = page.get_wiki_text()
     if 'DISPLAYTITLE' not in wikitext:
       return
+  """
 
   html = page.get_raw_html()
   m = search('<span class="error">(.*?)</span>', html)
@@ -28,12 +30,16 @@ def pagescraper(page, errors, disambig_errors, overflow):
   else:
     overflow[m.group(1)] = page
 
+def page_iter(w):
+  for page in w.get_all_pages(namespaces=['Main', 'TFW', 'File', 'Template', 'Help', 'Category']):
+    yield page
+
 def main(w):
   errors = {lang: [] for lang in LANGS}
   disambig_errors = {lang: [] for lang in LANGS}
   overflow = {}
   with pagescraper_queue(pagescraper, errors, disambig_errors, overflow) as pages:
-    for page in w.get_all_pages(namespaces=['Main', 'TFW', 'File', 'Template', 'Help', 'Category']):
+    for page in page_iter(w):
       pages.put(page)
 
   num_pages = sum(len(pages) for pages in errors.values()) + \

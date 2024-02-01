@@ -159,10 +159,14 @@ def pagescraper(page, translation_data):
 
     translation_data[page.lang].append(data)
 
+def page_iter(w):
+  for page in w.get_all_pages(namespaces=['Main', 'File', 'Template', 'Help', 'Category']):
+    yield page
+  
 def main(w):
   translation_data = {lang: [] for lang in LANGS}
   with pagescraper_queue(pagescraper, translation_data) as pages:
-    for page in w.get_all_pages(namespaces=['Main', 'File', 'Template', 'Help', 'Category']):
+    for page in page_iter(w):
       if page.title.startswith('Team Fortress Wiki:Discussion'):
         continue
       if page.title.endswith(' 3D.jpg') or page.title.endswith(' 3D.png'):
