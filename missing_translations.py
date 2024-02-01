@@ -13,7 +13,7 @@ def main(w):
       pass # Not english
     elif 'OTFWH' in page.title: # ETF2L Highlander Community Challenge/OTFWH
       pass # Special, non-translated page
-    elif page.title.startswith('WebAPI/'):
+    elif page.title.startswith('WebAPI'):
       pass # WebAPI pages are very technical and shouldn't be translated.
     else:
       english_pages.add(page.title)
@@ -30,9 +30,8 @@ def main(w):
 Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.
 
 ; See also
-* [[Project:Reports/All articles/{lang}|All articles in {{{{lang name|name|{lang}}}}}]]
-* [[Project:Reports/Missing categories/{lang}|Missing categories in {{{{lang name|name|{lang}}}}}]]
-* [[Special:RecentChangesLinked/Project:Reports/All articles/{lang}|Recent changes to articles in {{{{lang name|name|{lang}}}}}]]
+* [[Team Fortress Wiki:Reports/All articles/{lang}|All articles in {{{{lang name|name|{lang}}}}}]]
+* [[Special:RecentChangesLinked/Team Fortress Wiki:Reports/All articles/{lang}|Recent changes to articles in {{{{lang name|name|{lang}}}}}]]
 
 == List ==""".format(
       lang=language,

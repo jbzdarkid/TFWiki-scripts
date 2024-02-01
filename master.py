@@ -14,6 +14,8 @@ import open_pr_comment
 # Quotations which use quote characters
 # Using {{lang}} and {{if lang}} on non-template pages
 # Direct links to disambig pages
+# Lang template mis-ordering and lang-template duplicate keys
+# Templates sorted by usage and protect status
 
 # Reports I want to improve:
 # update readme (again)
@@ -65,6 +67,8 @@ all_reports = {
   'overtranslated': 'Pages with no english equivalent',
   'incorrectly_categorized': 'Pages with incorrect categorization',
   'incorrectly_linked': 'Pages with incorrect links',
+  'mismatched_weekly': 'Mismatched parenthesis',
+  'displaytitles_weekly': 'Duplicate displaytitles',
   'duplicate_files': 'Duplicate files',
   'unused_files': 'Unused files',
   'undocumented_templates': 'Undocumented templates',
@@ -87,7 +91,7 @@ if __name__ == '__main__':
     # Multi-language reports need frequent updates since we have many translators
     modules_to_run += ['untranslated_templates', 'missing_translations', 'all_articles']
     if datetime.now().weekday() == 0: # Every Monday, run english-only (or otherwise less frequently needed) reports
-      modules_to_run += ['wanted_templates', 'navboxes', 'overtranslated', 'missing_categories', 'incorrectly_categorized']
+      modules_to_run += ['wanted_templates', 'navboxes', 'overtranslated', 'missing_categories', 'incorrectly_categorized', 'mismatched_weekly', 'displaytitles_weekly']
     if datetime.now().day == 1: # On the 1st of every month, run everything
       modules_to_run = all_reports.keys()
 
@@ -96,11 +100,23 @@ if __name__ == '__main__':
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
 
     merge_base = check_output(['git', 'merge-base', 'HEAD', 'origin/' + environ['GITHUB_BASE_REF']], text=True).strip()
-    changed_files = check_output(['git', 'diff', '--name-only', merge_base], text=True).strip().split('\n')
-    added_files   = check_output(['git', 'diff', '--name-only', merge_base, '--diff-filter=A'], text=True).strip()
+    changed_files = {f for f in check_output(['git', 'diff', '--name-only', merge_base, '--diff-filter=M'], text=True).split('\n') if f}
+    added_files   = {f for f in check_output(['git', 'diff', '--name-only', merge_base, '--diff-filter=A'], text=True).split('\n') if f}
 
-    if added_files and 'README.md' not in changed_files:
+    print('Changed files:', changed_files)
+    print('Added files:', added_files)
+
+    if len(added_files) > 0 and 'README.md' not in changed_files:
       raise ValueError('When adding a new report, you must update the readme.')
+
+    changed_files |= added_files
+
+    if 'mismatched.py' in changed_files:
+      changed_files.remove('mismatched.py')
+      changed_files.add('mismatched_weekly.py')
+    if 'displaytitles.py' in changed_files:
+      changed_files.remove('displaytitles.py')
+      changed_files.add('displaytitles_weekly.py')
 
     for row in changed_files:
       file = row.replace('.py', '').strip()

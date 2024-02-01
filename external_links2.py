@@ -18,12 +18,19 @@ LINK_REGEX = compile('''
   )"
 ''', VERBOSE)
 
-# Domains which cannot be malware or phishing or broken links. Hopefully.
+# Domains which cannot be malware or phishing, and broken links are intentional.
+# These domains are not expected to go down, but host wikis (or other language-specific content) which may be a redlink.
 safe_domains = [
-  'en.wikipedia.org',
+  'archive.org',
+  'combineoverwiki.net',
+  'spiralknights.com',
   'steamcommunity.com',
-  'store.steampowered.com',
-  'www.teamfortress.com',
+  'steampowered.com',
+  'teamfortress.com',
+  'theportalwiki.com',
+  'valvesoftware.com',
+  'wikia.org',
+  'wikipedia.org',
 ]
 
 def pagescraper(page, page_links, all_domains, all_links):
@@ -31,7 +38,7 @@ def pagescraper(page, page_links, all_domains, all_links):
 
   links = set()
   for m in LINK_REGEX.finditer(text):
-    domain = m.group(2)
+    domain = '.'.join(m[2].split('.')[-2:])
     if domain in safe_domains:
       continue
     link = m.group(1)

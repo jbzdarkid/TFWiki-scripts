@@ -12,6 +12,8 @@ def main(w):
   if verbose:
     print(f'Found {len(non_article_categories)} non-article categories')
 
+  signal = object()
+
   lang_cats = {lang: set() for lang in LANGS}
   english_cats = set()
   for page in w.get_all_categories():
@@ -22,7 +24,12 @@ def main(w):
     if lang in LANGS:
       lang_cats[lang].add(basename)
     else:
-      english_cats.add(page.title)
+      is_empty = next(w.get_all_category_pages(page.title), signal) == signal
+      if is_empty:
+        if verbose:
+          print(f'English category {page.title} is empty, skipping')
+      else:
+        english_cats.add(page.title)
 
   if verbose:
     print(f'Found {len(english_cats)} english article categories')
@@ -51,17 +58,6 @@ There are <onlyinclude>{count}</onlyinclude> categories which are not translated
     missing_cats = english_cats - lang_cats[language] - english_only_cats
     if verbose:
       print(f'{language} is missing {len(missing_cats)} categories')
-
-    def filter(category):
-      if 'image' in category:
-        signal = object()
-        is_empty = next(w.get_all_category_pages(category), signal) == signal
-        return not is_empty
-      return True
-    missing_cats = [category for category in missing_cats if filter(category)]
-
-    if verbose:
-      print(f'{language} is missing {len(missing_cats)} categories (after filtering)')
 
     output = """\
 {{{{DISPLAYTITLE: {count} categories missing {{{{lang name|name|{lang}}}}} translation}}}}

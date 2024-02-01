@@ -5,7 +5,7 @@ from wikitools import wiki
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
-LANG_TEMPLATE_START = compile("""\
+LANG_TEMPLATE_START = compile(r"""\
   [^{]{{    # The start of a template '{{' which is not the start of a parameter '{{{'
   \s*       # Any amount of whitespace is allowed before the template name
   lang      # Language template. Note that this does not allow invocations of {{lang incomplete}}
@@ -13,7 +13,7 @@ LANG_TEMPLATE_START = compile("""\
   \|        # Start of parameter list
 """, IGNORECASE | VERBOSE)
 
-LANG_TEMPLATE_ARGS = compile("""\
+LANG_TEMPLATE_ARGS = compile(r"""\
   \|        # Start of a parameter
   (
     [^|=]*? # Parameter
