@@ -31,6 +31,8 @@ def main(w):
   with pagescraper_queue(pagescraper, all_links) as pages:
     for page in w.get_all_pages():
       pages.put(page)
+      if len(pages) > 100:
+        break
 
   output = """\
 {{{{DISPLAYTITLE: {domain_count} external domains}}}}
@@ -46,8 +48,8 @@ There are external links to <onlyinclude>{domain_count}</onlyinclude> different 
 
   for domain in domains:
     # Sort pages by language, then title (with english first)
-    pages = all_links[domain]
-    pages.sort(key = lambda page: page.lang == 'en', page.lang, page.title)
+    pages = list(all_links[domain])
+    pages.sort(key = lambda page: (page.lang == 'en', page.lang, page.title))
 
     output += f'== {domain} ({plural.pages(len(pages))}) ==\n'
     for page in pages[:10]:
