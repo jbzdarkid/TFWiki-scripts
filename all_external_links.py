@@ -16,21 +16,12 @@ LINK_REGEX = compile('''
 ''', VERBOSE)
 
 # Domains which cannot be malware or phishing or broken links. Hopefully.
-safe_hosts = [
-  'wikipedia.org',
-  'steamcommunity.com',
-  'steampowered.com',
-  'teamfortress.com',
-]
 
 def pagescraper(page, all_links):
   text = page.get_raw_html()
 
   for m in LINK_REGEX.finditer(text):
-    hostname = '.'.join(m[2].split('.')[-2:])
-    if hostname in safe_hosts:
-      continue
-
+    hostname = '.'.join(m[2].split('.')[-2:]).lower()
     if hostname not in all_links:
       all_links[hostname] = set()
     all_links[hostname].add(page)
@@ -50,11 +41,19 @@ There are external links to <onlyinclude>{domain_count}</onlyinclude> different 
     domain_count=len(all_links),
     date=time_and_date())
 
-  for domain in sorted(all_links.keys()):
-    pages = sorted(all_links[domain])
+  domains = list(all_links.keys())
+  domains.sort(key = lambda domain: len(all_links[domain]))
+
+  for domain in domains:
+    # Sort pages by language, then title (with english first)
+    pages = all_links[domain]
+    pages.sort(key = lambda page: page.lang == 'en', page.lang, page.title)
+
     output += f'== {domain} ({plural.pages(len(pages))}) ==\n'
     for page in pages[:10]:
       output += f'* [[{page.title}]]\n'
+    if len(pages) > 10:
+      output += f'... and {len(pages)-10} more\n'
 
   return output
 

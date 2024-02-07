@@ -73,7 +73,6 @@ all_reports = {
   'unused_files': 'Unused files',
   'undocumented_templates': 'Undocumented templates',
   'edit_stats': 'Users by edit count',
-  'external_links2': 'External links',
   'all_external_links': 'All external links',
   'bad_fragments': 'Redirects to nonexistant sections',
   'mismatched': 'Mismatched parenthesis',
