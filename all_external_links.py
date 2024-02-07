@@ -31,8 +31,6 @@ def main(w):
   with pagescraper_queue(pagescraper, all_links) as pages:
     for page in w.get_all_pages():
       pages.put(page)
-      if len(pages) > 100:
-        break
 
   output = """\
 {{{{DISPLAYTITLE: {domain_count} external domains}}}}
