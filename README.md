@@ -19,7 +19,6 @@ This version of the scripts has been updated to python3, which unfortunately bro
 
 ## Monthly reports
 - `all_external_links.py`: A slightly different take on scanning external links which just groups by domain name without making network calls.
-- `bad_fragments.py`: Searches for pages which link to other pages but to incorrect section headers.
 - `displaytitles.py`: Searches for pages with duplicate displaytitles, which show a gross-looking error message.
 - `duplicate_files.py`: Finds all identical files, and sorts them by usage count.
 - `edit_stats.py`: Provides some statistics about user editing habits on the wiki, along with a list of the top 100 editors by edit count

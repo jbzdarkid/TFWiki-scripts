@@ -74,7 +74,6 @@ all_reports = {
   'undocumented_templates': 'Undocumented templates',
   'edit_stats': 'Users by edit count',
   'all_external_links': 'All external links',
-  'bad_fragments': 'Redirects to nonexistant sections',
   'mismatched': 'Mismatched parenthesis',
   'displaytitles': 'Duplicate displaytitles',
 }

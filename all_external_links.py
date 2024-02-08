@@ -20,6 +20,10 @@ LINK_REGEX = compile('''
 def pagescraper(page, all_links):
   text = page.get_raw_html()
 
+  start = text.find('id="content"')
+  end = text.find('class="printfooter"')
+  text = text[start:end]
+
   for m in LINK_REGEX.finditer(text):
     hostname = '.'.join(m[2].split('.')[-2:]).lower()
     if hostname not in all_links:
@@ -41,13 +45,14 @@ There are external links to <onlyinclude>{domain_count}</onlyinclude> different 
     domain_count=len(all_links),
     date=time_and_date())
 
+  # Sort domains by count (high -> low), then title (a -> z)
   domains = list(all_links.keys())
-  domains.sort(key = lambda domain: len(all_links[domain]))
+  domains.sort(key = lambda domain: (-len(all_links[domain]), domain))
 
   for domain in domains:
-    # Sort pages by language, then title (with english first)
+    # Sort pages by title, then language (english first)
     pages = list(all_links[domain])
-    pages.sort(key = lambda page: (page.lang == 'en', page.lang, page.title))
+    pages.sort(key = lambda page: (page.title, page.lang != 'en', page.lang))
 
     output += f'== {domain} ({plural.pages(len(pages))}) ==\n'
     for page in pages[:10]:
