@@ -133,7 +133,7 @@ class Wiki:
         list='allpages',
         aplimit=500,
         apnamespace=self.namespaces[namespace],
-        apfilterredir='nonredirects', # Filter out redirects
+        apfilterredir='redirects', # Filter out redirects
       ):
         title = entry['title']
         if title.endswith('.js') or title.endswith('.css'):
