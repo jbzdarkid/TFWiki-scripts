@@ -4,14 +4,10 @@ from wikitools.page import Page
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
-NAMESPACES = ['Main', 'TFW', 'Template', 'Help', 'Category']
+NAMESPACES = ['Main', 'TFW', 'Help', 'Category']
 
 def pagescraper(page, english_redirects, lang_redirects, bad_redirects):
-  link = next(page.get_links(namespaces=NAMESPACES), None)
-  if not link:
-    if verbose:
-      print(f'Failed to find redirect target for {page.title}')
-    return # We might need some error handling here eventually.
+  link = next(page.get_links(namespaces='*'), None)
 
   if page.lang == 'en':
     english_redirects[page.title] = link
