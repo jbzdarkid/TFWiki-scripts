@@ -23,7 +23,7 @@ def pagescraper(page, english_redirects, lang_redirects, bad_redirects):
 def main(w):
   english_redirects = {}
   lang_redirects = {language: {} for language in LANGS}
-  bad_redirects = {}
+  bad_redirects = {language: {} for language in LANGS}
   with pagescraper_queue(pagescraper, english_redirects, lang_redirects, bad_redirects) as pages:
     for page in w.get_all_pages(namespaces=NAMESPACES, redirects=True):
       pages.put(page)
