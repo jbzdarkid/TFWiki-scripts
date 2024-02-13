@@ -125,15 +125,21 @@ class Wiki:
       auwitheditsonly='true',
     )
 
-  def get_all_pages(self, *, namespaces=None):
+  def get_all_pages(self, *, namespaces=None, redirects=False):
     if namespaces is None:
       namespaces = ['Main']
+    redirect_filter = {
+      False: 'nonredirects',
+      True: 'redirects',
+      None: 'all',
+    }[redirects]
+
     for namespace in namespaces:
       for entry in self.get_with_continue('query', 'allpages',
         list='allpages',
         aplimit=500,
         apnamespace=self.namespaces[namespace],
-        apfilterredir='redirects', # Filter out redirects
+        apfilterredir=redirect_filter,
       ):
         title = entry['title']
         if title.endswith('.js') or title.endswith('.css'):

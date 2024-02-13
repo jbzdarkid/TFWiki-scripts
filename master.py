@@ -78,6 +78,7 @@ all_reports = {
   'external_links2': 'External links',
   'mismatched': 'Mismatched parenthesis',
   'displaytitles': 'Duplicate displaytitles',
+  'incorrect_redirects': 'Mistranslated redirects',
 }
 
 if __name__ == '__main__':
