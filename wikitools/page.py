@@ -72,10 +72,13 @@ class Page:
     ):
       yield Page(self.wiki, entry['title'], entry)
 
-  def get_links(self, *, namespace='Main'):
+  def get_links(self, *, namespaces=None):
+    if namespaces is None:
+      namespaces = ['Main']
+    namespace_query = '|'.join((str(self.wiki.namespaces[ns]) for ns in namespaces))
     for entry in self.wiki.get_with_continue('query', 'pages',
       generator='links',
-      gplnamespace=self.wiki.namespaces[namespace],
+      gplnamespace=namespace_query,
       gpllimit=500,
       titles=self.url_title,
     ):

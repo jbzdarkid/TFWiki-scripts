@@ -22,6 +22,7 @@ This version of the scripts has been updated to python3, which unfortunately bro
 - `duplicate_files.py`: Finds all identical files, and sorts them by usage count.
 - `edit_stats.py`: Provides some statistics about user editing habits on the wiki, along with a list of the top 100 editors by edit count
 - `external_links2.py`: Searches all articles for links outside the tf2 wiki, and checks to see if those links are still valid (HTTP 200)
+- `incorrect_redirects.py`: Reports on language redirects which don't match english, or which redirect to another language.
 - `mismatched.py`: Searches all articles for incorrect pairs of parenthesis, to help catch broken links, tags, and templates.
 - `missing_categories.py`: Searches for non-translated categories. Categories which are only in english should generally be marked as {{non-article category}}.
 - `overtranslated.py`: Searches all articles for language pages which don't exist in english. This is usually indicative of duplicate translations.
