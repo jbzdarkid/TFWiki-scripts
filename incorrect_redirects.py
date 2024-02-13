@@ -7,7 +7,11 @@ LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl',
 NAMESPACES = ['Main', 'TFW', 'Help', 'Category']
 
 def pagescraper(page, english_redirects, lang_redirects, bad_redirects):
-  link = next(page.get_links(namespaces='*'), None)
+  link = next(page.get_links(namespaces=NAMESPACES), None)
+  if not link:
+    if verbose:
+      print(f'{page.title} redirects to a page outside of NAMESPACES, ignoring')
+    return
 
   if page.lang == 'en':
     english_redirects[page.title] = link
