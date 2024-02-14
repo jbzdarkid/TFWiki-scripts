@@ -59,26 +59,35 @@ def publish_report(w, module, report_name, root, summary):
 
   return link_map
 
-all_reports = {
-  'untranslated_templates': 'Untranslated templates',
-  'missing_translations': 'Missing translations',
-  'missing_categories': 'Untranslated categories',
+# Multi-language reports need frequent updates since we have many translators
+daily_reports = {
   'all_articles': 'All articles',
-  'wanted_templates': 'Wanted templates',
-  'navboxes': 'Pages which are missing navboxes',
-  'overtranslated': 'Pages with no english equivalent',
+  'missing_categories': 'Untranslated categories',
+  'missing_translations': 'Missing translations',
+  'untranslated_templates': 'Untranslated templates',
+}
+
+# English-only but otherwise frequently changing reports
+weekly_reports = {
+  'displaytitles_weekly': 'Duplicate displaytitles',
+  'incorrect_redirects': 'Mistranslated redirects',
   'incorrectly_categorized': 'Pages with incorrect categorization',
   'incorrectly_linked': 'Pages with incorrect links',
   'mismatched_weekly': 'Mismatched parenthesis',
-  'displaytitles_weekly': 'Duplicate displaytitles',
+  'navboxes': 'Pages which are missing navboxes',
+  'overtranslated': 'Pages with no english equivalent',
+  'wanted_templates': 'Wanted templates',
+}
+
+# Everything else (especially reports which require all HTML contents)
+monthly_reports = {
+  'displaytitles': 'Duplicate displaytitles',
   'duplicate_files': 'Duplicate files',
-  'unused_files': 'Unused files',
-  'undocumented_templates': 'Undocumented templates',
   'edit_stats': 'Users by edit count',
   'external_links2': 'External links',
   'mismatched': 'Mismatched parenthesis',
-  'displaytitles': 'Duplicate displaytitles',
-  'incorrect_redirects': 'Mistranslated redirects',
+  'undocumented_templates': 'Undocumented templates',
+  'unused_files': 'Unused files',
 }
 
 if __name__ == '__main__':
@@ -89,12 +98,12 @@ if __name__ == '__main__':
     root = 'Team Fortress Wiki:Reports'
     summary = 'Automatic update via https://github.com/jbzdarkid/TFWiki-scripts'
 
-    # Multi-language reports need frequent updates since we have many translators
-    modules_to_run += ['untranslated_templates', 'missing_translations', 'all_articles']
-    if datetime.now().weekday() == 0: # Every Monday, run english-only (or otherwise less frequently needed) reports
-      modules_to_run += ['wanted_templates', 'navboxes', 'overtranslated', 'missing_categories', 'incorrectly_categorized', 'mismatched_weekly', 'displaytitles_weekly']
-    if datetime.now().day == 1: # On the 1st of every month, run everything
-      modules_to_run = all_reports.keys()
+    # Determine which reports to run -- note that the weekly and monthly cadences don't necessarily line up.
+    modules_to_run += daily_reports.keys()
+    if datetime.now().weekday() == 0:
+      modules_to_run += weekly_reports.keys()
+    if datetime.now().day == 1:
+      modules_to_run += monthly_reports.keys()
 
   elif event == 'pull_request':
     root = 'User:Darkid/Reports'
