@@ -90,6 +90,8 @@ monthly_reports = {
   'unused_files': 'Unused files',
 }
 
+all_reports = daily_reports | weekly_reports | monthly_reports
+
 if __name__ == '__main__':
   event = environ.get('GITHUB_EVENT_NAME', 'local_run')
   modules_to_run = []
