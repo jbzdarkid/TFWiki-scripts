@@ -66,7 +66,7 @@ def pagescraper(navbox, navbox_templates):
   links = []
   transclusions = []
   for namespace in NAMESPACES:
-    links.extend(navbox.get_links(namespace=namespace))
+    links.extend(navbox.get_links(namespaces=[namespace]))
     transclusions.extend(navbox.get_transclusions(namespace=namespace))
   navbox_templates[navbox.title] = [
     set(link.title for link in links),
