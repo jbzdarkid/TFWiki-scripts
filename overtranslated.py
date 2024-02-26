@@ -155,7 +155,7 @@ def main(w):
 
     output += '== {{lang name|name|%s}} ==\n' % language
     for page in sorted(overtranslated[language]):
-      output += '* [[%s/%s]] does not have a non-redirect english equivalent: [[%s]]\n' % (page, language, page)
+      output += '* [[:%s/%s]] does not have a non-redirect english equivalent: [[:%s]]\n' % (page, language, page)
 
   return output
 
