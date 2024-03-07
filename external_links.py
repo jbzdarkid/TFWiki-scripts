@@ -143,9 +143,9 @@ def main(w):
   output = '== Dead or incorrectly behaving links ==\n'
   linkData = sorted(_linkData)
   for error, link in linkData:
-    output += '* %s (%s)\n' % (link, error)
+    output += f'* {link} ({error})\n'
     for page in sorted(links[link]):
-      output += '** [[%s]]\n' % page
+      output += f'** [[:{page}]]\n'
   output += '== Suspicious links ==\n'
   for link in links:
     suspicious = False
@@ -154,9 +154,9 @@ def main(w):
         suspicious = True
         break
     if suspicious:
-      output += '* %s\n' % link
+      output += f'* {link}\n'
     for page in sorted(links[link]):
-      output += '** [[%s]]\n' % page
+      output += f'** [[:{page}]]\n'
 
   output = output.replace('tumblr', 'tumb1r') # Link blacklist
   output = output.replace('amazon', 'amaz0n') # Link blacklist

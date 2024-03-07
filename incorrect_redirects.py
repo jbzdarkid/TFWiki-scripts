@@ -59,7 +59,7 @@ def main(w):
       output += '=== {{lang name|name|%s}} ===\n' % language
       for page in sorted(bad_redirects[language]):
         target = bad_redirects[language][page]
-        output += '* [%s&redirect=no %s] redirects to [[%s]]\n' % (page.get_page_url(), page.title, target)
+        output += f'* [{page.get_page_url()}&redirect=no {page.title}] redirects to [[:{target}]]\n'
 
   output += '== Mis-translated redirects ==\n'
   for language in LANGS:
@@ -70,8 +70,9 @@ def main(w):
     for page in sorted(incorrect_redirects[language]):
       lang_target = lang_redirects[language][page]
       english_target = english_redirects[page.basename]
-      output += '* [%s&redirect=no %s] redirects to [[%s]] but' % (page.get_page_url(), page.title, lang_target)
-      output += ' [%s&redirect=no %s] redirects to [[%s]]\n' % (Page(w, page.basename).get_page_url(), page.basename, english_target)
+      base_page = Page(w, page.basename)
+      output += f'* [{page.get_page_url()}&redirect=no {page.title}] redirects to [[:{lang_target}]] but'
+      output += f' [{base_page.get_page_url()}&redirect=no {base_page.title}] redirects to [[:{english_target}]]\n'
 
   return output
 

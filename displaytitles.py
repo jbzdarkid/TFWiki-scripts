@@ -59,7 +59,7 @@ def main(w):
   if len(overflow) > 0:
     output += '== Other errors ==\n'
     for error, page in overflow.items():
-      output += f'=== [[{page.title}]] ===\n{error}\n'
+      output += f'=== [[:{page.title}]] ===\n{error}\n'
 
   for language in LANGS:
     if len(errors[language]) + len(disambig_errors[language]) > 0:
@@ -67,12 +67,12 @@ def main(w):
 
     if len(errors[language]) > 0:
       for page in sorted(errors[language]):
-        output += f'* [[{page.title}]]\n'
+        output += f'* [[:{page.title}]]\n'
 
     if len(disambig_errors[language]) > 0:
       output += '=== Disambiguation pages ===\n'
       for page in sorted(disambig_errors[language]):
-        output += f'* [[{page.title}]]\n'
+        output += f'* [[:{page.title}]]\n'
   return output
 
 if __name__ == '__main__':
