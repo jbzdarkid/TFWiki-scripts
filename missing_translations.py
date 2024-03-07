@@ -38,7 +38,7 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       count=len(missing_pages),
       date=time_and_date())
     for page in sorted(missing_pages):
-      output += f'\n# [[{page}]] ([[{page}/{language}|create]])'
+      output += f'\n# [[:{page}]] ([[:{page}/{language}|create]])'
     outputs.append([language, output])
   return outputs
 

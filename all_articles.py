@@ -37,7 +37,7 @@ All articles in {{{{lang info|{lang}}}}}; '''<onlyinclude>{count}</onlyinclude>'
       output = sub('\n.*?Missing translations/en.*?\n', '\n', output)
 
     for page in sorted(all_pages[language]):
-      output += f'\n# [[{page.title}]]'
+      output += f'\n# [[:{page.title}]]'
     outputs.append([language, output])
 
   english_output = """\
@@ -50,7 +50,7 @@ List of all English articles; <onlyinclude>{count}</onlyinclude> in total. Data 
     count=len(all_english_pages),
     date=time_and_date())
   for page in sorted(all_english_pages):
-    english_output += f'\n# [[{page.title}]]'
+    english_output += f'\n# [[:{page.title}]]'
 
   outputs.append(['en', english_output])
 
