@@ -55,7 +55,7 @@ List of all duplicate files; <onlyinclude>{unique}</onlyinclude> unique files, {
 
     counts.sort(key=lambda s: (-s[0], s[1]))
 
-    output += f'[[:{dupe_list[0]}|200px]]\n'
+    output += f'[[{dupe_list[0]}|200px]]\n'
     for count, title in counts:
       output += f'* [[:{title}|]] ([{whatlinkshere(title, count)} {plural.uses(count)}])\n'
     output += '\n'
