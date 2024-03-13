@@ -23,7 +23,9 @@ class Page:
     return f'Page(w, {self.title})'
 
   def __le__(self, other):
-    return self.url_title < other.url_title
+    if self.lang == other.lang:
+      return self.url_title <= other.url_title
+    return self.lang == 'en' or (other.lang != 'en' and self.lang < other.lang)
 
   def get_wiki_text(self):
     cached_text = self.wiki.page_text_cache.get(self.title, None)

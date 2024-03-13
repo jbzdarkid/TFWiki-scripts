@@ -33,6 +33,7 @@ class pagescraper_queue:
     self.q = Queue()
     self.done = Event()
     self.threads = []
+    self.count = 0
     self.failures = 0
     for _ in range(self.num_threads):
       thread = Thread(target=self.meta_thread_func)
@@ -42,6 +43,10 @@ class pagescraper_queue:
 
   def put(self, obj):
     self.q.put(obj)
+    self.count += 1
+
+  def __len__(self):
+    return self.count
 
   def __exit__(self, exc_type, exc_val, traceback):
     self.done.set()
