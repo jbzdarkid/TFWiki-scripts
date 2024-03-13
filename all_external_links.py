@@ -49,12 +49,18 @@ There are external links to <onlyinclude>{domain_count}</onlyinclude> different 
   domains = list(all_links.keys())
   domains.sort(key = lambda domain: (-len(all_links[domain]), domain))
 
+  last_header = 100_000
   for domain in domains:
     # Sort pages by title, then language (english first)
     pages = list(all_links[domain])
     pages.sort(key = lambda page: (page.title, page.lang != 'en', page.lang))
 
-    output += f'== {domain} ({plural.pages(len(pages))}) ==\n'
+    if len(pages) < last_header:
+      next_header = last_header // 10
+      output += f'== Domains with {next_header}-{last_header-1} pages ==\n'
+      last_header = next_header
+
+    output += f'=== {domain} ({plural.pages(len(pages))}) ===\n'
     for page in pages[:10]:
       output += f'* [[{page.title}]]\n'
     if len(pages) > 10:
