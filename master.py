@@ -162,6 +162,7 @@ if __name__ == '__main__':
   for module in modules_to_run:
     report_name = all_reports[module]
     start = datetime.now()
+    print(f'Starting {report_name} at {start}')
     link_map = publish_report(w, module, report_name, root, summary)
     duration = datetime.now() - start
     duration -= timedelta(microseconds=duration.microseconds) # Strip microseconds
