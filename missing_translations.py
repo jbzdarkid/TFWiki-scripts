@@ -23,7 +23,7 @@ def main(w):
   for language in LANGS:
     missing_pages = set()
     for page in english_pages:
-      if page.basename not in all_pages[language]
+      if page.basename not in all_pages[language]:
         missing_pages.add(page)
 
     output = """\
