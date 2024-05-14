@@ -8,7 +8,7 @@ def main(w):
   all_pages = {lang:{} for lang in LANGS}
   english_pages = []
   for page in w.get_all_pages():
-    all_pages.add(page.title)
+    all_pages[page.lang].add(page.basename)
     if page.lang != 'en':
       pass # Not english
     elif 'OTFWH' in page.title: # ETF2L Highlander Community Challenge/OTFWH
