@@ -1,28 +1,29 @@
-from utils import time_and_date
+from utils import plural, time_and_date
 from wikitools import wiki
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 def main(w):
-  all_pages = set()
-  english_pages = set()
+  all_pages = {lang:{} for lang in LANGS}
+  english_pages = []
   for page in w.get_all_pages():
     all_pages.add(page.title)
-    if page.title.rpartition('/')[2] in LANGS:
+    if page.lang != 'en':
       pass # Not english
     elif 'OTFWH' in page.title: # ETF2L Highlander Community Challenge/OTFWH
       pass # Special, non-translated page
     elif page.title.startswith('WebAPI'):
       pass # WebAPI pages are very technical and shouldn't be translated.
     else:
-      english_pages.add(page.title)
+      english_pages.append(page)
 
+  # We are going to generate several outputs, one for each language. The rest of the code is language-specific.
   outputs = []
   for language in LANGS:
     missing_pages = set()
     for page in english_pages:
-      if f'{page}/{language}' not in all_pages:
+      if page.basename not in all_pages[language]
         missing_pages.add(page)
 
     output = """\
@@ -38,7 +39,8 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       count=len(missing_pages),
       date=time_and_date())
     for page in sorted(missing_pages):
-      output += f'\n# [[:{page}]] ([[:{page}/{language}|create]])'
+      link_count = page.get_links()
+      output += f'\n# [[:{page.basename}]] ([[:{page.title}|create]]) ({plural.links(link_count)})'
     outputs.append([language, output])
   return outputs
 
