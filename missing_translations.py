@@ -44,7 +44,7 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       count=len(missing_pages),
       date=time_and_date())
     for page in sorted(missing_pages):
-      link_count = page.get_links()
+      link_count = sum(1 for _ in page.get_links())
       output += f'\n# [[:{page.basename}]] ([[:{page.title}|create]]) ({plural.links(link_count)})'
     outputs.append([language, output])
   return outputs
