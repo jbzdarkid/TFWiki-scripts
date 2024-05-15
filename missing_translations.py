@@ -5,18 +5,20 @@ verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 def main(w):
-  all_pages = {lang:{} for lang in LANGS}
+  all_pages = {lang:set() for lang in LANGS}
   english_pages = []
   for page in w.get_all_pages():
-    all_pages[page.lang].add(page.basename)
     if page.lang != 'en':
-      pass # Not english
+      all_pages[page.lang].add(page.basename)
     elif 'OTFWH' in page.title: # ETF2L Highlander Community Challenge/OTFWH
       pass # Special, non-translated page
     elif page.title.startswith('WebAPI'):
       pass # WebAPI pages are very technical and shouldn't be translated.
     else:
       english_pages.append(page)
+
+  if verbose:
+    print(f'Done processing pages, found {len(english_pages)} english pages')
 
   # We are going to generate several outputs, one for each language. The rest of the code is language-specific.
   outputs = []
@@ -25,6 +27,9 @@ def main(w):
     for page in english_pages:
       if page.basename not in all_pages[language]:
         missing_pages.add(page)
+    
+    if verbose:
+      print(f'Found {len(missing_pages)} missing pages in {language}')
 
     output = """\
 {{{{DISPLAYTITLE: {count} pages missing {{{{lang name|name|{lang}}}}} translation}}}}
