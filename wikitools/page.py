@@ -26,7 +26,10 @@ class Page:
     return self.url_title < other.url_title
 
   def __eq__(self, other):
-    return self.wiki == other.wiki and self.url_title == other.url_title
+    try:
+      return self.wiki == other.wiki and self.url_title == other.url_title
+    except AttributeError:
+      return False
 
   def __hash__(self):
     return self.url_title.__hash__()
