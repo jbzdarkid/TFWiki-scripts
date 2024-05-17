@@ -58,7 +58,6 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       if len(sort_key) > 0: # If we have link counts
         output += f' ({plural.links(sort_key[page])})'
     outputs.append([language, output])
-    break
   return outputs
 
 if __name__ == '__main__':
