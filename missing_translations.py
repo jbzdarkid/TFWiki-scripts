@@ -3,7 +3,7 @@ from wikitools import wiki
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
-sort_by_count = False
+sort_by_count = True
 
 
 def main(w):
@@ -29,7 +29,7 @@ def main(w):
     for page in english_pages:
       if page.basename not in all_pages[language]:
         missing_pages.append(page)
-    
+
     if verbose:
       print(f'Found {len(missing_pages)} missing pages in {language}')
 
