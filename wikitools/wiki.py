@@ -3,6 +3,7 @@ from requests.exceptions import RequestException
 import requests
 
 from .page import Page
+from .zip_dict import ZipDict
 
 class Wiki:
   def __init__(self, api_url):
@@ -10,7 +11,7 @@ class Wiki:
     self.wiki_url = api_url.replace('api.php', 'index.php')
     self.lgtoken = None
     self.page_text_cache = {}
-    self.page_html_cache = {}
+    self.page_html_cache = ZipDict()
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
