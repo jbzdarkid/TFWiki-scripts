@@ -1,6 +1,6 @@
 from io import BytesIO
-from threading import Lock
 from zipfile import ZipFile, ZIP_DEFLATED
+from readerwriterlock import rwlock
 
 class ZipDict:
   """
@@ -12,15 +12,18 @@ class ZipDict:
   def __init__(self):
     self.buffer = BytesIO()
     self.zipfile = ZipFile(self.buffer, 'a', ZIP_DEFLATED, compresslevel=9)
-    self.lock = Lock()
+    # Since zipfiles are not multithread-safe, we need a reader/writer lock
+    # to allow concurrent access.
+    self.lock = rwlock.RWLockFair()
 
   def __del__(self):
     self.zipfile.close()
     del self.buffer # Explicitly clean up the buffer to recover memory
 
   def __getitem__(self, key):
-    with self.zipfile.open(key, 'r') as f:
-      return f.read().decode('utf-8')
+    with self.lock.gen_rlock():
+      with self.zipfile.open(key, 'r') as f:
+        return f.read().decode('utf-8')
 
   def get(self, key, default=None):
     try:
@@ -29,9 +32,7 @@ class ZipDict:
       return default
 
   def __setitem__(self, key, value):
-    # As writing data can result in recompression of the zipfile,
-    # writes must be sequential. Reads have no such restriction.
-    with self.lock:
+    with self.lock.gen_wlock():
       with self.zipfile.open(key, 'w') as f:
         f.write(value.encode('utf-8'))
 
