@@ -10,12 +10,10 @@ from wikitools.page import Page
 import open_pr_comment
 
 # Reports I want:
-# Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 # images without licensing?
 # Quotations which use quote characters
 # Using {{lang}} and {{if lang}} on non-template pages
 # Direct links to disambig pages
-# Just... a summary of every single external link. Maybe just 'count per domain' and then list the top 10 pages? I'm finding a LOT of sus links, and it's only the ones that are *broken*.
 # Lang template mis-ordering and lang-template duplicate keys
 # Templates sorted by usage and protect status
 # A 'missing translations' report but for dictionary entries (maybe sorted by usage, too?)
@@ -85,7 +83,7 @@ monthly_reports = {
   'displaytitles': 'Duplicate displaytitles',
   'duplicate_files': 'Duplicate files',
   'edit_stats': 'Users by edit count',
-  'external_links2': 'External links',
+  'all_external_links': 'All external links',
   'mismatched': 'Mismatched parenthesis',
   'undocumented_templates': 'Undocumented templates',
   'unused_files': 'Unused files',
