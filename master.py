@@ -19,6 +19,7 @@ import open_pr_comment
 # Lang template mis-ordering and lang-template duplicate keys
 # Templates sorted by usage and protect status
 # A 'missing translations' report but for dictionary entries (maybe sorted by usage, too?)
+# A report for "Edits on talkpages (not in the "user talk" namespace) in the past few days", so people can track active discussions?
 
 # Reports I want to improve:
 # update readme (again)
@@ -28,7 +29,7 @@ import open_pr_comment
 # Sort the output from mismatched
 # Sort the output from displaytitles
 # Threading for navboxes.py?
-# Ensure that PRs which add files also touch readme.md
+# Ensure that PRs which add files also touch readme.md -> isn't this done?
 # Templates which link to redirects
 
 def edit_or_save(page_name, file_name, output, summary):
