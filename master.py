@@ -13,8 +13,8 @@ import open_pr_comment
 # Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 # images without licensing?
 # Quotations which use quote characters
-# Using {{lang}} and {{if lang}} on non-template pages
-# Direct links to disambig pages
+# Using {{lang}} and {{if lang}} on non-template pages -> this is apparently somewhat common now to make copy/paste editing easier
+# Pages which link to disambig pages not in hatnote/see also
 # Just... a summary of every single external link. Maybe just 'count per domain' and then list the top 10 pages? I'm finding a LOT of sus links, and it's only the ones that are *broken*.
 # Lang template mis-ordering and lang-template duplicate keys
 # Templates sorted by usage and protect status
