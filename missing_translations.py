@@ -3,7 +3,7 @@ from wikitools import wiki
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
-sort_by_count = True
+sort_by_count = False
 
 
 def main(w):
@@ -54,7 +54,7 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       missing_pages.sort() # Alphabetical sort
 
     for page in missing_pages:
-      output += f'\n# [[:{page.basename}]] ([[:{page.title}|create]])'
+      output += f'\n# [[:{page.basename}]] ([[:{page.title}/{language}|create]])'
       if len(sort_key) > 0: # If we have link counts
         output += f' ({plural.links(sort_key[page])})'
     outputs.append([language, output])
