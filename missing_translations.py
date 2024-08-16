@@ -22,6 +22,12 @@ def main(w):
   if verbose:
     print(f'Done processing pages, found {len(english_pages)} english pages')
 
+  if sort_by_count:
+    link_counts = {page.title: sum(1 for _ in page.get_links()) for page in english_pages}
+    sort_key = lambda page: -link_counts[page.basename]
+  else:
+    sort_key = lambda page: page.title
+
   # We are going to generate several outputs, one for each language. The rest of the code is language-specific.
   outputs = []
   for language in LANGS:
@@ -46,12 +52,8 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       count=len(missing_pages),
       date=time_and_date())
 
-    sort_key = {}
-    if sort_by_count:
-      sort_key = {page: sum(1 for _ in page.get_links()) for page in missing_pages}
-      missing_pages.sort(key = lambda page: -sort_key[page])
-    else:
-      missing_pages.sort() # Alphabetical sort
+    # Sort key defined above (outside of the loop)
+    missing_pages.sort(key = sort_key)
 
     for page in missing_pages:
       output += f'\n# [[:{page.basename}]] ([[:{page.title}/{language}|create]])'
