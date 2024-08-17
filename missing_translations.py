@@ -58,7 +58,7 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
     for page in missing_pages:
       output += f'\n# [[:{page.basename}]] ([[:{page.title}/{language}|create]])'
       if sort_by_count: # then we have link counts
-        output += f' ({plural.links(link_counts[page])})'
+        output += f' ({plural.links(link_counts[page.basename])})'
     outputs.append([language, output])
   return outputs
 
