@@ -24,7 +24,12 @@ class Wiki:
       'format': 'json',
     })
     r = self.session.get(self.api_url, params=params)
-    r.raise_for_status()
+    if not r.ok:
+      if params.get('max_retries', 0) > 0:
+        params['max_retries'] -= 1
+        sleep(30)
+        return get(self, action, **params)
+      r.raise_for_status()
     j = r.json()
     if 'warnings' in j:
       print(r.url + '\tWarning: ' + j['warnings']['main']['*'])
@@ -90,6 +95,10 @@ class Wiki:
     })
     r = self.session.post(self.api_url, data=kwargs, files=files)
     if r.status_code >= 500:
+      if kwargs.get('max_retries', 0) > 0:
+        kwargs['max_retries'] -= 1
+        sleep(30)
+        return get(self, action, **kwargs)
       r.raise_for_status()
     return r.json()
 
@@ -101,7 +110,8 @@ class Wiki:
     namespaces = {}
     for namespace in self.get_with_continue('query', 'namespaces',
       meta='siteinfo',
-      siprop='namespaces'
+      siprop='namespaces',
+      max_retries=5, # If this fails our script can't run, so try pretty hard.
     ):
       namespaces[namespace['*']] = namespace['id']
     namespaces['Main'] = namespaces['']
