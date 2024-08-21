@@ -1,5 +1,5 @@
 from re import finditer
-from requests.exceptions import RequestException
+from time import sleep
 import requests
 
 from .page import Page
@@ -28,7 +28,7 @@ class Wiki:
       if params.get('max_retries', 0) > 0:
         params['max_retries'] -= 1
         sleep(30)
-        return get(self, action, **params)
+        return self.get(action, **params)
       r.raise_for_status()
     j = r.json()
     if 'warnings' in j:
@@ -39,7 +39,7 @@ class Wiki:
     while 1:
       try:
         data = self.get(action, **kwargs)
-      except RequestException:
+      except requests.exceptions.RequestException:
         return # Unable to load more info for this query
       if data == {'batchcomplete': ''}:
         return # No entries for this query
@@ -98,7 +98,7 @@ class Wiki:
       if kwargs.get('max_retries', 0) > 0:
         kwargs['max_retries'] -= 1
         sleep(30)
-        return get(self, action, **kwargs)
+        return self.post_with_login(action, files=files, **kwargs)
       r.raise_for_status()
     return r.json()
 

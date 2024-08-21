@@ -1,5 +1,3 @@
-from requests.exceptions import RequestException
-from time import sleep
 import functools
 import requests
 
@@ -37,7 +35,7 @@ class Page:
       text = raw['parse']['wikitext']['*']
       self.wiki.page_text_cache[self.title] = text
       return text
-    except RequestException:
+    except requests.exceptions.RequestException:
       return '' # Unable to fetch page contents, pretend it's empty
 
   def get_raw_html(self):
