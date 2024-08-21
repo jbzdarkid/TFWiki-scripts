@@ -1,5 +1,3 @@
-from requests.exceptions import RequestException
-from time import sleep
 import functools
 import requests
 
@@ -46,7 +44,7 @@ class Page:
       text = raw['parse']['wikitext']['*']
       self.wiki.page_text_cache[self.title] = text
       return text
-    except RequestException:
+    except requests.exceptions.RequestException:
       return '' # Unable to fetch page contents, pretend it's empty
 
   def get_raw_html(self):
@@ -108,26 +106,13 @@ class Page:
     if len(text) > 3000 * 1000: # 3 KB
       text = '<span class="error">Warning: Report truncated to 3 KB</span>\n' + text[:3000 * 1000]
 
-    # We would rather not lose all our hard work, so we try pretty hard to make the edit succeed.
-    i = 0
-    while True:
-      try:
-        data = self.wiki.post_with_csrf('edit',
-          title=self.url_title,
-          text=text,
-          summary=summary,
-          bot=bot,
-        )
-        break
-      except Exception as e:
-        print(f'Attempt {i} failed:\n{e}')
-        if i < 5:
-          i += 1
-          sleep(30)
-        else:
-          print(f'Failed to edit {self.title}:\n{e}')
-          return None
-
+    data = self.wiki.post_with_csrf('edit',
+      title=self.url_title,
+      text=text,
+      summary=summary,
+      bot=bot,
+      max_retries=1, # Edits can fail and we'll just write a text file out. Retry once in case of stupid failures.
+    )
     if 'error' in data:
       print(f'Failed to edit {self.title}:')
       print(data['error'])

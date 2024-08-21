@@ -1,8 +1,9 @@
 from re import finditer
-from requests.exceptions import RequestException
+from time import sleep
 import requests
 
 from .page import Page
+from .zip_dict import ZipDict
 
 class Wiki:
   def __init__(self, api_url):
@@ -10,7 +11,7 @@ class Wiki:
     self.wiki_url = api_url.replace('api.php', 'index.php')
     self.lgtoken = None
     self.page_text_cache = {}
-    self.page_html_cache = {}
+    self.page_html_cache = ZipDict()
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
@@ -26,7 +27,12 @@ class Wiki:
       'format': 'json',
     })
     r = self.session.get(self.api_url, params=params)
-    r.raise_for_status()
+    if not r.ok:
+      if params.get('max_retries', 0) > 0:
+        params['max_retries'] -= 1
+        sleep(30)
+        return self.get(action, **params)
+      r.raise_for_status()
     j = r.json()
     if 'warnings' in j:
       print(r.url + '\tWarning: ' + j['warnings']['main']['*'])
@@ -36,7 +42,7 @@ class Wiki:
     while 1:
       try:
         data = self.get(action, **kwargs)
-      except RequestException:
+      except requests.exceptions.RequestException:
         return # Unable to load more info for this query
       if data == {'batchcomplete': ''}:
         return # No entries for this query
@@ -92,6 +98,10 @@ class Wiki:
     })
     r = self.session.post(self.api_url, data=kwargs, files=files)
     if r.status_code >= 500:
+      if kwargs.get('max_retries', 0) > 0:
+        kwargs['max_retries'] -= 1
+        sleep(30)
+        return self.post_with_login(action, files=files, **kwargs)
       r.raise_for_status()
     return r.json()
 
@@ -103,7 +113,8 @@ class Wiki:
     namespaces = {}
     for namespace in self.get_with_continue('query', 'namespaces',
       meta='siteinfo',
-      siprop='namespaces'
+      siprop='namespaces',
+      max_retries=5, # If this fails our script can't run, so try pretty hard.
     ):
       namespaces[namespace['*']] = namespace['id']
     namespaces['Main'] = namespaces['']
