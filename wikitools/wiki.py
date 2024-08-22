@@ -98,7 +98,7 @@ class Wiki:
       if kwargs.get('max_retries', 0) > 0:
         kwargs['max_retries'] -= 1
         sleep(30)
-        return self.post_with_login(action, files=files, **kwargs)
+        return self.post_with_login(files=files, **kwargs)
       r.raise_for_status()
     return r.json()
 
