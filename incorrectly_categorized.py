@@ -3,6 +3,7 @@ from wikitools import wiki
 from wikitools.page import Page
 
 verbose = False
+LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 def pagescraper(category, w, miscategorized):
   for page in w.get_all_category_pages(category.title):

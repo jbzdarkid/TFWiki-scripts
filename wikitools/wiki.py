@@ -1,5 +1,5 @@
 from re import finditer
-from time import sleep
+from requests.exceptions import RequestException
 import requests
 
 from .page import Page
@@ -24,12 +24,7 @@ class Wiki:
       'format': 'json',
     })
     r = self.session.get(self.api_url, params=params)
-    if not r.ok:
-      if params.get('max_retries', 0) > 0:
-        params['max_retries'] -= 1
-        sleep(30)
-        return self.get(action, **params)
-      r.raise_for_status()
+    r.raise_for_status()
     j = r.json()
     if 'warnings' in j:
       print(r.url + '\tWarning: ' + j['warnings']['main']['*'])
@@ -39,7 +34,7 @@ class Wiki:
     while 1:
       try:
         data = self.get(action, **kwargs)
-      except requests.exceptions.RequestException:
+      except RequestException:
         return # Unable to load more info for this query
       if data == {'batchcomplete': ''}:
         return # No entries for this query
@@ -95,10 +90,6 @@ class Wiki:
     })
     r = self.session.post(self.api_url, data=kwargs, files=files)
     if r.status_code >= 500:
-      if kwargs.get('max_retries', 0) > 0:
-        kwargs['max_retries'] -= 1
-        sleep(30)
-        return self.post_with_login(files=files, **kwargs)
       r.raise_for_status()
     return r.json()
 
@@ -110,8 +101,7 @@ class Wiki:
     namespaces = {}
     for namespace in self.get_with_continue('query', 'namespaces',
       meta='siteinfo',
-      siprop='namespaces',
-      max_retries=5, # If this fails our script can't run, so try pretty hard.
+      siprop='namespaces'
     ):
       namespaces[namespace['*']] = namespace['id']
     namespaces['Main'] = namespaces['']
