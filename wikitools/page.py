@@ -138,6 +138,8 @@ class Page:
       return self.wiki.wiki_url + '?diff=' + str(data['edit']['newrevid'])
 
   def upload(self, fileobj, comment=''):
+    if not self.title.startswith('File:'):
+      print(f'WARNING: Page title "{page.title}" is not in the file namespace, page edits will not work properly')
     if fileobj.mode != 'rb':
       print(f'Failed to upload {self.title}, file must be opened in rb (was {fileobj.mode})')
       return
