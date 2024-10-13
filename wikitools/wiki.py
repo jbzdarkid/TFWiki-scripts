@@ -18,6 +18,9 @@ class Wiki:
 
     self.namespaces = self.get_namespaces()
 
+  def __eq__(self, other):
+    return self.api_url == other.api_url
+
   def get(self, action, **params):
     params.update({
       'action': action,

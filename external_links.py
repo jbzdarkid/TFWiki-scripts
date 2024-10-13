@@ -111,8 +111,8 @@ def main(w):
     print('Generating page list')
   page_q, done = Queue(), Event()
   for page in w.get_all_pages():
-    if page.title.rpartition('/')[2] in LANGS:
-      continue # Filter out non-english pages
+    if page.lang != 'en':
+      continue
     page_q.put(page)
   done.set()
   if verbose:

@@ -25,6 +25,15 @@ class Page:
   def __le__(self, other):
     return self.url_title < other.url_title
 
+  def __eq__(self, other):
+    try:
+      return self.wiki == other.wiki and self.url_title == other.url_title
+    except AttributeError:
+      return False
+
+  def __hash__(self):
+    return self.url_title.__hash__()
+
   def get_wiki_text(self):
     cached_text = self.wiki.page_text_cache.get(self.title, None)
     if cached_text:

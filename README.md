@@ -16,6 +16,7 @@ This version of the scripts has been updated to python3, which unfortunately bro
 - `incorrectly_categorized.py`: Searches all categories for articles which are categorized into the wrong language
 - `incorrectly_linked.py`: Searches all language pages for links to other languages (e.g. /es linking to /pt).
 - `mismatched_weekly.py`: Weekly copy of the monthly report which only runs on the past week of recent changes.
+- `missing_translations_weekly`: Weekly copy of the daily 'Missing translations' report, sorted by usage count.
 - `navboxes.py`: Looks for navboxes (display-only templates which crosslink many articles) that are not present on all of their article pages.
 - `overtranslated.py`: Searches all articles for language pages which don't exist in english. This is usually indicative of duplicate translations.
 - `wanted_templates.py`: Searches for template transclusions which don't exist, usually indicative of a typo.

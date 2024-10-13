@@ -76,6 +76,7 @@ weekly_reports = {
   'incorrectly_categorized': 'Pages with incorrect categorization',
   'incorrectly_linked': 'Pages with incorrect links',
   'mismatched_weekly': 'Mismatched parenthesis',
+  'missing_translations_weekly': 'Missing translations/sorted',
   'navboxes': 'Pages which are missing navboxes',
   'overtranslated': 'Pages with no english equivalent',
   'wanted_templates': 'Wanted templates',
