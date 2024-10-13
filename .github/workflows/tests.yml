@@ -1,0 +1,13 @@
+name: Validate and publish
+on:
+  push:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - run: pip install -r requirements.txt
+    - run: python -u tests.py
+      timeout-minutes: 5
