@@ -1,5 +1,4 @@
 from wikitools import wiki
-from datetime import datetime, timedelta
 
 import missing_translations
 
@@ -7,7 +6,7 @@ import missing_translations
 missing_translations.sort_by_count = True
 
 def main(w):
-  return mismatched.main(w)
+  return missing_translations.main(w)
 
 if __name__ == '__main__':
   verbose = True
