@@ -72,11 +72,11 @@ daily_reports = {
 # English-only but otherwise frequently changing reports
 weekly_reports = {
   'displaytitles_weekly': 'Duplicate displaytitles',
-  'mismatched_weekly': 'Mismatched parenthesis',
-  'missing_translations_weekly': 'Missing translations/sorted',
   'incorrect_redirects': 'Mistranslated redirects',
   'incorrectly_categorized': 'Pages with incorrect categorization',
   'incorrectly_linked': 'Pages with incorrect links',
+  'mismatched_weekly': 'Mismatched parenthesis',
+  'missing_translations_weekly': 'Missing translations/sorted',
   'navboxes': 'Pages which are missing navboxes',
   'overtranslated': 'Pages with no english equivalent',
   'wanted_templates': 'Wanted templates',
