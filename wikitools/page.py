@@ -27,6 +27,15 @@ class Page:
       return self.url_title <= other.url_title
     return self.lang == 'en' or (other.lang != 'en' and self.lang < other.lang)
 
+  def __eq__(self, other):
+    try:
+      return self.wiki == other.wiki and self.url_title == other.url_title
+    except AttributeError:
+      return False
+
+  def __hash__(self):
+    return self.url_title.__hash__()
+
   def get_wiki_text(self):
     cached_text = self.wiki.page_text_cache.get(self.title, None)
     if cached_text:
@@ -74,10 +83,13 @@ class Page:
     ):
       yield Page(self.wiki, entry['title'], entry)
 
-  def get_links(self, *, namespace='Main'):
+  def get_links(self, *, namespaces=None):
+    if namespaces is None:
+      namespaces = ['Main']
+    namespace_query = '|'.join((str(self.wiki.namespaces[ns]) for ns in namespaces))
     for entry in self.wiki.get_with_continue('query', 'pages',
       generator='links',
-      gplnamespace=self.wiki.namespaces[namespace],
+      gplnamespace=namespace_query,
       gpllimit=500,
       titles=self.url_title,
     ):
@@ -137,6 +149,8 @@ class Page:
       return self.wiki.wiki_url + '?diff=' + str(data['edit']['newrevid'])
 
   def upload(self, fileobj, comment=''):
+    if not self.title.startswith('File:'):
+      print(f'WARNING: Page title "{page.title}" is not in the file namespace, page edits will not work properly')
     if fileobj.mode != 'rb':
       print(f'Failed to upload {self.title}, file must be opened in rb (was {fileobj.mode})')
       return

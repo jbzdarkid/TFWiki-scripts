@@ -3,6 +3,7 @@ from requests.exceptions import RequestException
 import requests
 
 from .page import Page
+from .zip_dict import ZipDict
 
 class Wiki:
   def __init__(self, api_url):
@@ -10,12 +11,15 @@ class Wiki:
     self.wiki_url = api_url.replace('api.php', 'index.php')
     self.lgtoken = None
     self.page_text_cache = {}
-    self.page_html_cache = {}
+    self.page_html_cache = ZipDict()
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
 
     self.namespaces = self.get_namespaces()
+
+  def __eq__(self, other):
+    return self.api_url == other.api_url
 
   def get(self, action, **params):
     params.update({
@@ -125,15 +129,21 @@ class Wiki:
       auwitheditsonly='true',
     )
 
-  def get_all_pages(self, *, namespaces=None):
+  def get_all_pages(self, *, namespaces=None, redirects=False):
     if namespaces is None:
       namespaces = ['Main']
+    redirect_filter = {
+      False: 'nonredirects',
+      True: 'redirects',
+      None: 'all',
+    }[redirects]
+
     for namespace in namespaces:
       for entry in self.get_with_continue('query', 'allpages',
         list='allpages',
         aplimit=500,
         apnamespace=self.namespaces[namespace],
-        apfilterredir='nonredirects', # Filter out redirects
+        apfilterredir=redirect_filter,
       ):
         title = entry['title']
         if title.endswith('.js') or title.endswith('.css'):

@@ -6,16 +6,20 @@ This version of the scripts has been updated to python3, which unfortunately bro
 
 ## Daily reports
 - `all_articles.py`: Generates the complete list of translated articles for each language, which is used by the translator's noticeboard
+- `missing_categories.py`: Searches for non-translated categories. Categories which are only in english should generally be marked as {{non-article category}}.
 - `missing_translations.py`: Generates the list of missing translations for each language compared to english, which is used by the translator's noticeboard
 - `untranslated_templates.py`: Parses templates for {{lang}} usage, and reports whether or not they are fully translated.
 
 ## Weekly reports
-- `incorrectly_categorized.py`: Searches all categories for articles which are categorized into the wrong language
-- `incorrectly_categorized.py`: Searches all language pages for links to other languages (e.g. /es linking to /pt).
-- `navboxes.py`: Looks for navboxes (display-only templates which crosslink many articles) that are not present on all of their article pages.
-- `wanted_templates.py`: Searches for template transclusions which don't exist, usually indicative of a typo.
 - `displaytitles_weekly.py`: Weekly copy of the monthly report which only runs on the past week of recent changes.
+- `incorrect_redirects.py`: Reports on language redirects which don't match english, or which redirect to another language.
+- `incorrectly_categorized.py`: Searches all categories for articles which are categorized into the wrong language
+- `incorrectly_linked.py`: Searches all language pages for links to other languages (e.g. /es linking to /pt).
 - `mismatched_weekly.py`: Weekly copy of the monthly report which only runs on the past week of recent changes.
+- `missing_translations_weekly`: Weekly copy of the daily 'Missing translations' report, sorted by usage count.
+- `navboxes.py`: Looks for navboxes (display-only templates which crosslink many articles) that are not present on all of their article pages.
+- `overtranslated.py`: Searches all articles for language pages which don't exist in english. This is usually indicative of duplicate translations.
+- `wanted_templates.py`: Searches for template transclusions which don't exist, usually indicative of a typo.
 
 ## Monthly reports
 - `displaytitles.py`: Searches for pages with duplicate displaytitles, which show a gross-looking error message.
@@ -23,7 +27,5 @@ This version of the scripts has been updated to python3, which unfortunately bro
 - `edit_stats.py`: Provides some statistics about user editing habits on the wiki, along with a list of the top 100 editors by edit count
 - `external_links2.py`: Searches all articles for links outside the tf2 wiki, and checks to see if those links are still valid (HTTP 200)
 - `mismatched.py`: Searches all articles for incorrect pairs of parenthesis, to help catch broken links, tags, and templates.
-- `missing_categories.py`: Searches for non-translated categories. Categories which are only in english should generally be marked as {{non-article category}}.
-- `overtranslated.py`: Searches all articles for language pages which don't exist in english. This is usually indicative of duplicate translations.
 - `undocumented_templates.py`: Parses all templates to see if they have sufficient text in <noinclude> or {{documentation}}
 - `unused_files.py`: Reparses Special:UnusedFiles, and re-sorts the data, along with removing some known exceptions.

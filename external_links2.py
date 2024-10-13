@@ -183,7 +183,7 @@ def main(w):
       output += f'== {link_escape(dangerous_link)}: {dangerous_links[dangerous_link]} ==\n'
       for page in sorted(page_links.keys()):
         if dangerous_link in page_links[page]:
-          output += f'* [[{page.title}]]\n'
+          output += f'* [[:{page.title}]]\n'
 
   if len(dead_links) > 0:
     output += '= Broken links =\n'
@@ -208,7 +208,7 @@ def main(w):
           output += f'=== {link_escape(link)}: {dead_links[link]} ===\n'
           for page in sorted(page_links.keys()):
             if link in page_links[page]:
-              output += f'* [[{page.title}]]\n'
+              output += f'* [[:{page.title}]]\n'
 
   return output
 
