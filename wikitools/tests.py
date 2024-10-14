@@ -34,7 +34,7 @@ class Tests:
 
 if __name__ == '__main__':
   tests = Tests()
-    
+
   def is_test(method):
     return inspect.ismethod(method) and method.__name__.startswith('test')
   tests = list(inspect.getmembers(tests, is_test))
@@ -59,4 +59,3 @@ if __name__ == '__main__':
 
     print('===', test[0], 'passed')
   print('\nAll tests passed')
-
