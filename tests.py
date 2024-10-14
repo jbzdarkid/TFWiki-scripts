@@ -10,7 +10,7 @@ class Tests:
   #############
 
   # TODO: Define tests here (which start with the word test)
-  def test_nothing():
+  def test_nothing(self):
     pass
 
 if __name__ == '__main__':
