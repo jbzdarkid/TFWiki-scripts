@@ -35,7 +35,7 @@ def main(w):
   non_files_with_transclusions = []
 
   for template in image_templates:
-    for file in Page(w, f'Template:{template}').get_transclusions(*):
+    for file in Page(w, f'Template:{template}').get_transclusions('*'):
       if file not in all_files:
         non_files_with_transclusions.add(file)
         all_files[file] = [template]
