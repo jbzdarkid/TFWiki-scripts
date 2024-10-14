@@ -23,7 +23,9 @@ class Page:
     return f'Page(w, {self.title})'
 
   def __le__(self, other):
-    return self.url_title < other.url_title
+    if self.lang == other.lang:
+      return self.url_title <= other.url_title
+    return self.lang == 'en' or (other.lang != 'en' and self.lang < other.lang)
 
   def __eq__(self, other):
     try:
@@ -148,7 +150,7 @@ class Page:
 
   def upload(self, fileobj, comment=''):
     if not self.title.startswith('File:'):
-      print(f'WARNING: Page title "{page.title}" is not in the file namespace, page edits will not work properly')
+      print(f'WARNING: Page title "{self.title}" is not in the file namespace, page edits will not work properly')
     if fileobj.mode != 'rb':
       print(f'Failed to upload {self.title}, file must be opened in rb (was {fileobj.mode})')
       return
