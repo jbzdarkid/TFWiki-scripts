@@ -107,6 +107,7 @@ class Wiki:
       siprop='namespaces'
     ):
       namespaces[namespace['*']] = namespace['id']
+    namespaces['*'] = '*' # 'All', in many queries
     namespaces['Main'] = namespaces['']
     if 'Team Fortress Wiki' in namespaces:
       namespaces['TFW'] = namespaces['Team Fortress Wiki']

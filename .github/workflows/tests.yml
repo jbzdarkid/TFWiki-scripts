@@ -1,6 +1,6 @@
 name: Tests
 on:
-  push:
+  pull_request:
 
 jobs:
   run:
@@ -13,4 +13,6 @@ jobs:
         python-version: '3.x'
     - run: pip install -r requirements.txt
     - run: python -u wikitools/tests.py
+      timeout-minutes: 5
+    - run: python -u tests.py
       timeout-minutes: 5

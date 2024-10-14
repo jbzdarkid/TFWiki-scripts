@@ -11,7 +11,6 @@ import open_pr_comment
 
 # Reports I want:
 # Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
-# images without licensing?
 # Quotations which use quote characters
 # Using {{lang}} and {{if lang}} on non-template pages -> this is apparently somewhat common now to make copy/paste editing easier
 # Pages which link to disambig pages not in hatnote/see also
@@ -90,6 +89,7 @@ monthly_reports = {
   'external_links2': 'External links',
   'mismatched': 'Mismatched parenthesis',
   'undocumented_templates': 'Undocumented templates',
+  'unlicensed_images': 'Unlicensed images',
   'unused_files': 'Unused files',
 }
 
