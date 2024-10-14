@@ -1,4 +1,4 @@
-from utils import pagescraper_queue, time_and_date
+from utils import time_and_date
 from wikitools import wiki
 from wikitools.page import Page
 
