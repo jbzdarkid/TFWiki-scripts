@@ -1,4 +1,4 @@
-name: Validate and publish
+name: Tests
 on:
   push:
 
