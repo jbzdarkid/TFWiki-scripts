@@ -62,15 +62,15 @@ Found '''<onlyinclude>{count}</onlyinclude>''' files which have an incorrect lic
 
   output += '== Non-files with file license templates ==\n'
   for page in non_files_with_transclusions:
-    output += f'* {page}\n'
+    output += f'* [[{page}]]\n'
 
   output += '== Files with >1 license template ==\n'
   for file in files_with_multiple_templates:
-    output += f'* {file}\n'
+    output += f'* [[{file}]]\n'
 
   output += '== Files with no license templates ==\n'
   for file in files_with_no_template:
-    output += f'* {file}\n'
+    output += f'* [[{file}]]\n'
 
   return output
 
