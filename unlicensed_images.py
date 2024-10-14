@@ -47,6 +47,11 @@ def main(w):
 
   files_with_multiple_templates = [file for file, templates in all_files.items() if len(templates) > 1]
   files_with_no_template =        [file for file, templates in all_files.items() if len(templates) == 0]
+  
+  print(len(non_files_with_transclusions))
+  print(len(files_with_multiple_templates))
+  print(len(files_with_no_template))
+  raise
 
   output = """\
 {{{{DISPLAYTITLE: {count} files with incorrect licensing}}}}
