@@ -74,10 +74,13 @@ class Page:
   def get_transclusion_count(self):
     return sum(1 for _ in self.get_transclusions())
 
-  def get_transclusions(self, *, namespace='Main'):
+  def get_transclusions(self, *, namespaces=None)
+    if not namespaces:
+      namespaces = ['Main']
+    namespace_query = '|'.join((str(self.wiki.namespaces[ns]) for ns in namespaces))
     for entry in self.wiki.get_with_continue('query', 'embeddedin',
       list='embeddedin',
-      einamespace=self.wiki.namespaces[namespace],
+      einamespace=namespace_query,
       eilimit=500,
       eititle=self.url_title,
     ):

@@ -2,21 +2,8 @@
 import inspect
 import sys
 
-from page import Page
-
-class MockWiki:
-  def __init__(self):
-    pass
-  
 class Tests:
   # Class setup
-  wiki = MockWiki()
-
-  # Utilities
-  def sort_titles(self, titles):
-    pages = [Page(self.wiki, title) for title in titles]
-    pages.sort()
-    return [page.title for page in pages]
 
   #############
   #!# Tests #!#
