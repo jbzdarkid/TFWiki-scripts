@@ -1,6 +1,5 @@
 from re import finditer
 import requests
-import urllib3
 
 from .page import Page
 from .retry import StaticRetry
