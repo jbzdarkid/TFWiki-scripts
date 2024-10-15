@@ -66,7 +66,7 @@ def pagescraper(navbox, navbox_templates):
   transclusions = []
   for namespace in NAMESPACES:
     links.extend(navbox.get_links(namespaces=[namespace]))
-    transclusions.extend(navbox.get_transclusions(namespace=namespace))
+    transclusions.extend(navbox.get_transclusions(namespaces=[namespace]))
   navbox_templates[navbox.title] = [
     set(link.title for link in links),
     set(trans.title for trans in transclusions),
@@ -79,7 +79,7 @@ def main(w):
   template_navbox = Page(w, 'Template:Navbox')
 
   with pagescraper_queue(pagescraper, navbox_templates) as navboxes:
-    for page in template_navbox.get_transclusions(namespace='Template'):
+    for page in template_navbox.get_transclusions(namespaces=['Template']):
       if page.title.lower().startswith('template:navbox'):
         continue # Exclude alternative navbox templates
       if page.title.lower().endswith('sandbox'):

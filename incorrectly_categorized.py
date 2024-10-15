@@ -52,7 +52,7 @@ def main(w):
     'Category:Uses Full Moon templates/lang',
   ]
 
-  for page in Page(w, 'Template:Non-article category').get_transclusions(namespace='Category'):
+  for page in Page(w, 'Template:Non-article category').get_transclusions(namespaces=['Category']):
     maintanence_categories.append(page.title)
 
   miscategorized = {}

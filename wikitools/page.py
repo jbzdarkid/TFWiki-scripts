@@ -1,4 +1,3 @@
-from requests.exceptions import RequestException
 from time import sleep
 import functools
 import requests
@@ -36,6 +35,11 @@ class Page:
   def __hash__(self):
     return self.url_title.__hash__()
 
+  def join_namespaces(self, namespaces):
+    if not namespaces:
+      return 'Main'
+    return '|'.join((str(self.wiki.namespaces[ns]) for ns in namespaces))
+
   def get_wiki_text(self):
     cached_text = self.wiki.page_text_cache.get(self.title, None)
     if cached_text:
@@ -48,7 +52,7 @@ class Page:
       text = raw['parse']['wikitext']['*']
       self.wiki.page_text_cache[self.title] = text
       return text
-    except RequestException:
+    except requests.exceptions.RequestException:
       return '' # Unable to fetch page contents, pretend it's empty
 
   def get_raw_html(self):
@@ -59,7 +63,7 @@ class Page:
       r = requests.get(self.wiki.wiki_url, allow_redirects=True, params={'title': self.url_title})
       self.wiki.page_html_cache[self.title] = r.text
       return r.text
-    except RequestException:
+    except requests.exceptions.RequestException:
       return '' # Unable to fetch page contents, pretend it's empty
 
   def get_page_url(self, **kwargs):
@@ -75,24 +79,18 @@ class Page:
     return sum(1 for _ in self.get_transclusions())
 
   def get_transclusions(self, *, namespaces=None):
-    if not namespaces:
-      namespaces = ['Main']
-    namespace_query = '|'.join((str(self.wiki.namespaces[ns]) for ns in namespaces))
     for entry in self.wiki.get_with_continue('query', 'embeddedin',
       list='embeddedin',
-      einamespace=namespace_query,
+      einamespace=self.join_namespaces(namespaces),
       eilimit=500,
       eititle=self.url_title,
     ):
       yield Page(self.wiki, entry['title'], entry)
 
   def get_links(self, *, namespaces=None):
-    if namespaces is None:
-      namespaces = ['Main']
-    namespace_query = '|'.join((str(self.wiki.namespaces[ns]) for ns in namespaces))
     for entry in self.wiki.get_with_continue('query', 'pages',
       generator='links',
-      gplnamespace=namespace_query,
+      gplnamespace=self.join_namespaces(namespaces),
       gpllimit=500,
       titles=self.url_title,
     ):

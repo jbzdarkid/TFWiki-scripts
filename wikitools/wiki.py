@@ -1,8 +1,9 @@
 from re import finditer
-from requests.exceptions import RequestException
 import requests
+import urllib3
 
 from .page import Page
+from .retry import StaticRetry
 from .zip_dict import ZipDict
 
 class Wiki:
@@ -13,8 +14,17 @@ class Wiki:
     self.page_text_cache = {}
     self.page_html_cache = ZipDict()
 
+    # https://urllib3.readthedocs.io/en/stable/reference/urllib3.util.html#urllib3.util.Retry
+    retry = StaticRetry(
+      total=1,
+      allowed_methods={'GET', 'POST'},
+      status_forcelist=[503],
+      static_backoff=30, # 30 second fixed backoff (custom implementation)
+    )
+
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
+    self.session.mount('https://', requests.adapters.HTTPAdapter(max_retries=retry))
 
     self.namespaces = self.get_namespaces()
 
@@ -37,7 +47,7 @@ class Wiki:
     while 1:
       try:
         data = self.get(action, **kwargs)
-      except RequestException:
+      except requests.exceptions.RequestException:
         return # Unable to load more info for this query
       if data == {'batchcomplete': ''}:
         return # No entries for this query
