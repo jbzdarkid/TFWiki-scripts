@@ -37,7 +37,7 @@ class Page:
 
   def join_namespaces(self, namespaces):
     if not namespaces:
-      return 'Main'
+      return self.wiki.namespaces['Main']
     return '|'.join((str(self.wiki.namespaces[ns]) for ns in namespaces))
 
   def get_wiki_text(self):

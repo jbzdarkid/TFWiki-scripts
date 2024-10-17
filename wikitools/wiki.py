@@ -39,7 +39,7 @@ class Wiki:
     r.raise_for_status()
     j = r.json()
     if 'warnings' in j:
-      print(r.url + '\tWarning: ' + j['warnings'])
+      print(r.url + '\tWarning: ' + str(j['warnings']))
     return j
 
   def get_with_continue(self, action, entry_key, **kwargs):
