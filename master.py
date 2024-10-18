@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import importlib
 from os import environ
+from random import shuffle
 from subprocess import check_output
 from sys import stdout
 from traceback import print_exc
@@ -49,6 +50,7 @@ def publish_report(w, module, report_name, root, summary):
     report_output = importlib.import_module(module).main(w)
 
     if isinstance(report_output, list):
+      shuffle(report_output) # Shuffle the order so that we don't always upload the same language first, to ensure even coverage of 502s
       for lang, output in report_output:
         link_map[lang] = edit_or_save(f'{root}/{report_name}/{lang}', f'{report_file_name}_{lang}.txt', output, summary)
     else:
@@ -147,7 +149,9 @@ if __name__ == '__main__':
     w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
     for report in all_reports:
       # Root and summary don't matter because we can't publish anyways.
+      print(report)
       publish_report(w, report, all_reports[report], '', '')
+      break
     exit(0)
 
   else:
