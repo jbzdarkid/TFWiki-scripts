@@ -8,10 +8,12 @@ LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko',
 def pagescraper(category, w, miscategorized):
   for page in w.get_all_category_pages(category.title):
     if page.lang != category.lang:
-      if category not in miscategorized[category.lang]:
-        miscategorized[category.lang][category.title] = [page]
-      else:
-        miscategorized[category.lang][category.title].append(page)
+      if page.title not in miscategorized:
+        miscategorized[page.title] = {
+          'page': page,
+          'categories': [],
+        }
+      miscategorized[page.title]['categories'].append(category.title)
 
 def main(w):
   # TODO: Consider including /lang categories again
@@ -50,10 +52,10 @@ def main(w):
     'Category:Uses Full Moon templates/lang',
   ]
 
-  for page in Page(w, 'Template:Non-article category').get_transclusions(namespace='Category'):
+  for page in Page(w, 'Template:Non-article category').get_transclusions(namespaces=['Category']):
     maintanence_categories.append(page.title)
 
-  miscategorized = {lang: {} for lang in LANGS}
+  miscategorized = {}
   with pagescraper_queue(pagescraper, w, miscategorized) as categories:
     for category in w.get_all_categories(filter_redirects=False):
       if category.title not in maintanence_categories:
@@ -61,41 +63,20 @@ def main(w):
           print(f'Processing {category.title}')
         categories.put(category)
 
-  unique_pages = set()
-  for language in LANGS:
-    for pages in miscategorized[language].values():
-      unique_pages.update(page.title for page in pages)
-
   output = """\
 {{{{DISPLAYTITLE: {page_count} miscategorized pages}}}}
-{category_count} categories have pages from other languages ('''<onlyinclude>{page_count}</onlyinclude>''' total pages). Data as of {date}.
+<onlyinclude>{page_count}</onlyinclude> pages are in a category in another language. Data as of {date}.
 
 {{{{TOC limit|2}}}}
 """.format(
-    category_count=sum(len(cats) for cats in miscategorized.values()),
-    page_count=len(unique_pages),
+    page_count=len(miscategorized),
     date=time_and_date())
 
-  for language in LANGS:
-    if len(miscategorized[language]) == 0:
-      continue
-
-    category_keys = []
-    for category in miscategorized[language]:
-      category_keys.append([len(miscategorized[language][category]), category])
-      if verbose:
-        print(f'{category} has {category_keys[-1][0]} miscategorized pages')
-
-    if verbose:
-      print(f'{len(category_keys)} categories with bad pages in {language}')
-
-    output += '== {{lang name|name|%s}} ==\n' % language
-    for _, category in sorted(category_keys, reverse=True):
-      output += f'=== [[:{category}]] ===\n'
-      if verbose:
-        print(f'  {len(miscategorized[language][category])} pages in category {category}')
-      for page in sorted(miscategorized[language][category]):
-        output += f'* [{page.get_edit_url()} {page.title}]\n'
+  for page_title in sorted(miscategorized.keys()):
+    page = miscategorized[page_title]['page']
+    output += f'=== [{page.get_edit_url()} {page.title}] ===\n'
+    for category in sorted(miscategorized[page_title]['categories']):
+      output += f'* [[:{category}]]\n'
 
   return output
 

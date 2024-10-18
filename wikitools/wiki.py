@@ -1,8 +1,9 @@
 from re import finditer
-from requests.exceptions import RequestException
 import requests
 
 from .page import Page
+from .retry import StaticRetry
+from .zip_dict import ZipDict
 
 class Wiki:
   def __init__(self, api_url):
@@ -10,11 +11,24 @@ class Wiki:
     self.wiki_url = api_url.replace('api.php', 'index.php')
     self.lgtoken = None
     self.page_text_cache = {}
+    self.page_html_cache = ZipDict()
+
+    # https://urllib3.readthedocs.io/en/stable/reference/urllib3.util.html#urllib3.util.Retry
+    retry = StaticRetry(
+      total=1,
+      allowed_methods={'GET', 'POST'},
+      status_forcelist=[502, 503],
+      static_backoff=30, # 30 second fixed backoff (custom implementation)
+    )
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
+    self.session.mount('https://', requests.adapters.HTTPAdapter(max_retries=retry))
 
     self.namespaces = self.get_namespaces()
+
+  def __eq__(self, other):
+    return self.api_url == other.api_url
 
   def get(self, action, **params):
     params.update({
@@ -25,14 +39,14 @@ class Wiki:
     r.raise_for_status()
     j = r.json()
     if 'warnings' in j:
-      print(r.url + '\tWarning: ' + j['warnings']['main']['*'])
+      print(r.url + '\tWarning: ' + str(j['warnings']))
     return j
 
   def get_with_continue(self, action, entry_key, **kwargs):
     while 1:
       try:
         data = self.get(action, **kwargs)
-      except RequestException:
+      except requests.exceptions.RequestException:
         return # Unable to load more info for this query
       if data == {'batchcomplete': ''}:
         return # No entries for this query
@@ -102,8 +116,10 @@ class Wiki:
       siprop='namespaces'
     ):
       namespaces[namespace['*']] = namespace['id']
+    namespaces['*'] = '*' # 'All', in many queries
     namespaces['Main'] = namespaces['']
-    namespaces['TFW'] = namespaces['Team Fortress Wiki']
+    if 'Team Fortress Wiki' in namespaces:
+      namespaces['TFW'] = namespaces['Team Fortress Wiki']
     return namespaces
 
   def get_all_templates(self):
@@ -123,17 +139,21 @@ class Wiki:
       auwitheditsonly='true',
     )
 
-  # When you have a default parameter that is an object, it is persisted across function calls.
-  # Ergo, any modifications made inside the function will persist to subsequent calls.
-  # As long as you do not modify (and do not return) this object, it is safe to use this pattern.
-  # pylint: disable-next=dangerous-default-value
-  def get_all_pages(self, *, namespaces=['Main']):
+  def get_all_pages(self, *, namespaces=None, redirects=False):
+    if namespaces is None:
+      namespaces = ['Main']
+    redirect_filter = {
+      False: 'nonredirects',
+      True: 'redirects',
+      None: 'all',
+    }[redirects]
+
     for namespace in namespaces:
       for entry in self.get_with_continue('query', 'allpages',
         list='allpages',
         aplimit=500,
         apnamespace=self.namespaces[namespace],
-        apfilterredir='nonredirects', # Filter out redirects
+        apfilterredir=redirect_filter,
       ):
         title = entry['title']
         if title.endswith('.js') or title.endswith('.css'):
@@ -149,21 +169,38 @@ class Wiki:
     ):
       yield Page(self, entry['title'], entry)
 
-  def get_all_category_pages(self, category):
-    for entry in self.get_with_continue('query', 'categorymembers',
-      list='categorymembers',
-      cmlimit=500,
-      cmtitle=category,
-      cmprop='title', # Only return page titles, not page IDs
-      cmnamespace=self.namespaces['Main'],
-    ):
-      yield Page(self, entry['title'], entry)
+  def get_all_category_pages(self, category, *, namespaces=None):
+    if namespaces is None:
+      namespaces = ['Main']
+    for namespace in namespaces:
+      for entry in self.get_with_continue('query', 'categorymembers',
+        list='categorymembers',
+        cmlimit=500,
+        cmtitle=category,
+        cmprop='title', # Only return page titles, not page IDs
+        cmnamespace=self.namespaces[namespace],
+      ):
+        yield Page(self, entry['title'], entry)
 
   def get_all_files(self):
     for entry in self.get_with_continue('query', 'pages',
       generator='allimages',
       gailimit=500,
       prop='duplicatefiles', # Include info about duplicates
+    ):
+      yield Page(self, entry['title'], entry)
+
+  def get_recent_changes(self, starttime, *, namespaces=None):
+    if namespaces is None:
+      namespaces = ['*']
+    for entry in self.get_with_continue('query', 'recentchanges',
+      list='recentchanges',
+      rcstart=starttime.isoformat(),
+      rcend='now',
+      rcdir='newer',
+      rcshow='!bot', # Ignore bot changes by default
+      rctoponly='true', # Only show changes which are the most recent edit to avoid listing pages twice
+      rcnamespace='|'.join(str(self.namespaces[namespace]) for namespace in namespaces),
     ):
       yield Page(self, entry['title'], entry)
 
@@ -206,3 +243,9 @@ class Wiki:
 
     print(f'Successfully logged in as {username}')
     return True
+
+  def email_user(self, user, title, message):
+    data = self.post_with_csrf('emailuser', target=user, subject=title, text=message)
+    if 'error' in data:
+      print(data['error'])
+    return data

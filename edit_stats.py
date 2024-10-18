@@ -84,7 +84,7 @@ def addTimeData(timeSortedList):
        total = runningTotal)
   return output
 
-def addTopUsers(w, sortedList, count):
+def addTopUsers(sortedList, count):
   if verbose:
     print("Adding top", count, "users")
 
@@ -105,7 +105,7 @@ def addTopUsers(w, sortedList, count):
     timedelta = (datetime.now() - datetime(*userstarttime[:6])).days
     editsperday = round(float(usereditcount) / timedelta, 2)
     output += u"""|-
-  | {place} || [[{userlink}|{username}]] || {editcount} || {editday}
+  | {place} || [[:{userlink}|{username}]] || {editcount} || {editday}
   | data-sort-value="{sortabledate}" | {date}\n""".format(
         place = place, # List is indexed 0-99, editors are indexed 1-100
         userlink = userlink,
@@ -154,7 +154,7 @@ def main(w):
 ! class="header" | Edit count
 ! class="header" | Edits per day
 ! class="header" | Registration date
-""" + addTopUsers(w, sortedList, 100) + """
+""" + addTopUsers(sortedList, 100) + """
 |}"""
 
   return output

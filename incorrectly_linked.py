@@ -1,4 +1,3 @@
-from re import compile
 from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
@@ -46,7 +45,7 @@ def main(w):
     output += '== {{lang name|name|%s}} ==\n' % language
     for page, links in sorted(mislinked[language]):
       output += f'* [{page.get_edit_url()} {page.title}] has {len(links)} link{"s"[:len(links)^1]} to other languages: '
-      bad_links = [f'[[{link}]]' for link in sorted(links)]
+      bad_links = [f'[[:{link}]]' for link in sorted(links)]
       output += ', '.join(bad_links) + '\n'
 
   return output

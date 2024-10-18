@@ -14,21 +14,22 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0 # We need full git history to use git merge-base
-    - uses: actions/setup-python@v2
+    - uses: actions/setup-python@v5
       with:
         python-version: '3.x'
     - run: pip install -r requirements.txt
     - run: python -u master.py
-      timeout-minutes: 180
+      timeout-minutes: 600
       env:
         WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
         WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
         PULL_REQUEST_ID: ${{ github.event.pull_request.number }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - uses: actions/upload-artifact@v2
+        API_KEY: ${{ secrets.API_KEY }}
+    - uses: actions/upload-artifact@v4
       with:
         name: Failed uploads
         path: wiki_*.txt
