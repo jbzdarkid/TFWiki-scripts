@@ -1,6 +1,7 @@
 from re import search, sub
 from utils import pagescraper_queue, plural, time_and_date, whatlinkshere
 from wikitools import wiki
+from wikitools.page import Page
 
 verbose = False
 
@@ -9,12 +10,14 @@ def pagescraper(page, badpages):
   page_visible = sub('<includeonly>.*?</includeonly>', '', page_text)
   if len(page_text) == 0:
     return # Empty templates (usually due to HTTP failures)
-  elif float(len(page_visible)) / len(page_text) > .80:
-    return # Template is self-documenting, as it shows the majority of its contents.
   elif '{{tlx|' in page_visible or '{{tl|' in page_visible:
     return # Page has example usages
   elif search('{{([Dd]oc begin|[Tt]emplate doc|[Dd]ocumentation|[Ww]ikipedia doc|[dD]ictionary/wrapper)}}', page_visible):
     return # Page uses a documentation template
+  elif '{{{' not in page_text:
+    return # Page does not have any arguments 
+  elif not search('{{{[a-zA-Z0-9]+}}}', page_visible):
+    return # All of the arguments have defaults
 
   count = page.get_transclusion_count()
   if count > 0:
@@ -23,6 +26,17 @@ def pagescraper(page, badpages):
     badpages.append([count, page.title])
 
 def main(w):
+  navbox_templates = []
+  navbox = Page(w, 'Template:Navbox')
+  for page in navbox.get_transclusions(namespaces=['Template']):
+    if page.title.lower().startswith('template:navbox'):
+      continue # Exclude alternative navbox templates
+    if page.title.lower().endswith('sandbox'):
+      continue # Sandboxes link to pages but shouldn't be used
+    if 'navbox' not in page.get_wiki_text().lower():
+      continue # Some template pages actually *use* other navboxes, but are not one themselves.
+    navbox_templates.append(page.title)
+
   badpages = []
   with pagescraper_queue(pagescraper, badpages) as page_q:
     for page in w.get_all_templates():
@@ -30,6 +44,8 @@ def main(w):
         continue # Don't include subpage templates like Template:Dictionary or Template:PatchDiff
       elif page.title[:13] == 'Template:User':
         continue # Don't include userboxes.
+      elif page.title in navbox_templates:
+        continue # Don't include navboxes, they are self-documenting.
       page_q.put(page)
 
   badpages.sort(key=lambda s: (-s[0], s[1]))

@@ -16,7 +16,7 @@ import open_pr_comment
 # Using {{lang}} and {{if lang}} on non-template pages -> this is apparently somewhat common now to make copy/paste editing easier
 # Pages which link to disambig pages not in hatnote/see also
 # Just... a summary of every single external link. Maybe just 'count per domain' and then list the top 10 pages? I'm finding a LOT of sus links, and it's only the ones that are *broken*.
-# Lang template mis-ordering and lang-template duplicate keys
+# {{lang}} template mis-ordering and lang-template duplicate keys
 # Templates sorted by usage and protect status
 # A 'missing translations' report but for dictionary entries (maybe sorted by usage, too?)
 # A report for "Edits on talkpages (not in the "user talk" namespace) in the past few days", so people can track active discussions?
