@@ -1,6 +1,7 @@
 from re import search, sub
 from utils import pagescraper_queue, plural, time_and_date, whatlinkshere
 from wikitools import wiki
+from wikitools.page import Page
 
 verbose = False
 
@@ -27,7 +28,7 @@ def pagescraper(page, badpages):
 def main(w):
   navbox_templates = []
   navbox = Page(w, 'Template:Navbox')
-  for page in navbox.get_transclusions(namespace='Template'):
+  for page in navbox.get_transclusions(namespaces=['Template']):
     if page.title.lower().startswith('template:navbox'):
       continue # Exclude alternative navbox templates
     if page.title.lower().endswith('sandbox'):
