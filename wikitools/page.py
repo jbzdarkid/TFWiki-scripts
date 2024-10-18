@@ -111,25 +111,16 @@ class Page:
     if len(text) > 3000 * 1000: # 3 KB
       text = '<span class="error">Warning: Report truncated to 3 KB</span>\n' + text[:3000 * 1000]
 
-    # We would rather not lose all our hard work, so we try pretty hard to make the edit succeed.
-    i = 0
-    while True:
-      try:
-        data = self.wiki.post_with_csrf('edit',
-          title=self.url_title,
-          text=text,
-          summary=summary,
-          bot=bot,
-        )
-        break
-      except Exception as e:
-        print(f'Attempt {i} failed:\n{e}')
-        if i < 5:
-          i += 1
-          sleep(30)
-        else:
-          print(f'Failed to edit {self.title}:\n{e}')
-          return None
+    try:
+      data = self.wiki.post_with_csrf('edit',
+        title=self.url_title,
+        text=text,
+        summary=summary,
+        bot=bot,
+      )
+    except Exception as e:
+      print(f'Failed to edit {self.title}:\n{e}')
+      return None
 
     if 'error' in data:
       print(f'Failed to edit {self.title}:')

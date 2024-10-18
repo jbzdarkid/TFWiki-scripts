@@ -17,7 +17,7 @@ class Wiki:
     retry = StaticRetry(
       total=1,
       allowed_methods={'GET', 'POST'},
-      status_forcelist=[503],
+      status_forcelist=[502, 503],
       static_backoff=30, # 30 second fixed backoff (custom implementation)
     )
 
