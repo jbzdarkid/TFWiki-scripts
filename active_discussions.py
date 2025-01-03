@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
-from re import sub
 from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
 verbose = False
 one_month_ago = datetime.utcnow() - timedelta(days=30)
 one_week_ago  = datetime.utcnow() - timedelta(days=7)
+KNOWN_BOTS = ['WelcomeBOT'] # We only need to list bots which post to talkpages.
 
 def pagescraper(page, active_one_week, active_one_month):
   if verbose:
@@ -13,13 +13,13 @@ def pagescraper(page, active_one_week, active_one_month):
   weekly_users = set()
   monthly_users = set()
   for revision in page.get_revisions(one_month_ago):
+    if revision['user'] in KNOWN_BOTS:
+      continue
     if revision['timestamp'] > one_week_ago:
       weekly_users.add(revision['user'])
       monthly_users.add(revision['user'])
     elif revision['timestamp'] > one_month_ago:
       monthly_users.add(revision['user'])
-    else:
-      break
 
   # A discussion is considered 'active' if it has any user in the past week, or more than 3 users in the past month.
   if len(weekly_users) >= 1:
