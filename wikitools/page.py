@@ -1,3 +1,4 @@
+from datetime import datetime
 from time import sleep
 import functools
 import requests
@@ -106,6 +107,17 @@ class Page:
     ):
       # Also, this report uses page IDs for iteration, so for now we're returning solely based on the first page of results.
       return html.count('mw-whatlinkshere-tools') # Class for (<-- links | edit)
+
+  def get_revisions(self, starttime, rvprop='user|timestamp'):
+    for data in self.wiki.get_with_continue('query', 'pages',
+      prop='revisions',
+      titles=[self.url_title],
+      rvprop=rvprop,
+      rvlimit=500,
+    ):
+      for revision in data['revisions']:
+        revision['timestamp'] = datetime.strptime(revision['timestamp'], '%Y-%m-%dT%H:%M:%SZ')
+        yield revision
 
   def edit(self, text, summary, bot=True):
     if len(text) > 3000 * 1000: # 3 KB

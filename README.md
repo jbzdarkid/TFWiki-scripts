@@ -9,6 +9,7 @@ This version of the scripts uses python3, which unfortunately broke our old wiki
 - `missing_categories.py`: Searches for non-translated categories. Categories which are only in english should generally be marked as {{non-article category}}.
 - `missing_translations.py`: Generates the list of missing translations for each language compared to english, which is used by the translator's noticeboard
 - `untranslated_templates.py`: Parses templates for {{lang}} usage, and reports whether or not they are fully translated.
+- `active_discussions.py`: Searches for recent edits to talk namespaces, and reports on activity based on the number of editors.
 
 ## Weekly reports
 - `displaytitles_weekly.py`: Weekly copy of the monthly report which only runs on the past week of recent changes.
