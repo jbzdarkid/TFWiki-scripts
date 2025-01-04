@@ -61,11 +61,11 @@ def publish_report(w, module, report_name, root, summary):
 
 # Multi-language reports need frequent updates since we have many translators
 daily_reports = {
+  'active_discussions': 'Active discussions',
   'all_articles': 'All articles',
   'missing_categories': 'Untranslated categories',
   'missing_translations': 'Missing translations',
   'untranslated_templates': 'Untranslated templates',
-  'active_discussions': 'Active discussions',
 }
 
 # English-only but otherwise frequently changing reports
@@ -74,6 +74,7 @@ weekly_reports = {
   'incorrect_redirects': 'Mistranslated redirects',
   'incorrectly_categorized': 'Pages with incorrect categorization',
   'incorrectly_linked': 'Pages with incorrect links',
+  'lang_quality': 'Lang errors',
   'mismatched_weekly': 'Mismatched parenthesis',
   'missing_translations_weekly': 'Missing translations/sorted',
   'navboxes': 'Pages which are missing navboxes',

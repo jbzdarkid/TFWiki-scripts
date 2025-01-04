@@ -73,12 +73,22 @@ def parse_lang_templates(page):
   lang_templates = []
 
   for match in LANG_TEMPLATE_START.finditer(page_text):
-    # First entry is the line number
-    lang_template = [page_text[:match.start()].count('\n') + 1]
+    english_text = None
+    lang_template = []
     for match2 in LANG_TEMPLATE_ARGS.finditer(buffer[match.start() + 2]): # Skip the opening {{
       language = match2.group(1).strip().lower()
       text = match2.group(2).strip()
       lang_template.append((language, text))
+      if language = 'en':
+        english_text = text.split('\n', 1)[0].strip()
+
+    # Add an identifier to the start of the data (line number + english text, if available)
+    line_no = page_text[:match.start()].count('\n') + 1
+    location = f"''Line {line_no}''"
+    if english_text:
+      location += f': <nowiki>{english_text}</nowiki>'
+    lang_template.insert(location, 0)
+
     lang_templates.append(lang_template)
 
   return lang_templates
@@ -88,18 +98,11 @@ def pagescraper(page, translations, usage_counts):
 
   missing_translations = {lang:[] for lang in LANGS}
   for lang_template in lang_templates:
-    line_no = lang_template.pop(0)
-    english_text = None
+    location = lang_template.pop(0)
 
     missing_languages = set(LANGS)
     for lang, text in lang_template:
-      if lang == 'en':
-        english_text = text
       missing_languages.discard(lang)
-
-    location = f"''Line {line_no}''"
-    if english_text:
-      location += f': <nowiki>{english_text}</nowiki>'
 
     for language in missing_languages:
       missing_translations[language].append(location)
