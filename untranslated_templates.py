@@ -2,6 +2,7 @@ from re import compile, IGNORECASE, VERBOSE
 from utils import pagescraper_queue, time_and_date, plural, whatlinkshere
 from wikitools import wiki
 
+
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
