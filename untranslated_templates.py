@@ -2,7 +2,6 @@ from re import compile, IGNORECASE, VERBOSE
 from utils import pagescraper_queue, time_and_date, plural, whatlinkshere
 from wikitools import wiki
 
-
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
@@ -25,8 +24,9 @@ LANG_TEMPLATE_ARGS = compile(r"""
   )
 """, VERBOSE)
 
-def pagescraper(page, translations, usage_counts):
+def parse_lang_templates(page):
   page_text = page.get_wiki_text()
+
   # First, find the matching pairs
   def get_indices(char, string):
     index = -1
@@ -53,13 +53,13 @@ def pagescraper(page, translations, usage_counts):
   for index, value in locations:
     try:
       buffer[stack[-1]] += page_text[lastIndex:index]
-    except KeyError: # New addition
+    except KeyError:
       buffer[stack[-1]] = page_text[lastIndex:index]
-    except IndexError: # Unmached parenthesis, e.g. Class Weapons Tables
+    except IndexError:
       buffer[0] += page_text[lastIndex:index] # Add text to default layer
       stack.append(None) # So there's something to .pop()
       if verbose:
-        print('Found a closing brace without a matched opening brace')
+        print(page.title, 'Found a closing brace without a matched opening brace')
     if value == 1:
       stack.append(index)
     elif value == -1:
@@ -69,30 +69,40 @@ def pagescraper(page, translations, usage_counts):
   if verbose:
     print(page.title, 'contains', len(buffer), 'pairs of braces')
 
-
   # Finally, search through for lang templates using regex
-  missing_translations = {lang:[] for lang in LANGS}
+  lang_templates = []
 
   for match in LANG_TEMPLATE_START.finditer(page_text):
-    line_no = str(page_text[:match.start()].count('\n') + 1)
-    english_text = ''
-
-    missing_languages = set(LANGS)
+    # First entry is the line number
+    lang_template = [page_text[:match.start()].count('\n') + 1]
     for match2 in LANG_TEMPLATE_ARGS.finditer(buffer[match.start() + 2]): # Skip the opening {{
       language = match2.group(1).strip().lower()
-      if language == 'en':
-        english_text = match2.group(2).strip().split('\n', 1)[0].strip()
-      missing_languages.discard(language)
+      text = match2.group(2).strip()
+      lang_template.append((language, text))
+    lang_templates.append(lang_template)
+
+  return lang_templates
+
+def pagescraper(page, translations, usage_counts):
+  lang_templates = parse_lang_templates(page)
+
+  missing_translations = {lang:[] for lang in LANGS}
+  for lang_template in lang_templates:
+    line_no = lang_template.pop(0)
+    english_text = None
+
+    missing_languages = set(LANGS)
+    for lang, text in lang_template:
+      if lang == 'en':
+        english_text = text
+      missing_languages.discard(lang)
 
     location = f"''Line {line_no}''"
     if english_text:
       location += f': <nowiki>{english_text}</nowiki>'
+
     for language in missing_languages:
       missing_translations[language].append(location)
-
-    if verbose:
-      line = page_text[:match.start()].count('\n') + 1
-      print(f'Lang template at line {line} is missing translations for', ', '.join(sorted(missing_languages)))
 
   usage_count = page.get_transclusion_count()
   if usage_count == 0:
