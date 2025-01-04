@@ -1,4 +1,4 @@
-from defaultdict import defaultdict
+from collections import defaultdict
 from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
