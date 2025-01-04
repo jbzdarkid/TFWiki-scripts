@@ -6,7 +6,7 @@ from untranslated_templates import parse_lang_templates
 
 verbose = False
 
-LANG_ORDER = ['en', 'ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
+LANG_ORDER = 'en, ar, cs, da, de, es, fi, fr, hu, it, ja, ko, nl, no, pl, pt, pt-br, ro, ru, sv, tr, zh-hans, zh-hant'
 
 def pagescraper(page, errors):
   lang_templates = parse_lang_templates(page)
