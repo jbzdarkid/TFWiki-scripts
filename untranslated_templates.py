@@ -87,7 +87,7 @@ def parse_lang_templates(page):
     location = f"''Line {line_no}''"
     if english_text:
       location += f': <nowiki>{english_text}</nowiki>'
-    lang_template.insert(location, 0)
+    lang_template.insert(0, location)
 
     lang_templates.append(lang_template)
 
