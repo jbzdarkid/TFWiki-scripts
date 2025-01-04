@@ -82,6 +82,8 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages with {{{{tl|lang}}}} errors
     for location in errors[3][page]:
       output += f'* {location}\n'
 
+  return output
+
 if __name__ == '__main__':
   verbose = True
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
