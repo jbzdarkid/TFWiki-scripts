@@ -79,7 +79,7 @@ def parse_lang_templates(page):
       language = match2.group(1).strip().lower()
       text = match2.group(2).strip()
       lang_template.append((language, text))
-      if language = 'en':
+      if language == 'en':
         english_text = text.split('\n', 1)[0].strip()
 
     # Add an identifier to the start of the data (line number + english text, if available)
