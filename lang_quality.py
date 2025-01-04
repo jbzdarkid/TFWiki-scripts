@@ -25,7 +25,7 @@ def pagescraper(page, errors):
 
     actual_order = []
     for lang, _ in lang_template:
-      idx = LANG_ORDER.index(lang)
+      idx = LANG_ORDER.find(lang)
       # Error 1: Invalid language codes (will probably show up as 'out of order' as well)
       if idx == -1:
         errors[1][page].append(location)
