@@ -20,6 +20,8 @@ def pagescraper(page, missing_english, invalid_langs, duplicate_langs, misordere
 
     actual_order = []
     for lang, _ in lang_template:
+      if lang == '':
+        continue # Usually the 'force' parameter, wrapped in an {{#if:}}, which gets simplified to nothing.
       try:
         idx = LANG_ORDER.index(lang)
       except ValueError:
