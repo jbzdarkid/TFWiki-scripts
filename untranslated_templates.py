@@ -42,7 +42,11 @@ def parse_lang_templates(page):
   locations = [[len(page_text), -1]]
   for open in get_indices('{', page_text):
     locations.append([open, 1])
+  for open in get_indices('[', page_text):
+    locations.append([open, 1])
   for close in get_indices('}', page_text):
+    locations.append([close, -1])
+  for close in get_indices(']', page_text):
     locations.append([close, -1])
   locations.sort()
 

@@ -39,7 +39,7 @@ def pagescraper(page, missing_english, invalid_langs, duplicate_langs, misordere
     expected_order = sorted(actual_order)
     for i, actual in enumerate(actual_order):
       if expected_order[i] != actual:
-        misordered_langs[page][location] = (expected_order[i], actual)
+        misordered_langs[page][location] = (LANG_ORDER[expected_order[i]], LANG_ORDER[actual])
         break
 
 def main(w):
