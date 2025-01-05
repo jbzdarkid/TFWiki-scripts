@@ -82,7 +82,7 @@ def parse_lang_templates(page):
     # Add an identifier to the start of the data (line number + first language string)
     location = "''Line %d'': <nowiki>%s</nowiki>" % (
       page_text[:match.start()].count('\n') + 1,
-      lang_template[0][1].split('\n', 1)[0].strip(),
+      lang_template[0][1].split('\n', 1)[0].strip() if len(lang_template) > 0 else '',
     )
     lang_template.insert(0, location)
 
