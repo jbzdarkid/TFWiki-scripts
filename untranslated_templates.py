@@ -79,14 +79,12 @@ def parse_lang_templates(page):
       language = match2.group(1).strip().lower()
       text = match2.group(2).strip()
       lang_template.append((language, text))
-      if language == 'en':
-        english_text = text.split('\n', 1)[0].strip()
 
-    # Add an identifier to the start of the data (line number + english text, if available)
-    line_no = page_text[:match.start()].count('\n') + 1
-    location = f"''Line {line_no}''"
-    if english_text:
-      location += f': <nowiki>{english_text}</nowiki>'
+    # Add an identifier to the start of the data (line number + first language string)
+    location = "''Line %d'': <nowiki>%s</nowiki>" % (
+      page_text[:match.start()].count('\n') + 1,
+      lang_template[0][1].split('\n', 1)[0].strip(),
+    )
     lang_template.insert(0, location)
 
     lang_templates.append(lang_template)

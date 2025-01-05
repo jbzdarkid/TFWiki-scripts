@@ -8,41 +8,45 @@ verbose = False
 
 LANG_ORDER = 'en, ar, cs, da, de, es, fi, fr, hu, it, ja, ko, nl, no, pl, pt, pt-br, ro, ru, sv, tr, zh-hans, zh-hant'
 
-def pagescraper(page, errors):
+def pagescraper(page, missing_english, invalid_langs, duplicate_langs, misordered_langs):
   lang_templates = parse_lang_templates(page)
 
   for lang_template in lang_templates:
     location = lang_template.pop(0)
 
-    missing_english = True
-    for lang, _ in lang_template:
-      if lang == 'en':
-        missing_english = False
-
-    # Error 0: Missing english string
-    if missing_english:
-      errors[0][page].append(location)
+    # Error 1: Missing english string
+    if not(any((x[0] == 'en' for x in lang_template))):
+      missing_english[page].append(location)
 
     actual_order = []
     for lang, _ in lang_template:
       idx = LANG_ORDER.find(lang)
-      # Error 1: Invalid language codes (will probably show up as 'out of order' as well)
+      # Error 2: Invalid language codes (will probably show up as 'out of order' as well)
       if idx == -1:
-        errors[1][page].append(location)
+        invalid_langs[page][location].append(lang)
       else:
         actual_order.append(idx)
 
-    # Error 2: Languages out of order
-    if actual_order != sorted(actual_order):
-      errors[2][page].append(location)
-
     # Error 3: Duplicate languages
-    if len(actual_order) != len(set(actual_order)):
-      errors[3][page].append(location)
+    extra_langs = list(actual_order)
+    for lang in set(actual_order):
+      extra_langs.remove(lang)
+    if len(extra_langs) > 0:
+      duplicate_langs[page][location] = extra_langs
+
+    # Error 4: Languages out of order
+    expected_order = sorted(actual_order)
+    for i, actual in enumerate(actual_order):
+      if expected_order[i] != actual:
+        misordered_langs[page][location] = (expected_order[i], actual)
+        break
 
 def main(w):
-  errors = [defaultdict(list) for _ in range(4)]
-  with pagescraper_queue(pagescraper, errors) as pages:
+  missing_english = defaultdict(list)
+  invalid_langs = defaultdict(lambda: defaultdict(list))
+  duplicate_langs = defaultdict(dict)
+  misordered_langs = defaultdict(dict)
+  with pagescraper_queue(pagescraper, missing_english, invalid_langs, duplicate_langs, misordered_langs) as pages:
     for page in w.get_all_templates():
       pages.put(page)
 
@@ -54,33 +58,39 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages with {{{{tl|lang}}}} errors
     count=sum((len(e) for e in errors)),
     date=time_and_date())
 
-  if len(errors[0]) > 0:
+  if len(missing_english) > 0:
     output += '== Pages using {{tl|lang}} without an english string ==\n'
-  for page in errors[0]:
+  for page in missing_english:
     output += f'=== [{page.get_edit_url()} {page.title}] ===\n'
-    for location in errors[0][page]:
+    for location in missing_english[page]:
       output += f'* {location}\n'
 
-  if len(errors[1]) > 0:
+  if len(invalid_langs) > 0:
     output += '== Pages using {{tl|lang}} without an invalid language code ==\n'
-  for page in errors[1]:
+  for page in invalid_langs:
     output += f'=== [{page.get_edit_url()} {page.title}] ===\n'
-    for location in errors[1][page]:
+    for location in invalid_langs[page]:
+      langs = ', '.join(sorted(invalid_langs[page][location]))
       output += f'* {location}\n'
+      output += f':Invalid lang codes: {langs}\n'
 
-  if len(errors[2]) > 0:
-    output += '== Pages using {{tl|lang}} with out-of-order language codes ==\n'
-  for page in errors[2]:
-    output += f'=== [{page.get_edit_url()} {page.title}] ===\n'
-    for location in errors[2][page]:
-      output += f'* {location}\n'
-
-  if len(errors[3]) > 0:
+  if len(duplicate_langs) > 0:
     output += '== Pages using {{tl|lang}} with duplicate entries ==\n'
-  for page in errors[3]:
+  for page in duplicate_langs:
     output += f'=== [{page.get_edit_url()} {page.title}] ===\n'
-    for location in errors[3][page]:
+    for location in duplicate_langs[page]:
+      langs = ', '.join(sorted(duplicate_langs[page][location]))
       output += f'* {location}\n'
+      output += f':Duplicate lang codes: {langs}\n'
+
+  if len(misordered_langs) > 0:
+    output += '== Pages using {{tl|lang}} with out-of-order language codes ==\n'
+  for page in misordered_langs:
+    output += f'=== [{page.get_edit_url()} {page.title}] ===\n'
+    for location in misordered_langs[page]:
+      expected, actual = misordered_langs[page][location]
+      output += f'* {location}\n'
+      output += f':First out-of-order lang code: {actual}, expected {expected}\n'
 
   return output
 
