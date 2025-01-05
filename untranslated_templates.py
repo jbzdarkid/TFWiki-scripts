@@ -73,7 +73,6 @@ def parse_lang_templates(page):
   lang_templates = []
 
   for match in LANG_TEMPLATE_START.finditer(page_text):
-    english_text = None
     lang_template = []
     for match2 in LANG_TEMPLATE_ARGS.finditer(buffer[match.start() + 2]): # Skip the opening {{
       language = match2.group(1).strip().lower()
@@ -99,7 +98,7 @@ def pagescraper(page, translations, usage_counts):
     location = lang_template.pop(0)
 
     missing_languages = set(LANGS)
-    for lang, text in lang_template:
+    for lang, _ in lang_template:
       missing_languages.discard(lang)
 
     for language in missing_languages:

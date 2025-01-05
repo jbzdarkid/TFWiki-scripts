@@ -15,7 +15,7 @@ def pagescraper(page, missing_english, invalid_langs, duplicate_langs, misordere
     location = lang_template.pop(0)
 
     # Error 1: Missing english string
-    if not(any((x[0] == 'en' for x in lang_template))):
+    if not any((x[0] == 'en' for x in lang_template)):
       missing_english[page].append(location)
 
     actual_order = []
@@ -55,7 +55,7 @@ def main(w):
 Found '''<onlyinclude>{count}</onlyinclude>''' pages with {{{{tl|lang}}}} errors. Data as of {date}.
 
 """.format(
-    count=sum((len(e) for e in errors)),
+    count=len(missing_english) + len(invalid_langs) + len(duplicate_langs) + len(misordered_langs),
     date=time_and_date())
 
   if len(missing_english) > 0:
