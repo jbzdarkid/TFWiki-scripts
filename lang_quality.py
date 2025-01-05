@@ -63,14 +63,14 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages with {{{{tl|lang}}}} errors
 
   if len(missing_english) > 0:
     output += '== Pages using {{tl|lang}} without an english string ==\n'
-  for page in missing_english:
+  for page in sorted(missing_english):
     output += f'=== [{page.get_edit_url()} {page.title}] ===\n'
     for location in missing_english[page]:
       output += f'* {location}\n'
 
   if len(invalid_langs) > 0:
     output += '== Pages using {{tl|lang}} without an invalid language code ==\n'
-  for page in invalid_langs:
+  for page in sorted(invalid_langs):
     output += f'=== [{page.get_edit_url()} {page.title}] ===\n'
     for location in invalid_langs[page]:
       langs = ', '.join(sorted(invalid_langs[page][location]))
@@ -79,7 +79,7 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages with {{{{tl|lang}}}} errors
 
   if len(duplicate_langs) > 0:
     output += '== Pages using {{tl|lang}} with duplicate entries ==\n'
-  for page in duplicate_langs:
+  for page in sorted(duplicate_langs):
     output += f'=== [{page.get_edit_url()} {page.title}] ===\n'
     for location in duplicate_langs[page]:
       langs = ', '.join(sorted(duplicate_langs[page][location]))
@@ -88,7 +88,7 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages with {{{{tl|lang}}}} errors
 
   if len(misordered_langs) > 0:
     output += '== Pages using {{tl|lang}} with out-of-order language codes ==\n'
-  for page in misordered_langs:
+  for page in sorted(misordered_langs):
     output += f'=== [{page.get_edit_url()} {page.title}] ===\n'
     for location in misordered_langs[page]:
       expected, actual = misordered_langs[page][location]
