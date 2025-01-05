@@ -6,7 +6,7 @@ from untranslated_templates import parse_lang_templates
 
 verbose = False
 
-LANG_ORDER = 'en, ar, cs, da, de, es, fi, fr, hu, it, ja, ko, nl, no, pl, pt, pt-br, ro, ru, sv, tr, zh-hans, zh-hant'
+LANG_ORDER = 'en, ar, cs, da, de, es, fi, fr, hu, it, ja, ko, nl, no, pl, pt, pt-br, ro, ru, sv, tr, zh-hans, zh-hant'.split(', ')
 
 def pagescraper(page, missing_english, invalid_langs, duplicate_langs, misordered_langs):
   lang_templates = parse_lang_templates(page)
@@ -20,9 +20,10 @@ def pagescraper(page, missing_english, invalid_langs, duplicate_langs, misordere
 
     actual_order = []
     for lang, _ in lang_template:
-      idx = LANG_ORDER.find(lang)
-      # Error 2: Invalid language codes (will probably show up as 'out of order' as well)
-      if idx == -1:
+      try:
+        idx = LANG_ORDER.index(lang)
+      except ValueError:
+        # Error 2: Invalid language codes
         invalid_langs[page][location].append(lang)
       else:
         actual_order.append(idx)
@@ -32,7 +33,7 @@ def pagescraper(page, missing_english, invalid_langs, duplicate_langs, misordere
     for lang in set(actual_order):
       extra_langs.remove(lang)
     if len(extra_langs) > 0:
-      duplicate_langs[page][location] = extra_langs
+      duplicate_langs[page][location] = [LANG_ORDER[idx] for idx in extra_langs]
 
     # Error 4: Languages out of order
     expected_order = sorted(actual_order)
