@@ -16,18 +16,14 @@ import open_pr_comment
 # Using {{lang}} and {{if lang}} on non-template pages -> this is apparently somewhat common now to make copy/paste editing easier
 # Pages which link to disambig pages not in hatnote/see also
 # Just... a summary of every single external link. Maybe just 'count per domain' and then list the top 10 pages? I'm finding a LOT of sus links, and it's only the ones that are *broken*.
-# {{lang}} template mis-ordering and lang-template duplicate keys
 # Templates sorted by usage and protect status
 # A 'missing translations' report but for dictionary entries (maybe sorted by usage, too?)
 # Templates which have redirects in them
 
 # Reports I want to improve:
-# Consider running some scripts against the Help: namespace, too
-# (like what? miscategorized, mismatched, uhhh)
 # Sort missing categories by # pages
-# Sort the output from mismatched
-# Sort the output from displaytitles
 # Threading for navboxes.py?
+# Might be more smarts to do in lang_quality.py, e.g. non-ascii characters in 'en', or check for only quote characters (or other lang incomplete hints)
 
 def edit_or_save(page_name, file_name, output, summary):
   wiki_diff_url = Page(w, page_name).edit(output, bot=True, summary=summary)
@@ -127,16 +123,12 @@ if __name__ == '__main__':
 
     changed_files |= added_files
 
-    if 'mismatched.py' in changed_files:
-      changed_files.remove('mismatched.py')
-      changed_files.add('mismatched_weekly.py')
-    if 'displaytitles.py' in changed_files:
-      changed_files.remove('displaytitles.py')
-      changed_files.add('displaytitles_weekly.py')
-
     for row in changed_files:
       file = row.replace('.py', '').strip()
-      if file in all_reports:
+      weekly_file = file + '_weekly'
+      if weekly_file in all_reports:
+        modules_to_run.append(weekly_file)
+      elif file in all_reports:
         modules_to_run.append(file)
 
   elif event == 'workflow_dispatch':
