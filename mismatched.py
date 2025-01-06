@@ -24,43 +24,45 @@ html_tags = [
 ]
 for tag in html_tags:
   # The tag open match needs to allow for properties, e.g. <div style="foo">
-  pairs.append([len(pairs), f'<{tag}(?: [^>/]*)?(?:"[^"]+")?>', f'</{tag}>'])
+  pairs.append([pairs[-1][0] + 1, f'<{tag}(?: [^>/]*)?(?:"[^"]+")?>', f'</{tag}>'])
 
 pairs = [[pair[0], compile(pair[1], IGNORECASE), compile(pair[2], IGNORECASE)] for pair in pairs]
 
 # Some pages are expected to have mismatched parenthesis (as they are part of the update history, item description, etc)
-exemptions = [
-  None, # 0 index doesn't exist
-  [], # 1
+exemptions = {
+  # []
+  2: ['List of default keys', 'Deathcam', 'Scripting', 'Vector', 'Linux dedicated server', 'Atoll'],
 
-  # 2, aka []
-  ['List of default keys', 'Deathcam', 'Scripting', 'Vector', 'Linux dedicated server'],
-
-  # 3, {} often don't align because template pages are using a header or footer for tables.
-  [
+  # {} often don't align because template pages are using a header or footer for tables.
+  3: [
     'Template:Cite web',
     'Template:Class speed table',
     'Template:Class weapons table',
-    'Template:Userboxbottom',
-    'Template:Userboxtop',
-    'Template:Wqc',
     'Template:Contracts',
     'Template:Cqc',
     'Template:List of item attributes',
+    'Template:Translation progress/stats/row',
+    'Template:Userboxbottom',
+    'Template:Userboxtop',
+    'Template:Wqc',
   ],
 
-  # 4, <!-- --> is often messed up by The Heartsman, who has an >>--arrow---> through their name.
-  ['Monster Mash-Up Pack', 'Night of the Living Update'],
+  # <!-- --> is often messed up by The Heartsman, who has an >>--arrow---> through their name.
+  4: ['Monster Mash-Up Pack', 'Night of the Living Update'],
 
-  # 5 <nowiki> and # 6 <noinclude> are often used to make template code *appear* correct, while still transcluding properly.
-  ['Help:Images', 'Help:Editing', 'Help:Translation switching'],
-  ['Help:Images'],
+  # <nowiki> and <noinclude> are often used to make template code *appear* correct, while still transcluding properly.
+  5: ['Help:Images', 'Help:Editing', 'Help:Translation switching'],
+  6: ['Help:Images'],
 
-  [], # 6
+  # <includeonly> is used for subst-only templates, so that they do not show an error on the template page itself.
+  7: ['Template:Sp'],
 
-  # 7, <includeonly> is used for subst-only templates, so that they do not show an error on the template page itself.
-  ['Template:Sp'],
-]
+  # <code> is misaligned in this template to support a "plainlinks" style
+  11: ['Template:Lang info'],
+
+  # Complex wiki template which does custom <ul> stuff
+  26: ['Template:Shortcut'],
+}
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
@@ -71,7 +73,7 @@ def pagescraper(page, translation_data):
 
   locations = []
   for i, left, right, in pairs:
-    if i < len(exemptions) and any(page.basename.startswith(e) for e in exemptions[i]):
+    if i in exemptions and any(page.basename.startswith(e) for e in exemptions[i]):
       continue
 
     for m in left.finditer(text):
@@ -157,14 +159,14 @@ def pagescraper(page, translation_data):
       data += ' '*(error-start+extra_width) + text[error] + ' '*10 + '\n'
       data += '</nowiki></div>\n'
 
-    translation_data[page.lang].append(data)
+    translation_data[page] = data
 
 def page_iter(w):
   for page in w.get_all_pages(namespaces=['Main', 'File', 'Template', 'Help', 'Category']):
     yield page
   
 def main(w):
-  translation_data = {lang: [] for lang in LANGS}
+  translation_data = {}
   with pagescraper_queue(pagescraper, translation_data) as pages:
     for page in page_iter(w):
       if page.title.startswith('Team Fortress Wiki:Discussion'):
@@ -190,18 +192,20 @@ def main(w):
       pages.put(page)
   output = """\
 {{{{DISPLAYTITLE: {count} pages with mismatched parenthesis}}}}
-<onlyinclude>{count}</onlyinclude> pages with mismatched <nowiki>(), [], and {{}}</nowiki>. Data as of {date}.
+<onlyinclude>{count}</onlyinclude> pages with mismatched <nowiki>[], and {{}}</nowiki>. Data as of {date}.
 {{{{TOC limit|2}}}}
 
 """.format(
-    count=sum(len(lang_pages) for lang_pages in translation_data.values()),
+    count=len(translation_data),
     date=time_and_date())
 
-  for language in LANGS:
-    if len(translation_data[language]) > 0:
-      output += '== {{lang name|name|%s}} ==\n' % language
-      for data in translation_data[language]:
-        output += data
+  pages = sorted(list(translation_data.keys()))
+  last_language = None
+  for page in pages:
+    if last_language != page.lang:
+      last_language = page.lang
+      output += '== {{lang name|name|%s}} ==\n' % page.lang
+    output += translation_data[page]
 
   return output
 
