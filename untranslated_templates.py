@@ -6,11 +6,12 @@ verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 LANG_TEMPLATE_START = compile(r"""
-  [^{]{{    # The start of a template '{{' which is not the start of a parameter '{{{'
-  \s*       # Any amount of whitespace is allowed before the template name
-  lang      # Language template. Note that this does not allow invocations of {{lang incomplete}}
-  \s*       # Any amount of whitespace (but critically, no more ascii characters)
-  \|        # Start of parameter list
+  [^{]{{            # The start of a template '{{' which is not the start of a parameter '{{{'
+  \s*               # Any amount of whitespace is allowed before the template name
+  lang              # Template name {{lang}}
+  ( incomplete)?    # Also matches {{lang incomplete}} but we can check which one it is by the first group
+  \s*               # Any amount of whitespace (but critically, no more ascii characters)
+  \|                # Start of parameter list
 """, IGNORECASE | VERBOSE)
 
 LANG_TEMPLATE_ARGS = compile(r"""
@@ -77,18 +78,18 @@ def parse_lang_templates(page):
   lang_templates = []
 
   for match in LANG_TEMPLATE_START.finditer(page_text):
-    lang_template = []
+    lang_template = {'args': []}
     for match2 in LANG_TEMPLATE_ARGS.finditer(buffer[match.start() + 2]): # Skip the opening {{
       language = match2.group(1).strip().lower()
       text = match2.group(2).strip()
-      lang_template.append((language, text))
+      lang_template['args'].append((language, text))
 
-    # Add an identifier to the start of the data (line number + first language string)
-    location = "''Line %d'': <nowiki>%s</nowiki>" % (
+    lang_template['location'] = "''Line %d'': <nowiki>%s</nowiki>" % (
       page_text[:match.start()].count('\n') + 1,
-      lang_template[0][1].split('\n', 1)[0].strip() if len(lang_template) > 0 else '',
+      lang_template['args'][0][1].split('\n', 1)[0].strip() if len(lang_template['args']) > 0 else '',
     )
-    lang_template.insert(0, location)
+
+    lang_template['template'] = match.group(1)
 
     lang_templates.append(lang_template)
 
@@ -99,10 +100,12 @@ def pagescraper(page, translations, usage_counts):
 
   missing_translations = {lang:[] for lang in LANGS}
   for lang_template in lang_templates:
-    location = lang_template.pop(0)
+    if lang_template['template'] == 'lang incomplete':
+      continue # Alternate lang template which indicates that we don't need full translation
+    location = lang_template['location']
 
     missing_languages = set(LANGS)
-    for lang, _ in lang_template:
+    for lang, _ in lang_template['args']:
       missing_languages.discard(lang)
 
     for language in missing_languages:
