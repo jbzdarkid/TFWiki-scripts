@@ -1,5 +1,5 @@
 from queue import Queue, Empty
-from re import compile, DOTALL
+from re2 import compile, DOTALL
 from threading import Thread, Event
 from wikitools import wiki
 from wikitools.page import Page

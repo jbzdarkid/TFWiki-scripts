@@ -1,4 +1,4 @@
-from re import finditer
+from re2 import finditer
 import requests
 
 from .page import Page

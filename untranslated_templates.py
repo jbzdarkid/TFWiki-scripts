@@ -1,4 +1,4 @@
-from re import compile, IGNORECASE, VERBOSE
+from re2 import compile, IGNORECASE, VERBOSE
 from utils import pagescraper_queue, time_and_date, plural, whatlinkshere
 from wikitools import wiki
 

@@ -1,4 +1,4 @@
-from re import search
+from re2 import search
 from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 

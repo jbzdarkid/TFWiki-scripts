@@ -1,5 +1,5 @@
 from os import environ
-from re import compile, VERBOSE
+from re2 import compile, VERBOSE
 from time import sleep
 from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
