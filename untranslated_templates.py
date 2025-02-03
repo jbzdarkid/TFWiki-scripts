@@ -1,10 +1,11 @@
-from re2 import compile, IGNORECASE, VERBOSE
+from re2 import compile, IGNORECASE
 from utils import pagescraper_queue, time_and_date, plural, whatlinkshere
 from wikitools import wiki
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
+'''
 LANG_TEMPLATE_START = compile(r"""
   [^{]{{            # The start of a template '{{' which is not the start of a parameter '{{{'
   \s*               # Any amount of whitespace is allowed before the template name
@@ -24,6 +25,9 @@ LANG_TEMPLATE_ARGS = compile(r"""
     [^|]*   # Value
   )
 """, VERBOSE)
+'''
+LANG_TEMPLATE_START = compile(r'[^{]{{\s*lang( incomplete)?\s*\|', IGNORECASE)
+LANG_TEMPLATE_ARGS = compile(r'\|([^|=]*?)=([^|]*)')
 
 def parse_lang_templates(page):
   page_text = page.get_wiki_text()
