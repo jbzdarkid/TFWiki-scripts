@@ -1,5 +1,5 @@
 from os import environ
-from re2 import compile, VERBOSE
+from re2 import compile
 from time import sleep
 from utils import pagescraper_queue, time_and_date
 from wikitools import wiki
@@ -8,6 +8,7 @@ import requests
 verbose = False
 
 # Within the HTML source code, all links should be href="()". Internal links start with /wiki/foo, so this will find all external links.
+"""
 LINK_REGEX = compile('''
   href="(       # Within the HTML source code, all links start with href=
     https?://   # Match http/https scheme (internal wiki links start with /wiki)
@@ -17,6 +18,8 @@ LINK_REGEX = compile('''
     [^"]*       # The rest of the URL
   )"
 ''', VERBOSE)
+"""
+LINK_REGEX = compile('href="(https:?://([^/"]+)[^"]*)')
 
 # Domains which cannot be malware or phishing, and broken links are intentional.
 # These domains are not expected to go down, but host wikis (or other language-specific content) which may be a redlink.
