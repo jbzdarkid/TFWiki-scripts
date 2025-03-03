@@ -70,6 +70,7 @@ weekly_reports = {
   'incorrect_redirects': 'Mistranslated redirects',
   'incorrectly_categorized': 'Pages with incorrect categorization',
   'incorrectly_linked': 'Pages with incorrect links',
+  'lang_duplicates': 'Lang duplicates',
   'lang_quality': 'Lang errors',
   'mismatched_weekly': 'Mismatched parenthesis',
   'missing_translations_weekly': 'Missing translations/sorted',

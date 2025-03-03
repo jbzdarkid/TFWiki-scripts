@@ -16,6 +16,7 @@ This version of the scripts uses python3, which unfortunately broke our old wiki
 - `incorrect_redirects.py`: Reports on language redirects which don't match english, or which redirect to another language.
 - `incorrectly_categorized.py`: Searches all categories for articles which are categorized into the wrong language.
 - `incorrectly_linked.py`: Searches all language pages for links to other languages (e.g. /es linking to /pt).
+- `lang_duplicates.py`: Parses templates for {{lang}} usage, and reports on strings which are frequently used (or duplicated in the dictionary).
 - `lang_quality.py`: Parses templates for {{lang}} usage, and reports on various editor mistakes.
 - `mismatched_weekly.py`: Weekly copy of the monthly report which only runs on the past week of recent changes.
 - `missing_translations_weekly`: Weekly copy of the daily 'Missing translations' report, sorted by usage count.
