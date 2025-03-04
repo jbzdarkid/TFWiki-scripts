@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta
 import importlib
+from datetime import datetime, timedelta
 from os import environ
 from random import shuffle
 from subprocess import check_output
@@ -40,7 +40,7 @@ def publish_report(w, module, report_name, root, summary):
   link_map = {}
   report_file_name = 'wiki_' + report_name.lower().replace(' ', '_')
   try:
-    report_output = importlib.import_module('reports/' + module).main(w)
+    report_output = importlib.import_module('reports.' + module).main(w)
 
     if isinstance(report_output, list):
       shuffle(report_output) # Shuffle the order so that we don't always upload the same language first, to ensure even coverage of 502s
