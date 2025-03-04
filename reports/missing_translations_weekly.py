@@ -1,6 +1,6 @@
 from wikitools import wiki
 
-import missing_translations
+from . import missing_translations
 
 # Flipping the 'sort_by_count' flag to, well, sort by count
 missing_translations.sort_by_count = True

@@ -2,7 +2,7 @@ from collections import defaultdict
 from .utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
-from untranslated_templates import parse_lang_templates
+from .untranslated_templates import parse_lang_templates
 
 verbose = False
 

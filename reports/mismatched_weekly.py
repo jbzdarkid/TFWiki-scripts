@@ -1,7 +1,7 @@
 from wikitools import wiki
 from datetime import datetime, timedelta
 
-import mismatched
+from . import mismatched
 
 # We are overwriting page_iter so that the weekly report can just process the past week of changes.
 def page_iter(w):
