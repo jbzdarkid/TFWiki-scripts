@@ -1,7 +1,3 @@
-*.txt
+reports/wiki_*.txt
 *.pyc
-decompiled
-models
-config.py
-skeleton_config.py
 venv/
