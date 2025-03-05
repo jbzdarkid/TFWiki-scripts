@@ -1,7 +1,7 @@
 # coding: utf-8
 from re import compile, IGNORECASE
 from unicodedata import east_asian_width as width
-from utils import pagescraper_queue, time_and_date
+from .utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
 pairs = [

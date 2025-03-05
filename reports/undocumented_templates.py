@@ -1,5 +1,5 @@
 from re import search, sub
-from utils import pagescraper_queue, plural, time_and_date, whatlinkshere
+from .utils import pagescraper_queue, plural, time_and_date, whatlinkshere
 from wikitools import wiki
 from wikitools.page import Page
 

@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta
 import importlib
+from datetime import datetime, timedelta
 from os import environ
 from random import shuffle
 from subprocess import check_output
@@ -40,7 +40,7 @@ def publish_report(w, module, report_name, root, summary):
   link_map = {}
   report_file_name = 'wiki_' + report_name.lower().replace(' ', '_')
   try:
-    report_output = importlib.import_module(module).main(w)
+    report_output = importlib.import_module('reports.' + module).main(w)
 
     if isinstance(report_output, list):
       shuffle(report_output) # Shuffle the order so that we don't always upload the same language first, to ensure even coverage of 502s
@@ -112,25 +112,37 @@ if __name__ == '__main__':
     root = 'User:Darkid/Reports'
     summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
 
+    touched_readme = False
+    touched_master = False
+    touched_reports = set()
+
     merge_base = check_output(['git', 'merge-base', 'HEAD', 'origin/' + environ['GITHUB_BASE_REF']], text=True).strip()
-    changed_files = {f for f in check_output(['git', 'diff', '--name-only', merge_base, '--diff-filter=M'], text=True).split('\n') if f}
-    added_files   = {f for f in check_output(['git', 'diff', '--name-only', merge_base, '--diff-filter=A'], text=True).split('\n') if f}
+    output = check_output(['git', 'diff', '--name-status', '--no-renames', merge_base], text=True).strip()
+    for line in output.split('\n'):
+      status, file = line.split('\t')[:2]
+      if file == 'README.md':
+        touched_readme = True
+      elif file == 'master.py':
+        touched_master = True
 
-    print('Changed files:', changed_files)
-    print('Added files:', added_files)
+      # Run all reports which were added, modified, or copied
+      elif status in 'AMC' and file.startswith('reports/'):
+        report_name = file[8:-3]
+        touched_reports.add(report_name)
 
-    if len(added_files) > 0 and 'README.md' not in changed_files:
-      raise ValueError('When adding a new report, you must update the readme.')
+    print('Touched readme:', touched_readme)
+    print('Touched master:', touched_master)
+    print('Touched reports:', touched_reports)
 
-    changed_files |= added_files
+    if not (touched_readme and touched_master) and len(touched_reports) > 0:
+      raise ValueError('When adding a new report, you must update the readme and master.py')
 
-    for row in changed_files:
-      file = row.replace('.py', '').strip()
-      weekly_file = file + '_weekly'
-      if weekly_file in all_reports:
-        modules_to_run.append(weekly_file)
-      elif file in all_reports:
-        modules_to_run.append(file)
+    for report in touched_reports:
+      weekly_report = report + '_weekly'
+      if weekly_report in all_reports:
+        modules_to_run.append(weekly_report)
+      elif report in all_reports:
+        modules_to_run.append(report)
 
   elif event == 'workflow_dispatch':
     root = 'User:Darkid/Reports'
@@ -153,6 +165,8 @@ if __name__ == '__main__':
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
   if not w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD']):
     exit(1)
+
+  print(f'Succesfully logged in, running reports: {modules_to_run}')
 
   comment = 'Please verify the following diffs:\n'
   succeeded = True

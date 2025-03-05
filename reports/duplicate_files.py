@@ -1,4 +1,4 @@
-from utils import plural, time_and_date, whatlinkshere
+from .utils import plural, time_and_date, whatlinkshere
 from wikitools import wiki
 from wikitools.page import Page
 
