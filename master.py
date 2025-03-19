@@ -31,7 +31,7 @@ def edit_or_save(page_name, file_name, output, summary):
     return wiki_diff_url
 
   # Edit failed, fall back to saving to file (will be attached as a build artifact)
-  with open(file_name, 'w', encoding='utf-8') as f:
+  with open(f'reports/{file_name}', 'w', encoding='utf-8') as f:
     f.write(output)
 
   return None
