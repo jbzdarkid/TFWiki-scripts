@@ -45,6 +45,7 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
 
 ; See also
 * [[Team Fortress Wiki:Reports/All articles/{lang}|All articles in {{{{lang name|name|{lang}}}}}]]
+* [[Team Fortress Wiki:Reports/Missing translations/sorted/{lang}|This report, but sorted by page usage instead of alphabetical]]
 * [[Special:RecentChangesLinked/Team Fortress Wiki:Reports/All articles/{lang}|Recent changes to articles in {{{{lang name|name|{lang}}}}}]]
 
 == List ==""".format(
