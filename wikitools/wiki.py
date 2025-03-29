@@ -24,6 +24,7 @@ class Wiki:
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
     self.session.mount('https://', requests.adapters.HTTPAdapter(max_retries=retry))
+    self.session.headers.update({'User-Agent': 'TFWikiScripts (https://github.com/jbzdarkid/TFWiki-scripts, 1.0)'})
 
     self.namespaces = self.get_namespaces()
 
