@@ -32,5 +32,5 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: Failed uploads
-        path: wiki_*.txt
+        path: reports/wiki_*.txt
         if-no-files-found: ignore
