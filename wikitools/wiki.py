@@ -6,7 +6,7 @@ from .retry import StaticRetry
 from .zip_dict import ZipDict
 
 class Wiki:
-  def __init__(self, api_url):
+  def __init__(self, api_url, user_agent=None):
     self.api_url = api_url
     self.wiki_url = api_url.replace('api.php', 'index.php')
     self.lgtoken = None
@@ -24,7 +24,9 @@ class Wiki:
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
     self.session.mount('https://', requests.adapters.HTTPAdapter(max_retries=retry))
-    self.session.headers.update({'User-Agent': 'TFWikiScripts (https://github.com/jbzdarkid/TFWiki-scripts, 1.0)'})
+    if not user_agent:
+      user_agent = 'TFWikiScripts (https://github.com/jbzdarkid/TFWiki-scripts, 1.0)'
+    self.session.headers.update({'User-Agent': user_agent})
 
     self.namespaces = self.get_namespaces()
 
