@@ -19,6 +19,7 @@ import open_pr_comment
 # Templates sorted by usage and protect status
 # A 'missing translations' report but for dictionary entries (maybe sorted by usage, too?)
 # Templates which have redirects in them
+# Main (or just non-Template) pages which use <includeonly> <onlyinclude> etc.
 
 # Reports I want to improve:
 # Sort missing categories by # pages
