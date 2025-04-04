@@ -3,7 +3,7 @@ from .utils import pagescraper_queue, plural, time_and_date, whatlinkshere
 from wikitools import wiki
 from wikitools.page import Page
 
-verbose = False
+verbose = True
 
 def pagescraper(page, badpages):
   page_text = page.get_wiki_text()
