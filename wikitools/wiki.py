@@ -15,7 +15,7 @@ class Wiki:
 
     # https://urllib3.readthedocs.io/en/stable/reference/urllib3.util.html#urllib3.util.Retry
     retry = StaticRetry(
-      total=1,
+      total=2,
       allowed_methods={'GET', 'POST'},
       status_forcelist=[502, 503, 429],
       static_backoff=30, # 30 second fixed backoff (custom implementation)
