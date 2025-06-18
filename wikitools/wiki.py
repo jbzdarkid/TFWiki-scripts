@@ -1,8 +1,8 @@
 from re import finditer
+from time import sleep
 import requests
 
 from .page import Page
-from .retry import StaticRetry
 from .zip_dict import ZipDict
 
 class Wiki:
@@ -13,24 +13,16 @@ class Wiki:
     self.page_text_cache = {}
     self.page_html_cache = ZipDict()
 
-    # TODO: At some point I should probably re-instate the actual factual retry code, but it had some issue where the "total" wasn't resetting,
-    # and it just never backed off. In the meantime, I'm just doing my own thing.
-    # https://urllib3.readthedocs.io/en/stable/reference/urllib3.util.html#urllib3.util.Retry
-    # retry = StaticRetry(
-    #   total=2,
-    #   allowed_methods={'GET', 'POST'},
-    #   status_forcelist=[502, 503, 429],
-    #   static_backoff=30, # 30 second fixed backoff (custom implementation)
-    # )
-
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
-    # self.session.mount('https://', requests.adapters.HTTPAdapter(max_retries=retry))
     if not user_agent:
       user_agent = 'TFWikiScripts (https://github.com/jbzdarkid/TFWiki-scripts, 1.0)'
     self.session.headers.update({'User-Agent': user_agent})
 
     self.namespaces = self.get_namespaces()
+
+  def __eq__(self, other):
+    return self.api_url == other.api_url
 
   def retry(self, action):
     i = 0
@@ -50,9 +42,6 @@ class Wiki:
         if i >= 3:
           raise
         sleep(30)
-  
-  def __eq__(self, other):
-    return self.api_url == other.api_url
 
   def get(self, action, **params):
     params.update({
