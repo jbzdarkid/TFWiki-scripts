@@ -32,9 +32,9 @@ class Wiki:
         r.raise_for_status()
         return r
       except requests.RequestException as e:
+        print(e)
         # Always reraise for unexpected status codes (400, 401)
         if e.response.status_code not in [429, 502, 503]:
-          print(e)
           raise
 
         # For other status codes, allow up to 3 retries, with a 30s sleep between attempts
