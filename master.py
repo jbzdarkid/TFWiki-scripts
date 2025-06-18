@@ -177,7 +177,7 @@ if __name__ == '__main__':
   modules_to_run = list(modules_to_run)
   shuffle(modules_to_run)
 
-for module in modules_to_run:
+  for module in modules_to_run:
     report_name = all_reports[module]
     start = datetime.now()
     print(f'Starting {report_name} at {start}')
