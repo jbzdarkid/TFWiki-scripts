@@ -13,23 +13,44 @@ class Wiki:
     self.page_text_cache = {}
     self.page_html_cache = ZipDict()
 
+    # TODO: At some point I should probably re-instate the actual factual retry code, but it had some issue where the "total" wasn't resetting,
+    # and it just never backed off. In the meantime, I'm just doing my own thing.
     # https://urllib3.readthedocs.io/en/stable/reference/urllib3.util.html#urllib3.util.Retry
-    retry = StaticRetry(
-      total=2,
-      allowed_methods={'GET', 'POST'},
-      status_forcelist=[502, 503, 429],
-      static_backoff=30, # 30 second fixed backoff (custom implementation)
-    )
+    # retry = StaticRetry(
+    #   total=2,
+    #   allowed_methods={'GET', 'POST'},
+    #   status_forcelist=[502, 503, 429],
+    #   static_backoff=30, # 30 second fixed backoff (custom implementation)
+    # )
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
-    self.session.mount('https://', requests.adapters.HTTPAdapter(max_retries=retry))
+    # self.session.mount('https://', requests.adapters.HTTPAdapter(max_retries=retry))
     if not user_agent:
       user_agent = 'TFWikiScripts (https://github.com/jbzdarkid/TFWiki-scripts, 1.0)'
     self.session.headers.update({'User-Agent': user_agent})
 
     self.namespaces = self.get_namespaces()
 
+  def retry(self, action):
+    i = 0
+    while 1:
+      try:
+        r = action()
+        r.raise_for_status()
+        return r
+      except requests.RequestException as e:
+        # Always reraise for unexpected status codes (400, 401)
+        if e.response.status_code not in [429, 502, 503]:
+          print(e)
+          raise
+
+        # For other status codes, allow up to 3 retries, with a 30s sleep between attempts
+        i += 1
+        if i >= 3:
+          raise
+        sleep(30)
+  
   def __eq__(self, other):
     return self.api_url == other.api_url
 
@@ -38,8 +59,7 @@ class Wiki:
       'action': action,
       'format': 'json',
     })
-    r = self.session.get(self.api_url, params=params)
-    r.raise_for_status()
+    r = self.retry(lambda: self.session.get(self.api_url, params=params))
     j = r.json()
     if 'warnings' in j:
       print(r.url + '\tWarning: ' + str(j['warnings']))
@@ -85,8 +105,9 @@ class Wiki:
       'offset': 0,
     })
     while True:
-      r = self.session.get(self.wiki_url, params=params)
-      if not r.ok:
+      try:
+        r = self.retry(lambda: self.session.get(self.wiki_url, params=params))
+      except:
         yield '' # Not sure this is the best approach, but some reports return a 404 when there is no more data
         return
       if 'There are no results for this report.' in r.text:
@@ -103,9 +124,8 @@ class Wiki:
       'action': action,
       'format': 'json',
     })
-    r = self.session.post(self.api_url, data=kwargs, files=files)
-    if r.status_code >= 500:
-      r.raise_for_status()
+    
+    r = self.retry(lambda: self.session.post(self.api_url, data=kwargs, files=files))
     return r.json()
 
   def post_with_csrf(self, action, **kwargs):
