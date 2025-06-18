@@ -32,17 +32,16 @@ class Wiki:
         r.raise_for_status()
         return r
       except requests.RequestException as e:
-        print(e)
-        print(e.response.headers)
-        # Always reraise for unexpected status codes (400, 401)
+        # Always reraise for unexpected status codes
         if e.response.status_code not in [429, 502, 503]:
+          print(e)
           raise
 
-        # For other status codes, allow up to 3 retries, with a 30s sleep between attempts
+        # For other status codes, allow up to 5 retries, with an ever-increasing sleep between attempts
         i += 1
-        if i >= 3:
+        if i > 5:
           raise
-        sleep(30)
+        sleep(30 * i)
 
   def get(self, action, **params):
     params.update({
