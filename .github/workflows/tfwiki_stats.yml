@@ -29,6 +29,7 @@ jobs:
         PULL_REQUEST_ID: ${{ github.event.pull_request.number }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         API_KEY: ${{ secrets.API_KEY }}
+        USER_AGENT: ${{ secrets.USER_AGENT }}
     - uses: actions/upload-artifact@v4
       with:
         name: Failed uploads
