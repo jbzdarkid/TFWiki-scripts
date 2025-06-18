@@ -163,7 +163,7 @@ if __name__ == '__main__':
     print(f'Not sure what to run in response to {event}')
     exit(1)
 
-  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php', environ['USER_AGENT'])
   if not w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD']):
     exit(1)
 
