@@ -33,6 +33,7 @@ class Wiki:
         return r
       except requests.RequestException as e:
         print(e)
+        print(e.response.headers)
         # Always reraise for unexpected status codes (400, 401)
         if e.response.status_code not in [429, 502, 503]:
           raise
