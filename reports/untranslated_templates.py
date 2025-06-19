@@ -2,6 +2,9 @@ from re import compile, IGNORECASE, VERBOSE
 from .utils import pagescraper_queue, time_and_date, plural, whatlinkshere
 from wikitools import wiki
 
+counters = [0] * 100
+from datetime import datetime
+
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
@@ -17,8 +20,11 @@ LANG_TEMPLATE_ARGS = compile(r"""
 """, VERBOSE)
 
 def parse_lang_templates(page):
+  counters[0] -= datetime.now().timestamp()
   page_text = page.get_wiki_text()
+  counters[0] += datetime.now().timestamp()
 
+  counters[1] -= datetime.now().timestamp()
   buffer = {0: ''} # Text buffers for each level of the template, i.e. {{contains this text {{but not this text}} and still this text}}
   stack = [0] # Contains the indices which open the stack depth(s), i.e. the hierarchy of nested templates
   for i, char in enumerate(page_text):
@@ -34,6 +40,7 @@ def parse_lang_templates(page):
 
     # Add this character to the buffer for the current stack (or create the buffer if it doesn't exist)
     buffer[stack[-1]] = buffer.get(stack[-1], '') + char
+  counters[1] += datetime.now().timestamp()
 
   if verbose:
     print(page.title, 'contains', len(buffer), 'pairs of braces')
@@ -41,6 +48,7 @@ def parse_lang_templates(page):
   # Finally, search through for lang templates using regex
   lang_templates = []
 
+  counters[2] -= datetime.now().timestamp()
   for index, text in buffer.items():
     template_name = text.split('|', 1)[0].strip()
     if not template_name.startswith('lang'):
@@ -48,12 +56,14 @@ def parse_lang_templates(page):
 
     args = []
     first_arg_text = ''
+    counters[3] -= datetime.now().timestamp()
     for match in LANG_TEMPLATE_ARGS.finditer(text):
       language = match.group(1).strip().lower()
       text = match.group(2).strip()
       args.append((language, text)) # Note that we're not using a dictionary here since some consumers care about duplicates
       if not first_arg_text:
         first_arg_text = text.split('\n', 1)[0].strip()
+    counters[3] += datetime.now().timestamp()
 
     line_no = page_text[:index].count('\n') + 1
     lang_templates.append({
@@ -62,11 +72,15 @@ def parse_lang_templates(page):
       'location': f"''Line {line_no}'': <nowiki>{first_arg_text}</nowiki>",
     })
 
+  counters[2] += datetime.now().timestamp()
   return lang_templates
 
 def pagescraper(page, translations, usage_counts):
+  counters[4] -= datetime.now().timestamp()
   lang_templates = parse_lang_templates(page)
+  counters[4] += datetime.now().timestamp()
 
+  counters[5] -= datetime.now().timestamp()
   missing_translations = {lang:[] for lang in LANGS}
   for lang_template in lang_templates:
     if lang_template['template'] == 'lang incomplete':
@@ -79,8 +93,11 @@ def pagescraper(page, translations, usage_counts):
 
     for language in missing_languages:
       missing_translations[language].append(location)
+  counters[5] += datetime.now().timestamp()
 
+  counters[6] -= datetime.now().timestamp()
   usage_count = page.get_transclusion_count()
+  counters[6] += datetime.now().timestamp()
   if usage_count == 0:
     return # Who cares, if it's not being used.
 
@@ -93,6 +110,7 @@ def pagescraper(page, translations, usage_counts):
 def main(w):
   translations = {lang: [] for lang in LANGS}
   usage_counts = {}
+  counters[7] -= datetime.now().timestamp()
   with pagescraper_queue(pagescraper, translations, usage_counts) as pages:
     for page in w.get_all_templates():
       if '/' in page.title:
@@ -102,6 +120,7 @@ def main(w):
       if page.title == 'Template:Lang':
         continue # Special exclusion
       pages.put(page)
+  counters[7] += datetime.now().timestamp()
 
   outputs = []
   for language in LANGS:
@@ -119,12 +138,16 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
       count=len(translations[language]),
       date=time_and_date())
 
+    counters[8] -= datetime.now().timestamp()
     for template, missing in sorted(translations[language], key=lambda elem: (-usage_counts[elem[0].title], elem[0].title)):
       count = usage_counts[template.title]
       output += f'\n# [{template.get_edit_url()} {template.title}] has [{whatlinkshere(template.title, count)} {plural.uses(count)}] and is missing {plural.translations(len(missing))}'
       for location in missing:
         output += f'\n#:{location}'
+    counters[8] += datetime.now().timestamp()
     outputs.append([language, output])
+
+  print('Counters', counters)
   return outputs
 
 if __name__ == '__main__':
