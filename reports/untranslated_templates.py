@@ -64,6 +64,8 @@ def parse_lang_templates(page):
       if not first_arg_text:
         first_arg_text = text.split('\n', 1)[0].strip()
     counters[3] += datetime.now().timestamp()
+    if not first_arg_text or first_arg_text == '':
+      print(args)
 
     line_no = page_text[:index].count('\n') + 1
     lang_templates.append({
@@ -80,6 +82,9 @@ def pagescraper(page, translations, usage_counts):
   lang_templates = parse_lang_templates(page)
   counters[4] += datetime.now().timestamp()
 
+  if len(lang_templates) == 0:
+    return # Should be impossible (since we're looking for templates which transclude {{lang}}), but just in case.
+
   counters[5] -= datetime.now().timestamp()
   missing_translations = {lang:[] for lang in LANGS}
   for lang_template in lang_templates:
@@ -95,13 +100,17 @@ def pagescraper(page, translations, usage_counts):
       missing_translations[language].append(location)
   counters[5] += datetime.now().timestamp()
 
+  if len(missing_translations) == 0:
+    return # Template is fully translated, no need to report on it for anyone.
+
   counters[6] -= datetime.now().timestamp()
   usage_count = page.get_transclusion_count()
   counters[6] += datetime.now().timestamp()
+
   if usage_count == 0:
     return # Who cares, if it's not being used.
 
-  usage_counts[page.title] =  usage_count
+  usage_counts[page.title] = usage_count
 
   for lang, lang_missing_translations in missing_translations.items():
     if len(lang_missing_translations) > 0:
@@ -112,7 +121,11 @@ def main(w):
   usage_counts = {}
   counters[7] -= datetime.now().timestamp()
   with pagescraper_queue(pagescraper, translations, usage_counts) as pages:
-    for page in w.get_all_templates():
+    # For performance, only search for templates which are reported to transclude lang/lang incomplete.
+    pages_with_lang = set()
+    pages_with_lang.union(Page(w, 'Template:Lang').get_transclusions(namespaces=['Template']))
+    pages_with_lang.union(Page(w, 'Template:Lang incomplete').get_transclusions(namespaces=['Template']))
+    for page in pages_with_lang:
       if '/' in page.title:
         continue # Don't include subpage templates like Template:Dictionary and Template:PatchDiff
       if page.title[:13] == 'Template:User':
