@@ -121,11 +121,15 @@ def main(w):
   translations = {lang: [] for lang in LANGS}
   usage_counts = {}
   counters[7] -= datetime.now().timestamp()
+  counters[9] -= datetime.now().timestamp()
+  # For performance, only search for templates which are reported to transclude lang/lang incomplete.
+  pages_with_lang = set()
+  pages_with_lang.union(Page(w, 'Template:Lang').get_transclusions(namespaces=['Template']))
+  pages_with_lang.union(Page(w, 'Template:Lang incomplete').get_transclusions(namespaces=['Template']))
+  print(pages_with_lang)
+  counters[9] += datetime.now().timestamp()
+
   with pagescraper_queue(pagescraper, translations, usage_counts) as pages:
-    # For performance, only search for templates which are reported to transclude lang/lang incomplete.
-    pages_with_lang = set()
-    pages_with_lang.union(Page(w, 'Template:Lang').get_transclusions(namespaces=['Template']))
-    pages_with_lang.union(Page(w, 'Template:Lang incomplete').get_transclusions(namespaces=['Template']))
     for page in pages_with_lang:
       if '/' in page.title:
         continue # Don't include subpage templates like Template:Dictionary and Template:PatchDiff
