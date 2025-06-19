@@ -1,6 +1,7 @@
 from re import compile, IGNORECASE, VERBOSE
 from .utils import pagescraper_queue, time_and_date, plural, whatlinkshere
 from wikitools import wiki
+from wikitools.page import Page
 
 counters = [0] * 100
 from datetime import datetime
