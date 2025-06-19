@@ -26,7 +26,10 @@ def parse_lang_templates(page):
       stack.append(i)
       continue
     elif char in '}]':
-      stack.pop()
+      # The 'base' of the stack should not ever be popped (since it represents text at root scope)
+      # If we get a mismatch just... do our best. Mismatched parens will be reported elsewhere.
+      if len(stack) > 1:
+        stack.pop() 
       continue
 
     # Add this character to the buffer for the current stack (or create the buffer if it doesn't exist)
