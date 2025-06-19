@@ -33,11 +33,11 @@ class Wiki:
         return r
       except requests.RequestException as e:
         # Always reraise for unexpected status codes
-        if e.response.status_code not in [429, 502, 503]:
+        if e.response and e.response.status_code not in [429, 502, 503]:
           print(e)
           raise
 
-        # For other status codes, allow up to 5 retries, with an ever-increasing sleep between attempts
+        # For other status codes (or generic connection failures), allow up to 5 retries, with an ever-increasing sleep between attempts
         i += 1
         if i > 5:
           raise
