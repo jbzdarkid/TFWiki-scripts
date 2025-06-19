@@ -23,7 +23,7 @@ def parse_lang_templates(page):
   stack = [0] # Contains the indices which open the stack depth(s), i.e. the hierarchy of nested templates
   for i, char in enumerate(page_text):
     if char in '{[':
-      stack.push(i)
+      stack.append(i)
       continue
     elif char in '}]':
       stack.pop()
@@ -38,7 +38,7 @@ def parse_lang_templates(page):
   # Finally, search through for lang templates using regex
   lang_templates = []
 
-  for index, text in buffer.values():
+  for index, text in buffer.items():
     template_name = text.split('|', 1)[0].strip()
     if not template_name.startswith('lang'):
       continue # We only care about {{lang}} and {{lang incomplete}}
