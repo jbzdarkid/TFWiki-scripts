@@ -115,6 +115,7 @@ if __name__ == '__main__':
 
     touched_readme = False
     touched_master = False
+    created_report = False
     touched_reports = set()
 
     merge_base = check_output(['git', 'merge-base', 'HEAD', 'origin/' + environ['GITHUB_BASE_REF']], text=True).strip()
@@ -126,16 +127,16 @@ if __name__ == '__main__':
       elif file == 'master.py':
         touched_master = True
 
-      # Run all reports which were added, modified, or copied
-      elif status in 'A' and file.startswith('reports/'):
-        report_name = file[8:-3]
-        touched_reports.add(report_name)
+      elif file.startswith('reports/'):
+        if status == 'A':
+          created_report = True
+        if status in 'AMC': # Run all reports which were added, modified, or copied
+          report_name = file[8:-3]
+          touched_reports.add(report_name)
 
-    print('Touched readme:', touched_readme)
-    print('Touched master:', touched_master)
     print('Touched reports:', touched_reports)
 
-    if not (touched_readme and touched_master) and len(touched_reports) > 0:
+    if created_report and not (touched_readme and touched_master):
       raise ValueError('When adding a new report, you must update the readme and master.py')
 
     for report in touched_reports:
