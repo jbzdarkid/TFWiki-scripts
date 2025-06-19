@@ -124,8 +124,8 @@ def main(w):
   counters[9] -= datetime.now().timestamp()
   # For performance, only search for templates which are reported to transclude lang/lang incomplete.
   pages_with_lang = set()
-  pages_with_lang.union(Page(w, 'Template:Lang').get_transclusions(namespaces=['Template']))
-  pages_with_lang.union(Page(w, 'Template:Lang incomplete').get_transclusions(namespaces=['Template']))
+  pages_with_lang.update(Page(w, 'Template:Lang').get_transclusions(namespaces=['Template']))
+  pages_with_lang.update(Page(w, 'Template:Lang incomplete').get_transclusions(namespaces=['Template']))
   print(pages_with_lang)
   counters[9] += datetime.now().timestamp()
 
