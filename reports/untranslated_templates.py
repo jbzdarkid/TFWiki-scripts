@@ -149,6 +149,9 @@ def parse_lang_templates(page):
 
 def pagescraper(page, translations, usage_counts):
   lang_templates = parse_lang_templates(page)
+  lang_templates2 = parse_lang_templates2(page)
+  if lang_templates != lang_templates2:
+    print(page)
 
   if len(lang_templates) == 0:
     return # Should be impossible (since we're looking for templates which transclude {{lang}}), but just in case.
