@@ -88,7 +88,7 @@ def parse_lang_templates(page):
       language = match2.group(1).strip().lower()
       text = match2.group(2).strip()
       lang_template['args'].append((language, text))
-
+    print(lang_template['args']) # TODO: Testing
     lang_template['location'] = "''Line %d'': <nowiki>%s</nowiki>" % (
       page_text[:match.start()].count('\n') + 1,
       lang_template['args'][0][1].split('\n', 1)[0].strip() if len(lang_template['args']) > 0 else '',
