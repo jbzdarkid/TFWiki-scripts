@@ -127,7 +127,7 @@ if __name__ == '__main__':
         touched_master = True
 
       # Run all reports which were added, modified, or copied
-      elif status in 'AMC' and file.startswith('reports/'):
+      elif status in 'A' and file.startswith('reports/'):
         report_name = file[8:-3]
         touched_reports.add(report_name)
 
