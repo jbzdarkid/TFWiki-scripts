@@ -46,18 +46,13 @@ def parse_lang_templates2(page):
     # Add this character to the buffer for the current stack (or create the buffer if it doesn't exist)
     buffer[stack[-1]] = buffer.get(stack[-1], '') + char
 
-  if verbose:
-    print(page.title, 'contains', len(buffer), 'pairs of braces')
-
-  # Finally, search through for lang templates using regex
+  # Finally, search through each template for a lang template, then parse the args via regex
   lang_templates = []
 
   for index, text in buffer.items():
     template_name = text.split('|', 1)[0].strip()
-    if not template_name.startswith('lang'):
-      continue # We only care about {{lang}} and {{lang incomplete}}
-
-    print(page.title, template_name, index, text)
+    if template_name not in ['lang', 'lang incomplete']:
+      continue
 
     args = []
     first_arg_text = ''
@@ -128,8 +123,6 @@ def parse_lang_templates(page):
   lang_templates = []
 
   for match in LANG_TEMPLATE_START.finditer(page_text):
-    print(page.title, match.group(1), match.start() + 2, buffer[match.start() + 2])
-
     lang_template = {'args': []}
     for match2 in LANG_TEMPLATE_ARGS.finditer(buffer[match.start() + 2]): # Skip the opening {{
       language = match2.group(1).strip().lower()
@@ -151,7 +144,7 @@ def pagescraper(page, translations, usage_counts):
   lang_templates = parse_lang_templates(page)
   lang_templates2 = parse_lang_templates2(page)
   if lang_templates != lang_templates2:
-    print(page)
+    print('v1/v2 mismatch for', page)
 
   if len(lang_templates) == 0:
     return # Should be impossible (since we're looking for templates which transclude {{lang}}), but just in case.
@@ -199,7 +192,7 @@ def main(w):
         continue # Special exclusion
       pages.put(page)
       i += 1
-      if i > 10:
+      if i > 100:
         break
 
   outputs = []
