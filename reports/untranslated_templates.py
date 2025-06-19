@@ -3,7 +3,7 @@ from .utils import pagescraper_queue, time_and_date, plural, whatlinkshere
 from wikitools import wiki
 from wikitools.page import Page
 
-verbose = True
+verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 LANG_TEMPLATE_START = compile(r"""
@@ -144,7 +144,7 @@ def pagescraper(page, translations, usage_counts):
   lang_templates = parse_lang_templates(page)
   lang_templates2 = parse_lang_templates2(page)
   if lang_templates != lang_templates2:
-    print('v1/v2 mismatch for', page)
+    print('v1/v2 mismatch for', page, len(lang_templates), len(lang_templates2))
 
   if len(lang_templates) == 0:
     return # Should be impossible (since we're looking for templates which transclude {{lang}}), but just in case.
