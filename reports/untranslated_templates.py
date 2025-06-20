@@ -53,6 +53,8 @@ def parse_lang_templates2(page):
     template_name = text.split('|', 1)[0].strip()
     if template_name not in ['lang', 'lang incomplete']:
       continue
+    if page_text[index-2:index+1] == '{{{':
+      continue # Ignore 'lang' when it's used as an argument (as opposed to a template)
 
     args = []
     first_arg_text = ''
