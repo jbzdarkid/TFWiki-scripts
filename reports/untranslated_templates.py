@@ -147,6 +147,14 @@ def pagescraper(page, translations, usage_counts):
   lang_templates2 = parse_lang_templates2(page)
   if lang_templates != lang_templates2:
     print('v1/v2 mismatch for', page, len(lang_templates), len(lang_templates2))
+    l1 = lang_templates
+    l2 = lang_templates2
+    assert len(l1) == len(l2), f'{len(l1)} != {len(l2)}'
+    for i in range(len(l1)):
+      assert l1[i]['template'] == l2[i]['template'], f'{l1[i]["template"]}\n!=\n{l2[i]["template"]}'
+      assert l1[i]['location'] == l2[i]['location'], f'{l1[i]["location"]}\n!=\n{l2[i]["location"]}'
+      assert l1[i]['args'] == l2[i]['args'], f'{l1[i]["args"]}\n!=\n{l2[i]["args"]}'
+
 
   if len(lang_templates) == 0:
     return # Should be impossible (since we're looking for templates which transclude {{lang}}), but just in case.
@@ -194,7 +202,7 @@ def main(w):
         continue # Special exclusion
       pages.put(page)
       i += 1
-      if i > 100:
+      if i > 500:
         break
 
   outputs = []
