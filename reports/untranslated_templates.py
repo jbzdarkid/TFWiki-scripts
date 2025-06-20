@@ -134,7 +134,7 @@ def parse_lang_templates(page):
       lang_template['args'][0][1].split('\n', 1)[0].strip() if len(lang_template['args']) > 0 else '',
     )
 
-    lang_template['template'] = match.group(1)
+    lang_template['template'] = 'lang incomplete' if match.group(1) else 'lang'
 
     lang_templates.append(lang_template)
 
