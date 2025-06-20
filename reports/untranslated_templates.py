@@ -50,7 +50,7 @@ def parse_lang_templates2(page):
   lang_templates = []
 
   for index, text in buffer.items():
-    template_name = text.split('|', 1)[0].strip()
+    template_name = text.split('|', 1)[0].strip().lower()
     if template_name not in ['lang', 'lang incomplete']:
       continue
     if page_text[index-2:index+1] == '{{{':
