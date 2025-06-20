@@ -131,7 +131,6 @@ def parse_lang_templates(page):
       search_text = buffer[match.start() + 1]
     else:
       search_text = buffer[match.start() + 2]
-    print(search_text[:15], match.start())
     for match2 in LANG_TEMPLATE_ARGS.finditer(search_text):
       language = match2.group(1).strip().lower()
       text = match2.group(2).strip()
@@ -142,7 +141,6 @@ def parse_lang_templates(page):
       lang_template['args'][0][1].split('\n', 1)[0].strip() if len(lang_template['args']) > 0 else '',
     )
 
-    print(match.group(1))
     lang_template['template'] = 'lang incomplete' if match.group(1) else 'lang'
 
     lang_templates.append(lang_template)
