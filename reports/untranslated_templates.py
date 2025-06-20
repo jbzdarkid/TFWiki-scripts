@@ -57,19 +57,19 @@ def parse_lang_templates2(page):
       continue # Ignore 'lang' when it's used as an argument (as opposed to a template)
 
     args = []
-    first_arg_text = ''
+    first_arg_text = None
     for match in LANG_TEMPLATE_ARGS.finditer(text):
       language = match.group(1).strip().lower()
       text = match.group(2).strip()
       args.append((language, text)) # Note that we're not using a dictionary here since some consumers care about duplicates
-      if not first_arg_text:
+      if first_arg_text is None:
         first_arg_text = text.split('\n', 1)[0].strip()
 
     line_no = page_text[:index].count('\n') + 2
     lang_templates.append({
       'template': template_name,
       'args': args,
-      'location': f"''Line {line_no}'': <nowiki>{first_arg_text}</nowiki>",
+      'location': f"''Line {line_no}'': <nowiki>{first_arg_text if first_arg_text else ''}</nowiki>",
     })
 
   return lang_templates
