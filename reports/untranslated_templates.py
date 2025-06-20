@@ -65,7 +65,7 @@ def parse_lang_templates2(page):
       if not first_arg_text:
         first_arg_text = text.split('\n', 1)[0].strip()
 
-    line_no = page_text[:index].count('\n') + 1
+    line_no = page_text[:index].count('\n') + 2
     lang_templates.append({
       'template': template_name,
       'args': args,
@@ -132,7 +132,7 @@ def parse_lang_templates(page):
       lang_template['args'].append((language, text))
 
     lang_template['location'] = "''Line %d'': <nowiki>%s</nowiki>" % (
-      page_text[:match.start()].count('\n') + 1,
+      page_text[:match.start()].count('\n') + 3,
       lang_template['args'][0][1].split('\n', 1)[0].strip() if len(lang_template['args']) > 0 else '',
     )
 
