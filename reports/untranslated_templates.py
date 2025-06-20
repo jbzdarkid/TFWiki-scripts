@@ -7,7 +7,7 @@ verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
 LANG_TEMPLATE_START = compile(r"""
-  [^{]{{            # The start of a template '{{' which is not the start of a parameter '{{{'
+  (^|[^{]){{        # The start of a template '{{' which is not the start of a parameter '{{{'
   \s*               # Any amount of whitespace is allowed before the template name
   lang              # Template name {{lang}}
   ([ ]incomplete)?  # Also matches {{lang incomplete}} but we can check which one it is by the first group
@@ -65,7 +65,7 @@ def parse_lang_templates2(page):
       if first_arg_text is None:
         first_arg_text = text.split('\n', 1)[0].strip()
 
-    line_no = page_text[:index].count('\n') + 2
+    line_no = page_text[:index].count('\n') + 1
     lang_templates.append({
       'template': template_name,
       'args': args,
@@ -126,13 +126,19 @@ def parse_lang_templates(page):
 
   for match in LANG_TEMPLATE_START.finditer(page_text):
     lang_template = {'args': []}
-    for match2 in LANG_TEMPLATE_ARGS.finditer(buffer[match.start() + 2]): # Skip the opening {{
+    # Skip the opening {{
+    if match.group(0).startswith('{{'):
+      search_text = buffer[match.start() + 1]
+    else:
+      search_text = buffer[match.start() + 2]
+    print(search_text[:5])
+    for match2 in LANG_TEMPLATE_ARGS.finditer(search_text):
       language = match2.group(1).strip().lower()
       text = match2.group(2).strip()
       lang_template['args'].append((language, text))
 
     lang_template['location'] = "''Line %d'': <nowiki>%s</nowiki>" % (
-      page_text[:match.start() + 1].count('\n') + 2,
+      page_text[:match.start() + 1].count('\n') + 1,
       lang_template['args'][0][1].split('\n', 1)[0].strip() if len(lang_template['args']) > 0 else '',
     )
 
@@ -149,12 +155,11 @@ def pagescraper(page, translations, usage_counts):
     print('v1/v2 mismatch for', page, len(lang_templates), len(lang_templates2))
     l1 = lang_templates
     l2 = lang_templates2
-    assert len(l1) == len(l2), f'{len(l1)} != {len(l2)}'
+    assert len(l1) == len(l2), f'{len(l1)} != {len(l2)}\n{l1}\n{l2}'
     for i in range(len(l1)):
       assert l1[i]['template'] == l2[i]['template'], f'{l1[i]["template"]}\n!=\n{l2[i]["template"]}'
       assert l1[i]['location'] == l2[i]['location'], f'{l1[i]["location"]}\n!=\n{l2[i]["location"]}'
       assert l1[i]['args'] == l2[i]['args'], f'{l1[i]["args"]}\n!=\n{l2[i]["args"]}'
-
 
   if len(lang_templates) == 0:
     return # Should be impossible (since we're looking for templates which transclude {{lang}}), but just in case.
