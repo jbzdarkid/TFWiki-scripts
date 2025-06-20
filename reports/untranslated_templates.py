@@ -10,7 +10,7 @@ LANG_TEMPLATE_START = compile(r"""
   [^{]{{            # The start of a template '{{' which is not the start of a parameter '{{{'
   \s*               # Any amount of whitespace is allowed before the template name
   lang              # Template name {{lang}}
-  ( incomplete)?    # Also matches {{lang incomplete}} but we can check which one it is by the first group
+  ([ ]incomplete)?  # Also matches {{lang incomplete}} but we can check which one it is by the first group
   \s*               # Any amount of whitespace (but critically, no more ascii characters)
   \|                # Start of parameter list
 """, IGNORECASE | VERBOSE)
