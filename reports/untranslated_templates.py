@@ -193,7 +193,6 @@ def pagescraper(page, translations, usage_counts):
 def main(w):
   translations = {lang: [] for lang in LANGS}
   usage_counts = {}
-  i = 0
   with pagescraper_queue(pagescraper, translations, usage_counts) as pages:
     # For performance, only check template pages which are reported to transclude lang/lang incomplete.
     pages_with_lang = set()
@@ -205,9 +204,6 @@ def main(w):
       if page.title == 'Template:Lang':
         continue # Special exclusion
       pages.put(page)
-      i += 1
-      if i > 500:
-        break
 
   outputs = []
   for language in LANGS:
