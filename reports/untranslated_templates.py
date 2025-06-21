@@ -167,7 +167,7 @@ def pagescraper(page, translations, usage_counts):
       assert l1[i]['location'] == l2[i]['location'], f'{l1[i]["location"]}\n!=\n{l2[i]["location"]}'
       assert l1[i]['args'] == l2[i]['args'], f'{l1[i]["args"]}\n!=\n{l2[i]["args"]}'
 
-  if len(lang_templates) == 0:
+  if lang_templates is None or len(lang_templates) == 0:
     return # Should be impossible (since we're looking for templates which transclude {{lang}}), but just in case.
 
   missing_translations = {lang:[] for lang in LANGS}
