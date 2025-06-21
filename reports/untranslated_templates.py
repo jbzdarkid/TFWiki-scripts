@@ -6,15 +6,6 @@ from wikitools.page import Page
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']
 
-LANG_TEMPLATE_START = compile(r"""
-  (?:^|[^{]){{      # The start of a template '{{' which is not the start of a parameter '{{{'
-  \s*               # Any amount of whitespace is allowed before the template name
-  lang              # Template name {{lang}}
-  ([ ]incomplete)?  # Also matches {{lang incomplete}} but we can check which one it is by the first group
-  \s*               # Any amount of whitespace (but critically, no more ascii characters)
-  \|                # Start of parameter list
-""", IGNORECASE | VERBOSE)
-
 LANG_TEMPLATE_ARGS = compile(r"""
   \|        # Start of a parameter
   (
@@ -26,8 +17,7 @@ LANG_TEMPLATE_ARGS = compile(r"""
   )
 """, VERBOSE)
 
-
-def parse_lang_templates2(page):
+def parse_lang_templates(page):
   page_text = page.get_wiki_text()
   if not page_text:
     return None
@@ -76,99 +66,11 @@ def parse_lang_templates2(page):
 
   return lang_templates
 
-def parse_lang_templates(page):
-  page_text = page.get_wiki_text()
-  if not page_text:
-    return None
-
-  # First, find the matching pairs
-  def get_indices(char, string):
-    index = -1
-    indices = []
-    while 1:
-      try:
-        index = string.index(char, index+1)
-      except ValueError:
-        break
-      indices.append(index)
-    return indices
-
-  locations = [[len(page_text), -1]]
-  for open in get_indices('{', page_text):
-    locations.append([open, 1])
-  for open in get_indices('[', page_text):
-    locations.append([open, 1])
-  for close in get_indices('}', page_text):
-    locations.append([close, -1])
-  for close in get_indices(']', page_text):
-    locations.append([close, -1])
-  locations.sort()
-
-  # Next, divide the text up based on those pairs. Embedded text is separated out, e.g. {a{b}c} will become "ac" and "b".
-  stack = [0]
-  buffer = {0: ''}
-  lastIndex = 0
-  for index, value in locations:
-    try:
-      buffer[stack[-1]] = buffer.get(stack[-1], '') + page_text[lastIndex:index]
-    except IndexError:
-      buffer[0] += page_text[lastIndex:index] # Add text to default layer
-      stack.append(None) # So there's something to .pop()
-      if verbose:
-        print(page.title, 'Found a closing brace without a matched opening brace')
-    if value == 1:
-      stack.append(index)
-    elif value == -1:
-      stack.pop()
-    lastIndex = index + 1
-
-  if verbose:
-    print(page.title, 'contains', len(buffer), 'pairs of braces')
-
-  # Finally, search through for lang templates using regex
-  lang_templates = []
-
-  for match in LANG_TEMPLATE_START.finditer(page_text):
-    lang_template = {'args': []}
-    # Skip the opening {{
-    if match.group(0).startswith('{{'):
-      search_text = buffer[match.start() + 1]
-    else:
-      search_text = buffer[match.start() + 2]
-    for match2 in LANG_TEMPLATE_ARGS.finditer(search_text):
-      language = match2.group(1).strip().lower()
-      text = match2.group(2).strip()
-      lang_template['args'].append((language, text))
-
-    lang_template['location'] = "''Line %d'': <nowiki>%s</nowiki>" % (
-      page_text[:match.start() + 1].count('\n') + 1,
-      lang_template['args'][0][1].split('\n', 1)[0].strip() if len(lang_template['args']) > 0 else '',
-    )
-
-    lang_template['template'] = 'lang incomplete' if match.group(1) else 'lang'
-
-    lang_templates.append(lang_template)
-
-  return lang_templates
-
 def pagescraper(page, translations, usage_counts):
   lang_templates = parse_lang_templates(page)
-  lang_templates2 = parse_lang_templates2(page)
-  if lang_templates != lang_templates2:
-    if lang_templates is None or lang_templates2 is None:
-      print(lang_templates is None, lang_templates2 is None)
-      return
-    print('v1/v2 mismatch for', page, len(lang_templates), len(lang_templates2))
-    l1 = lang_templates
-    l2 = lang_templates2
-    assert len(l1) == len(l2), f'{len(l1)} != {len(l2)}\n{l1}\n{l2}'
-    for i in range(len(l1)):
-      assert l1[i]['template'] == l2[i]['template'], f'{l1[i]["template"]}\n!=\n{l2[i]["template"]}'
-      assert l1[i]['location'] == l2[i]['location'], f'{l1[i]["location"]}\n!=\n{l2[i]["location"]}'
-      assert l1[i]['args'] == l2[i]['args'], f'{l1[i]["args"]}\n!=\n{l2[i]["args"]}'
 
   if len(lang_templates) == 0:
-    return # Should be impossible (since we're looking for templates which transclude {{lang}}), but just in case.
+    return # Should be impossible (since we're only parsing pages which transclude {{lang}}), but just in case.
 
   missing_translations = {lang:[] for lang in LANGS}
   for lang_template in lang_templates:
