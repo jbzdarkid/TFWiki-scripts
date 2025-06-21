@@ -29,6 +29,8 @@ LANG_TEMPLATE_ARGS = compile(r"""
 
 def parse_lang_templates2(page):
   page_text = page.get_wiki_text()
+  if not page_text:
+    return None
 
   buffer = {0: ''} # Text buffers for each level of the template, i.e. {{contains this text {{but not this text}} and still this text}}
   stack = [0] # Contains the indices which open the stack depth(s), i.e. the hierarchy of nested templates
@@ -76,6 +78,8 @@ def parse_lang_templates2(page):
 
 def parse_lang_templates(page):
   page_text = page.get_wiki_text()
+  if not page_text:
+    return None
 
   # First, find the matching pairs
   def get_indices(char, string):
@@ -151,6 +155,9 @@ def pagescraper(page, translations, usage_counts):
   lang_templates = parse_lang_templates(page)
   lang_templates2 = parse_lang_templates2(page)
   if lang_templates != lang_templates2:
+    if lang_templates is None or lang_templates2 is None:
+      print(lang_templates is None, lang_templates2 is None)
+      return
     print('v1/v2 mismatch for', page, len(lang_templates), len(lang_templates2))
     l1 = lang_templates
     l2 = lang_templates2
