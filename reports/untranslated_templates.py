@@ -20,7 +20,7 @@ LANG_TEMPLATE_ARGS = compile(r"""
 def parse_lang_templates(page):
   page_text = page.get_wiki_text()
   if not page_text:
-    return None
+    return []
 
   buffer = {0: ''} # Text buffers for each level of the template, i.e. {{contains this text {{but not this text}} and still this text}}
   stack = [0] # Contains the indices which open the stack depth(s), i.e. the hierarchy of nested templates
