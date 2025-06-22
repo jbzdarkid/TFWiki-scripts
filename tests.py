@@ -1,6 +1,14 @@
 # A very light smattering of tests
 import inspect
 import sys
+from wikitools.wiki import Wiki
+from wikitools.page import Page
+from reports.untranslated_templates import parse_lang_templates
+
+class MockWiki(Wiki):
+  def get_namespaces(self):
+    return {} # This would usually incur a network call, so we mock it here.
+
 
 class Tests:
   # Class setup
@@ -9,9 +17,28 @@ class Tests:
   #!# Tests #!#
   #############
 
-  # TODO: Define tests here (which start with the word test)
-  def test_nothing(self):
-    pass
+  def test_lang_parser(self):
+    w = MockWiki('https://wiki.teamfortress.com/w/api.php')
+    p = Page(w, 'TestPage')
+    w.page_text_cache[p.title] = """{{lang
+      | en = English
+      | ru = Russian
+    }}{{lang incomplete|en=[[Hi]] there|de=[[Hello/de|{{common string|hello}}]]}}
+    {{some template|{{{lang|}}}
+    """
+    expected = [{
+      'template': 'lang',
+      'location': "''Line 1'': <nowiki>English</nowiki>",
+      'args': [('en', 'English'), ('ru', 'Russian')],
+    }, {
+      'template': 'lang incomplete',
+      'location': "''Line 4'': <nowiki>there</nowiki>",
+      'args': [('en', 'there'), ('de', '')],
+    }]
+
+    actual = parse_lang_templates(p)
+    assert expected[0] == actual[0], actual[0]
+    assert expected[1] == actual[1], actual[1]
 
 if __name__ == '__main__':
   tests = Tests()
