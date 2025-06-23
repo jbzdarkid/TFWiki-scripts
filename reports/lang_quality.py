@@ -14,9 +14,10 @@ def pagescraper(page, missing_english, invalid_langs, duplicate_langs, misordere
   for lang_template in lang_templates:
     location = lang_template['location']
 
-    # Error 1: Missing english string
-    if not any((x[0] == 'en' for x in lang_template['args'])):
-      missing_english[page].append(location)
+    # Error 1: Missing english string (usually indicates a typo)
+    if lang_template['template'] == 'lang':
+      if not any((x[0] == 'en' for x in lang_template['args'])):
+        missing_english[page].append(location)
 
     actual_order = []
     for lang, _ in lang_template['args']:
