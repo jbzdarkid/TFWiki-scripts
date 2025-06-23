@@ -23,6 +23,8 @@ def pagescraper(page, missing_english, invalid_langs, duplicate_langs, misordere
     for lang, _ in lang_template['args']:
       if lang == '':
         continue # Usually the 'force' parameter, wrapped in an {{#if:}}, which gets simplified to nothing.
+      elif lang == '1':
+        idx = len(LANG_ORDER) # Default value, should always be last in the ordering
       try:
         idx = LANG_ORDER.index(lang)
       except ValueError:
