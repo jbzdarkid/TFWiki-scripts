@@ -152,6 +152,7 @@ if __name__ == '__main__':
     modules_to_run = all_reports.keys() # On manual triggers, run everything
 
   elif event == 'local_run':
+    print('Local run; executing all reports')
     w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
     for report in all_reports:
       # Root and summary don't matter because we can't publish anyways.
@@ -168,7 +169,10 @@ if __name__ == '__main__':
   if not w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD']):
     exit(1)
 
-  print(f'Succesfully logged in, running reports: {modules_to_run}')
+  print('Successfully logged in, fetching RC log to invalidate the cache')
+  w.update_caches_from_recent_changes()
+
+  print(f'Running reports: {modules_to_run}')
 
   comment = 'Please verify the following diffs:\n'
   succeeded = True

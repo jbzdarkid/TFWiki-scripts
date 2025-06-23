@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
 from io import BytesIO
-from zipfile import ZipFile, ZIP_DEFLATED
+from json import loads, dumps
 from readerwriterlock import rwlock
+from zipfile import ZipFile, ZIP_DEFLATED
 
 class ZipDict:
   """
@@ -9,18 +11,24 @@ class ZipDict:
   but is very efficient for large caches of repetitive text.
   """
 
-  def __init__(self):
-    self.buffer = BytesIO()
-    self.zipfile = ZipFile(self.buffer, 'a', ZIP_DEFLATED, compresslevel=9)
+  def __init__(self, filename):
     # Since zipfiles are not multithread-safe, we need a reader/writer lock
     # to allow concurrent access.
     self.lock = rwlock.RWLockFair()
+    self.zipfile = ZipFile(filename, 'a', ZIP_DEFLATED, compresslevel=9)
+
+    # Copy out the metadata in memory since we'll be reading/writing from it a lot.
+    self.metadata = loads(self.get('metadata', '{}'))
 
   def __del__(self):
+    with self.lock.gen_rlock():
+      self['metadata'] = dumps(self.metadata)
     self.zipfile.close()
-    del self.buffer # Explicitly clean up the buffer to recover memory
 
   def __getitem__(self, key):
+    if not self.is_valid(key):
+      return
+  
     with self.lock.gen_rlock():
       with self.zipfile.open(key, 'r') as f:
         return f.read().decode('utf-8')
@@ -32,10 +40,28 @@ class ZipDict:
       return default
 
   def __setitem__(self, key, value):
+    if key not in self.metadata: # N.B. we are actually writing an entry in the metadata for itself. Unused atm.
+      self.metadata[key] = {}
+    self.metadata[key]['last_fetched'] = datetime.utcnow() - timedelta.hours(1) # Buffer 1 hour for safety.
+
     with self.lock.gen_wlock():
       with self.zipfile.open(key, 'w') as f:
         f.write(value.encode('utf-8'))
 
+  def is_valid(self, key):
+    if key == 'metadata':
+      return True
+
+    data = self.metadata.get(key, None)
+    return data and 'last_fetched' in data and 'last_modified' in data and data['last_fetched'] > data['last_modified']
+    
+  def set_modified(self, key, time):
+    if key == 'metadata':
+      return
+
+    if key not in self.metadata:
+      self.metadata[key] = {}
+    self.metadata[key]['last_modified'] = time
 
 if __name__ == '__main__':
   import psutil

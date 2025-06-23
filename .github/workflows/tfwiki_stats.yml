@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   run:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -21,6 +21,11 @@ jobs:
       with:
         python-version: '3.x'
     - run: pip install -r requirements.txt
+    - uses: actions/cache/restore@v4
+      with:
+        enableCrossOsArchive: true
+        path: *.zip
+        key: tfwiki-zip-caches
     - run: python -u master.py
       timeout-minutes: 600
       env:
@@ -30,6 +35,12 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         API_KEY: ${{ secrets.API_KEY }}
         USER_AGENT: ${{ secrets.USER_AGENT }}
+    - uses: actions/cache/save@v4
+      if: always()
+      with:
+        enableCrossOsArchive: true
+        path: *.zip
+        key: tfwiki-zip-caches
     - uses: actions/upload-artifact@v4
       with:
         name: Failed uploads
