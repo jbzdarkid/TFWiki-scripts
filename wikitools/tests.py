@@ -3,15 +3,15 @@ import inspect
 import sys
 
 from page import Page
-from wiki import Wiki
 
-class MockWiki(Wiki):
-  def get_namespaces(self):
-    return {} # This would usually incur a network call, so we mock it here.
+# We're not wrapping Wiki here because it doesn't import properly. Yay, python.
+class MockWiki:
+  def __init__(self):
+    pass
   
 class Tests:
   # Class setup
-  wiki = MockWiki('https://wiki.example.com/w/api.php')
+  wiki = MockWiki()
 
   # Utilities
   def sort_titles(self, titles):
