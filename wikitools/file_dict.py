@@ -16,7 +16,7 @@ class FileDict:
     self.root.mkdir(parents=True, exist_ok=True)
 
     self.metadata = loads(self.get('metadata', '{}'))
-    
+
     # Register an atexit handler to save the metadata before we shut down.
     atexit.register(self.close)
 

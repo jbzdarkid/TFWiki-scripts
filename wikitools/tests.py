@@ -3,6 +3,7 @@ import inspect
 import sys
 
 from page import Page
+from wiki import Wiki
 
 class MockWiki(Wiki):
   def get_namespaces(self):
