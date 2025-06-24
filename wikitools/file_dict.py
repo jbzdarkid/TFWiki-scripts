@@ -63,8 +63,8 @@ class FileDict:
     # If the data has been modified since we cached it, it is not valid.
     # If any piece of data is missing, assume the cache is valid.
     data = self.metadata.get(key, {})
-    last_modified = data.get('last_modified', datetime.fromtimestamp(0))
-    last_cached = data.get('last_cached', datetime.utcnow())
+    last_modified = data.get('last_modified', 0)
+    last_cached = data.get('last_cached', datetime.utcnow().timestamp())
     
     return last_cached > last_modified
 
