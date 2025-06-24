@@ -2,6 +2,7 @@ import atexit
 from datetime import datetime, timedelta
 from json import loads, dumps
 from pathlib import Path
+from hashlib import sha256
 
 class FileDict:
   """
@@ -24,7 +25,10 @@ class FileDict:
     self['metadata'] = dumps(self.metadata)
 
   def _path(self, key):
-    return (self.root / key).with_suffix('.txt')
+    hash = hashlib.sha256()
+    hash.update(key.encode('utf-8'))
+    hex = hash.hexdigest()
+    return (self.root / hex[:2] / hex).with_suffix('.txt')
 
   def get(self, key, default=None):
     try:
