@@ -25,7 +25,7 @@ class FileDict:
     self['metadata'] = dumps(self.metadata)
 
   def _path(self, key):
-    hash = hashlib.sha256()
+    hash = sha256()
     hash.update(key.encode('utf-8'))
     hex = hash.hexdigest()
     return (self.root / hex[:2] / hex).with_suffix('.txt')
@@ -51,6 +51,7 @@ class FileDict:
       self.metadata[key] = {}
     self.metadata[key]['last_fetched'] = (datetime.utcnow() - timedelta(hours=1)).timestamp() # Buffer 1 hour for safety.
 
+    self._path(key).parent.mkdir(exist_ok=True, parents=True)
     with self._path(key).open('w', encoding='utf-8') as f:
       f.write(value)
 
