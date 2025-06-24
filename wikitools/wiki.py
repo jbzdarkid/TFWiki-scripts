@@ -220,7 +220,7 @@ class Wiki:
   def update_caches_from_recent_changes(self):
     one_week_ago = datetime.utcnow() - timedelta(days=7)
     for page in self.get_recent_changes(one_week_ago):
-      modified_time = datetime.fromutc(page.raw['timestamp'])
+      modified_time = datetime.fromisoformat(page.raw['timestamp'])
       self.page_text_cache.set_modified(page.title, modified_time)
       self.page_html_cache.set_modified(page.title, modified_time)
 
