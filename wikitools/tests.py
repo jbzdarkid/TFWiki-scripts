@@ -4,13 +4,13 @@ import sys
 
 from page import Page
 
-class MockWiki:
-  def __init__(self):
-    pass
+class MockWiki(Wiki):
+  def get_namespaces(self):
+    return {} # This would usually incur a network call, so we mock it here.
   
 class Tests:
   # Class setup
-  wiki = MockWiki()
+  wiki = MockWiki('https://wiki.example.com/w/api.php')
 
   # Utilities
   def sort_titles(self, titles):

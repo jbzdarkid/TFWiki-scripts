@@ -12,15 +12,15 @@ class MockWiki(Wiki):
 
 class Tests:
   # Class setup
+  wiki = MockWiki('https://wiki.example.com/w/api.php')
 
   #############
   #!# Tests #!#
   #############
 
   def test_lang_parser(self):
-    w = MockWiki('https://wiki.teamfortress.com/w/api.php')
-    p = Page(w, 'TestPage')
-    w.page_text_cache[p.title] = """{{lang
+    p = Page(self.wiki, 'TestPage')
+    self.wiki.page_text_cache[p.title] = """{{lang
       | en = English
       | ru = Russian
     }}{{lang incomplete|en=[[Hi]] there|de=[[Hello/de|{{common string|hello}}]]}}
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     print('---', test[0], 'started')
     try:
       test[1]()
-    except Exception:
+    except:
       print('!!!', test[0], 'failed:')
       import traceback
       traceback.print_exc()

@@ -3,15 +3,15 @@ from time import sleep
 import requests
 
 from .page import Page
-from .zip_dict import ZipDict
+from .file_dict import FileDict
 
 class Wiki:
   def __init__(self, api_url, user_agent=None):
     self.api_url = api_url
     self.wiki_url = api_url.replace('api.php', 'index.php')
     self.lgtoken = None
-    self.page_text_cache = ZipDict('text_cache.zip')
-    self.page_html_cache = ZipDict('html_cache.zip')
+    self.page_text_cache = FileDict('text_cache')
+    self.page_html_cache = FileDict('html_cache')
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()

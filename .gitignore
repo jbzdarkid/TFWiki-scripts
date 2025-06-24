@@ -1,4 +1,5 @@
 reports/wiki_*.txt
 *.pyc
-*.zip
 venv/
+text_cache/
+html_cache/

@@ -1,3 +1,4 @@
+import atexit
 from datetime import datetime, timedelta
 from io import BytesIO
 from json import loads, dumps
@@ -19,10 +20,13 @@ class ZipDict:
 
     # Copy out the metadata in memory since we'll be reading/writing from it a lot.
     self.metadata = loads(self.get('metadata', '{}'))
+    
+    # Register an atexit handler to save the zipfile before we shut down.
+    # We used to use __del__ but that can close too late (i.e. while python is actively shutting down).
+    atexit.register(self.close)
 
-  def __del__(self):
-    with self.lock.gen_rlock():
-      self['metadata'] = dumps(self.metadata)
+  def close(self):
+    self['metadata'] = dumps(self.metadata)
     self.zipfile.close()
 
   def __getitem__(self, key):
@@ -42,26 +46,34 @@ class ZipDict:
   def __setitem__(self, key, value):
     if key not in self.metadata: # N.B. we are actually writing an entry in the metadata for itself. Unused atm.
       self.metadata[key] = {}
-    self.metadata[key]['last_fetched'] = datetime.utcnow() - timedelta.hours(1) # Buffer 1 hour for safety.
+    self.metadata[key]['last_fetched'] = (datetime.utcnow() - timedelta(hours=1)).timestamp() # Buffer 1 hour for safety.
 
     with self.lock.gen_wlock():
-      with self.zipfile.open(key, 'w') as f:
+      with self.zipfile.open(key, 'a') as f:
+        print('Writing', key, len(value))
+        f.seek(0)
         f.write(value.encode('utf-8'))
 
   def is_valid(self, key):
     if key == 'metadata':
       return True
 
-    data = self.metadata.get(key, None)
-    return data and 'last_fetched' in data and 'last_modified' in data and data['last_fetched'] > data['last_modified']
+    # Look up the last modification time and last time we wrote to the cache.
+    # If the data has been modified since we cached it, it is not valid.
+    # If any piece of data is missing, assume the cache is valid.
+    data = self.metadata.get(key, {})
+    last_modified = data.get('last_modified', datetime.fromtimestamp(0))
+    last_cached = data.get('last_cached', datetime.utcnow())
     
-  def set_modified(self, key, time):
+    return last_cached > last_modified
+    
+  def set_modified(self, key, dt):
     if key == 'metadata':
       return
 
     if key not in self.metadata:
       self.metadata[key] = {}
-    self.metadata[key]['last_modified'] = time
+    self.metadata[key]['last_modified'] = dt.timestamp()
 
 if __name__ == '__main__':
   import psutil
