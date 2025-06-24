@@ -10,8 +10,8 @@ class Wiki:
     self.api_url = api_url
     self.wiki_url = api_url.replace('api.php', 'index.php')
     self.lgtoken = None
-    self.page_text_cache = FileDict('text_cache')
-    self.page_html_cache = FileDict('html_cache')
+    self.page_text_cache = FileDict('cache/text')
+    self.page_html_cache = FileDict('cache/html')
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()

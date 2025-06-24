@@ -24,8 +24,8 @@ jobs:
     - uses: actions/cache/restore@v4
       with:
         enableCrossOsArchive: true
-        path: *.zip
-        key: tfwiki-zip-caches
+        path: cache/*
+        key: tfwiki-file-cache
     - run: python -u master.py
       timeout-minutes: 600
       env:
@@ -39,8 +39,8 @@ jobs:
       if: always()
       with:
         enableCrossOsArchive: true
-        path: *.zip
-        key: tfwiki-zip-caches
+        path: cache/*
+        key: tfwiki-file-cache
     - uses: actions/upload-artifact@v4
       with:
         name: Failed uploads

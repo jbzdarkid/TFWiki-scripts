@@ -1,5 +1,4 @@
 reports/wiki_*.txt
 *.pyc
 venv/
-text_cache/
-html_cache/
+cache/
