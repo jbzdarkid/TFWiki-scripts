@@ -4,6 +4,7 @@ import sys
 
 from page import Page
 
+# We're not wrapping Wiki here because it doesn't import properly. Yay, python.
 class MockWiki:
   def __init__(self):
     pass

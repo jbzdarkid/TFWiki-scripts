@@ -1,17 +1,18 @@
+from datetime import datetime, timedelta
 from re import finditer
 from time import sleep
 import requests
 
 from .page import Page
-from .zip_dict import ZipDict
+from .file_dict import FileDict
 
 class Wiki:
   def __init__(self, api_url, user_agent=None):
     self.api_url = api_url
     self.wiki_url = api_url.replace('api.php', 'index.php')
     self.lgtoken = None
-    self.page_text_cache = {}
-    self.page_html_cache = ZipDict()
+    self.page_text_cache = FileDict('cache/text')
+    self.page_html_cache = FileDict('cache/html')
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
@@ -26,7 +27,7 @@ class Wiki:
 
   def retry(self, action):
     i = 0
-    while 1:
+    while True:
       try:
         r = action()
         r.raise_for_status()
@@ -55,7 +56,7 @@ class Wiki:
     return j
 
   def get_with_continue(self, action, entry_key, **kwargs):
-    while 1:
+    while True:
       try:
         data = self.get(action, **kwargs)
       except requests.exceptions.RequestException:
@@ -215,6 +216,13 @@ class Wiki:
       rcnamespace='|'.join(str(self.namespaces[namespace]) for namespace in namespaces),
     ):
       yield Page(self, entry['title'], entry)
+
+  def update_caches_from_recent_changes(self):
+    one_week_ago = datetime.utcnow() - timedelta(days=7)
+    for page in self.get_recent_changes(one_week_ago):
+      modified_time = datetime.fromisoformat(page.raw['timestamp'])
+      self.page_text_cache.set_modified(page.title, modified_time)
+      self.page_html_cache.set_modified(page.title, modified_time)
 
   def get_all_unused_files(self):
     for html in self.get_html_with_continue('Special:UnusedFiles'):
