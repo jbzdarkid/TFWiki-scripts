@@ -25,7 +25,7 @@ jobs:
       with:
         enableCrossOsArchive: true
         path: cache/*
-        key: tfwiki-file-cache
+        key: tfwiki-file-cache2
     - run: python -u master.py
       timeout-minutes: 600
       env:
@@ -40,7 +40,7 @@ jobs:
       with:
         enableCrossOsArchive: true
         path: cache/*
-        key: tfwiki-file-cache
+        key: tfwiki-file-cache2
     - uses: actions/upload-artifact@v4
       with:
         name: Failed uploads
