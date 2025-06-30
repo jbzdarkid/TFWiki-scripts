@@ -27,7 +27,7 @@ jobs:
         path: cache/*
         key: tfwiki-file-cache3
     - run: python -u master.py
-      timeout-minutes: 590
+      timeout-minutes: 350
       env:
         WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
         WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
