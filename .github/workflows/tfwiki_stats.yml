@@ -24,7 +24,8 @@ jobs:
     - uses: actions/cache/restore@v4
       with:
         path: cache/*
-        restore-keys: tfwiki-file-cache # Restores the most recent cache
+        key: tfwiki-file-cache-invalid
+        restore-keys: tfwiki-file-cache- # Restores the most recent cache
     - run: python -u master.py
       timeout-minutes: 350
       env:
