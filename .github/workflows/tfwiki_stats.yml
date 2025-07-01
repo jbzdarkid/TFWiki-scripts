@@ -23,9 +23,8 @@ jobs:
     - run: pip install -r requirements.txt
     - uses: actions/cache/restore@v4
       with:
-        enableCrossOsArchive: true
         path: cache/*
-        key: tfwiki-file-cache3
+        restore-keys: tfwiki-file-cache # Restores the most recent cache
     - run: python -u master.py
       timeout-minutes: 350
       env:
@@ -38,9 +37,8 @@ jobs:
     - uses: actions/cache/save@v4
       if: always()
       with:
-        enableCrossOsArchive: true
         path: cache/*
-        key: tfwiki-file-cache3
+        key: tfwiki-file-cache-${{ github.run_id }} # Caches are immutable; we must create a new one each run.
     - uses: actions/upload-artifact@v4
       with:
         name: Failed uploads
