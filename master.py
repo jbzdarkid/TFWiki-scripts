@@ -60,7 +60,6 @@ def publish_report(w, module, report_name, root, summary):
 daily_reports = {
   'active_discussions': 'Active discussions',
   'all_articles': 'All articles',
-  'missing_categories': 'Untranslated categories',
   'missing_translations': 'Missing translations',
   'untranslated_templates': 'Untranslated templates',
 }
@@ -74,6 +73,7 @@ weekly_reports = {
   'lang_duplicates': 'Lang duplicates',
   'lang_quality': 'Lang errors',
   'mismatched_weekly': 'Mismatched parenthesis',
+  'missing_categories': 'Untranslated categories',
   'missing_translations_weekly': 'Missing translations/sorted',
   'navboxes': 'Pages which are missing navboxes',
   'overtranslated': 'Pages with no english equivalent',
