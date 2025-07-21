@@ -41,6 +41,7 @@ jobs:
         path: cache/*
         key: tfwiki-file-cache-${{ github.run_id }} # Caches are immutable; we must create a new one each run.
     - uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: Failed uploads
         path: reports/wiki_*.txt
