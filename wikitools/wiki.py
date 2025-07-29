@@ -30,6 +30,7 @@ class Wiki:
     while True:
       try:
         r = action()
+        sleep(1)
         r.raise_for_status()
         return r
       except requests.RequestException as e:
@@ -42,7 +43,7 @@ class Wiki:
         i += 1
         if i > 5:
           raise
-        sleep(30 * i)
+        sleep(30)
 
   def get(self, action, **params):
     params.update({
