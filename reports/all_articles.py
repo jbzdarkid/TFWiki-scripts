@@ -16,6 +16,12 @@ def main(w):
     else:
       all_pages[page.lang].add(page)
 
+  if len(all_english_pages) < 6000:
+      print('en', len(all_english_pages))
+      for lang in all_pages:
+          print(lang, len(all_pages[lang]))
+      raise ValueError('Not enough english pages: Something went wrong with our page lookups. Bailing out to avoid causing issues.')
+
   outputs = []
   for language in LANGS:
     output = """\
