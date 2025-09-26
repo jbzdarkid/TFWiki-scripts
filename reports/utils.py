@@ -24,7 +24,7 @@ def whatlinkshere(title, count, **kwargs):
 
 
 class pagescraper_queue:
-  def __init__(self, thread_func, *args, num_threads=50):
+  def __init__(self, thread_func, *args, num_threads=8):
     self.thread_func = thread_func
     self.thread_func_args = args
     self.num_threads = num_threads
@@ -34,7 +34,7 @@ class pagescraper_queue:
     self.done = Event()
     self.threads = []
     self.count = 0
-    self.failures = 0
+    self.failures = []
     for _ in range(self.num_threads):
       thread = Thread(target=self.meta_thread_func)
       self.threads.append(thread)
@@ -52,8 +52,8 @@ class pagescraper_queue:
     self.done.set()
     for thread in self.threads:
       thread.join()
-    if self.failures > 5:
-      raise Exception(f'There were {self.failures} exceptions thrown during execution')
+    if len(self.failures) > 0:
+      raise Exception(f'There were {len(self.failures)} exceptions thrown during execution')
 
   def meta_thread_func(self):
     while True:
@@ -70,10 +70,10 @@ class pagescraper_queue:
       except KeyboardInterrupt:
         self.done.set()
         self.q = Queue() # "Clear" the queue
-        self.failures = 9999
+        self.failures.append(ex)
         return
-      except:
-        self.failures += 1
+      except Exception as ex:
+        self.failures.append(ex)
         import traceback
         traceback.print_exc()
 
@@ -83,22 +83,14 @@ class pagescraper_queue_single:
     self.thread_func_args = args
 
   def __enter__(self):
-    self.failures = 0
+    self.failures = []
     return self
 
   def put(self, obj):
-    try:
-      self.thread_func(obj, *self.thread_func_args)
-    except KeyboardInterrupt:
-      raise
-    except:
-      self.failures += 1
-      import traceback
-      traceback.print_exc()
+    self.thread_func(obj, *self.thread_func_args)
 
   def __exit__(self, exc_type, exc_val, traceback):
-    if self.failures > 5:
-      raise Exception(f'There were {self.failures} exceptions thrown during execution')
+    pass
 
 if __name__ == '__main__':
   print(f'There are {plural.translations(2)} but only {plural.dogs(1)}')
