@@ -41,9 +41,9 @@ class Wiki:
 
         # For other status codes (or generic connection failures), allow up to 5 retries, with an ever-increasing sleep between attempts
         i += 1
-        if i > 5:
+        if i > 60:
           raise
-        sleep(30)
+        sleep(5)
 
   def get(self, action, **params):
     params.update({
