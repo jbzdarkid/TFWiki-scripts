@@ -24,7 +24,7 @@ def whatlinkshere(title, count, **kwargs):
 
 
 class pagescraper_queue:
-  def __init__(self, thread_func, *args, num_threads=8):
+  def __init__(self, thread_func, *args, num_threads=32):
     self.thread_func = thread_func
     self.thread_func_args = args
     self.num_threads = num_threads
