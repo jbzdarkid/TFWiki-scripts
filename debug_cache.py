@@ -1,3 +1,4 @@
+import sys
 from wikitools.wiki import Wiki
 
 w = Wiki('https://wiki.teamfortress.com/w/api.php')
