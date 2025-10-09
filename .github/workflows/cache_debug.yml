@@ -22,5 +22,5 @@ jobs:
         path: cache/*
         key: tfwiki-file-cache-invalid
         restore-keys: tfwiki-file-cache- # Restores the most recent cache
-    - run: python -u debug_cache.py ${{ inputs.page_name }}
+    - run: python -u debug_cache.py "${{ inputs.page_name }}"
 
