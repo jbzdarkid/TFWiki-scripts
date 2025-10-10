@@ -42,7 +42,7 @@ class Page:
     return '|'.join((str(self.wiki.namespaces[ns]) for ns in namespaces))
 
   def get_wiki_text(self):
-    cached_text = self.wiki.page_text_cache.get(self.title, None)
+    cached_text = self.wiki.page_text_cache.get(self.url_title, None)
     if cached_text:
       return cached_text
     try:
@@ -51,18 +51,18 @@ class Page:
         print(f'Error while fetching {self.url_title} contents: ' + str(raw['error']))
         return '' # Unable to fetch page contents, pretend it's empty
       text = raw['parse']['wikitext']['*']
-      self.wiki.page_text_cache[self.title] = text
+      self.wiki.page_text_cache[self.url_title] = text
       return text
     except requests.exceptions.RequestException:
       return '' # Unable to fetch page contents, pretend it's empty
 
   def get_raw_html(self):
-    cached_html = self.wiki.page_html_cache.get(self.title, None)
+    cached_html = self.wiki.page_html_cache.get(self.url_title, None)
     if cached_html:
       return cached_html
     try:
       r = requests.get(self.wiki.wiki_url, allow_redirects=True, params={'title': self.url_title})
-      self.wiki.page_html_cache[self.title] = r.text
+      self.wiki.page_html_cache[self.url_title] = r.text
       return r.text
     except requests.exceptions.RequestException:
       return '' # Unable to fetch page contents, pretend it's empty
