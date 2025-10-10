@@ -218,9 +218,9 @@ class Wiki:
     ):
       yield Page(self, entry['title'], entry)
 
-  def update_caches_from_recent_changes(self):
-    one_week_ago = datetime.utcnow() - timedelta(days=7)
-    for page in self.get_recent_changes(one_week_ago):
+  def update_caches_from_recent_changes(self, days_ago=7):
+    start_time = datetime.utcnow() - timedelta(days=days_ago)
+    for page in self.get_recent_changes(start_time):
       modified_time = datetime.fromisoformat(page.raw['timestamp'])
       self.page_text_cache.set_modified(page.title, modified_time)
       self.page_html_cache.set_modified(page.title, modified_time)
