@@ -222,6 +222,7 @@ class Wiki:
     start_time = datetime.utcnow() - timedelta(days=days_ago)
     for page in self.get_recent_changes(start_time):
       modified_time = datetime.fromisoformat(page.raw['timestamp'])
+      print(page.title, modified_time)
       self.page_text_cache.set_modified(page.title, modified_time)
       self.page_html_cache.set_modified(page.title, modified_time)
 
