@@ -222,9 +222,20 @@ class Wiki:
     start_time = datetime.utcnow() - timedelta(days=days_ago)
     for page in self.get_recent_changes(start_time):
       modified_time = datetime.fromisoformat(page.raw['timestamp'])
-      print(page.url_title, modified_time)
+      if page.url_title == 'Template:Backpack_item':
+        print(page.url_title, modified_time)
+        print(self.page_text_cache.metadata.get(page.url_title))
+        print(self.page_text_cache.cache_valid(page.url_title))
+        print(self.page_html_cache.metadata.get(page.url_title))
+        print(self.page_html_cache.cache_valid(page.url_title))
       self.page_text_cache.set_modified(page.url_title, modified_time)
       self.page_html_cache.set_modified(page.url_title, modified_time)
+      if page.url_title == 'Template:Backpack_item':
+        print(page.url_title, modified_time)
+        print(self.page_text_cache.metadata.get(page.url_title))
+        print(self.page_text_cache.cache_valid(page.url_title))
+        print(self.page_html_cache.metadata.get(page.url_title))
+        print(self.page_html_cache.cache_valid(page.url_title))
 
   def get_all_unused_files(self):
     for html in self.get_html_with_continue('Special:UnusedFiles'):

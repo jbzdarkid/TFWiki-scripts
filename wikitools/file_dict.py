@@ -65,8 +65,14 @@ class FileDict:
     data = self.metadata.get(key, {})
     last_modified = data.get('last_modified', 0)
     last_cached = data.get('last_cached', datetime.utcnow().timestamp())
-    
+
+    if key == 'Template:Backpack_item':
+      print(data)
     return last_cached > last_modified
+    """
+    one_month_ago = (datetime.utcnow() - timedelta(days=30)).timestamp()
+    return last_modified < one_month_ago or last_cached > last_modified
+    """
 
   # Evict a cache entry if it's not more recent than |dt|
   # This is a soft eviction (i.e. the file continues to exist).
