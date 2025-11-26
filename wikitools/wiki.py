@@ -64,6 +64,8 @@ class Wiki:
         return # Unable to load more info for this query
       if data == {'batchcomplete': ''}:
         return # No entries for this query
+      elif 'error' in data and data['error']['code'] == 'internal_api_error_DBConnectionError':
+        continue # Some sort of transient wiki error. Just retry.
       if 'error' in data:
         print('Error: ' + str(data['error']))
         break
