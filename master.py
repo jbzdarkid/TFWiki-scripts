@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from os import environ
 from random import shuffle
 from subprocess import check_output
-from sys import stdout
+from sys import argv, stdout
 from traceback import print_exc
 from wikitools import wiki
 from wikitools.page import Page
@@ -147,9 +147,11 @@ if __name__ == '__main__':
         modules_to_run.append(report)
 
   elif event == 'workflow_dispatch':
-    root = 'User:Darkid/Reports'
-    summary = 'Test update via https://github.com/jbzdarkid/TFWiki-scripts'
-    modules_to_run = all_reports.keys() # On manual triggers, run everything
+    root = 'Team Fortress Wiki:Reports'
+    summary = 'Manually triggered update from https://github.com/jbzdarkid/TFWiki-scripts'
+
+    # On manual triggers, run everything, unless a specific report was specified.
+    modules_to_run = argv[1].split(' ') if len(argv) > 1 else all_reports.keys()
 
   elif event == 'local_run':
     print('Local run; executing all reports')
@@ -172,15 +174,15 @@ if __name__ == '__main__':
   print('Successfully logged in, fetching RC log to invalidate the cache')
   w.update_caches_from_recent_changes()
 
+  # I am working on a caching story, but it's not 100% ready yet.
+  # Until then, shuffle the order of reports to guarantee a more even coverage,
+  # when reports time out.
+  modules_to_run = list(modules_to_run)
+  shuffle(modules_to_run)
   print(f'Running reports: {modules_to_run}')
 
   comment = 'Please verify the following diffs:\n'
   succeeded = True
-
-  # Especially when running all_reports, this is actually in a specific order.
-  # However, I've been having lots of timeouts, so I am just randomizing this order as a preventative measure.
-  modules_to_run = list(modules_to_run)
-  shuffle(modules_to_run)
 
   for module in modules_to_run:
     report_name = all_reports[module]
