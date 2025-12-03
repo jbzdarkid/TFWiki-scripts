@@ -3,6 +3,9 @@ on:
   schedule:
     - cron: '0 1 * * *' # Run the script daily, the script itself controls which reports are run
   workflow_dispatch:
+    inputs:
+      reports:
+        type: string
   pull_request:
 
 concurrency: 
@@ -26,7 +29,7 @@ jobs:
         path: cache/*
         key: tfwiki-file-cache-invalid
         restore-keys: tfwiki-file-cache- # Restores the most recent cache
-    - run: python -u master.py
+    - run: python -u master.py ${{ inputs.reports }}
       timeout-minutes: 350
       env:
         WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
