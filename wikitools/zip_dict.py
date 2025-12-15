@@ -1,5 +1,5 @@
 import atexit
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from io import BytesIO
 from json import loads, dumps
 from readerwriterlock import rwlock
@@ -46,7 +46,7 @@ class ZipDict:
   def __setitem__(self, key, value):
     if key not in self.metadata: # N.B. we are actually writing an entry in the metadata for itself. Unused atm.
       self.metadata[key] = {}
-    self.metadata[key]['last_fetched'] = (datetime.utcnow() - timedelta(hours=1)).timestamp() # Buffer 1 hour for safety.
+    self.metadata[key]['last_fetched'] = datetime.now(UTC).timestamp()
 
     with self.lock.gen_wlock():
       with self.zipfile.open(key, 'a') as f:
@@ -63,7 +63,7 @@ class ZipDict:
     # If any piece of data is missing, assume the cache is valid.
     data = self.metadata.get(key, {})
     last_modified = data.get('last_modified', datetime.fromtimestamp(0))
-    last_cached = data.get('last_cached', datetime.utcnow())
+    last_cached = data.get('last_cached', datetime.now(UTC))
     
     return last_cached > last_modified
     

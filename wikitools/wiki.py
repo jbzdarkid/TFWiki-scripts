@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from re import finditer
 from time import sleep
 import requests
@@ -13,6 +13,7 @@ class Wiki:
     self.lgtoken = None
     self.page_text_cache = FileDict('cache/text')
     self.page_html_cache = FileDict('cache/html')
+    self.MAX_RETRIES = 60
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
@@ -39,9 +40,9 @@ class Wiki:
           print(e)
           raise
 
-        # For other status codes (or generic connection failures), allow up to 5 retries, with an ever-increasing sleep between attempts
+        # For other status codes (or generic connection failures), allow a number of retries, sleeping between attempts
         i += 1
-        if i > 60:
+        if i > self.MAX_RETRIES:
           raise
         sleep(5)
 
@@ -72,7 +73,7 @@ class Wiki:
         entries = data[action][entry_key]
       except KeyError:
         if action not in data:
-          print(f'Entry key "{entry_key}" was not found in data. Did you mean one of these keys: {", ".join(data.keys())}')
+          print(f'Query "{action}" was not found in data. Did you mean one of these keys: {", ".join(data.keys())}')
         else:
           print(f'Entry key "{entry_key}" was not found in data[{action}]. Did you mean one of these keys: {", ".join(data[action].keys())}')
         break
@@ -219,23 +220,11 @@ class Wiki:
       yield Page(self, entry['title'], entry)
 
   def update_caches_from_recent_changes(self, days_ago=7):
-    start_time = datetime.utcnow() - timedelta(days=days_ago)
+    start_time = datetime.now(UTC) - timedelta(days=days_ago)
     for page in self.get_recent_changes(start_time):
       modified_time = datetime.fromisoformat(page.raw['timestamp'])
-      if page.url_title == 'Template:Backpack_item':
-        print('page', page.url_title, modified_time)
-        print('text meta', self.page_text_cache.metadata.get(page.url_title))
-        print('text valid', self.page_text_cache.cache_valid(page.url_title))
-        print('html meta', self.page_html_cache.metadata.get(page.url_title))
-        print('html valid', self.page_html_cache.cache_valid(page.url_title))
       self.page_text_cache.set_modified(page.url_title, modified_time)
       self.page_html_cache.set_modified(page.url_title, modified_time)
-      if page.url_title == 'Template:Backpack_item':
-        print('page', page.url_title, modified_time)
-        print('text meta', self.page_text_cache.metadata.get(page.url_title))
-        print('text valid', self.page_text_cache.cache_valid(page.url_title))
-        print('html meta', self.page_html_cache.metadata.get(page.url_title))
-        print('html valid', self.page_html_cache.cache_valid(page.url_title))
 
   def get_all_unused_files(self):
     for html in self.get_html_with_continue('Special:UnusedFiles'):

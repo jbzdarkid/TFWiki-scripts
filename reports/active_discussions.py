@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from .utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
 verbose = False
-one_month_ago = datetime.utcnow() - timedelta(days=30)
-one_week_ago  = datetime.utcnow() - timedelta(days=7)
+one_month_ago = datetime.now(UTC) - timedelta(days=30)
+one_week_ago  = datetime.now(UTC) - timedelta(days=7)
 KNOWN_BOTS = ['WelcomeBOT'] # We only need to list bots which post to talkpages.
 
 def pagescraper(page, active_one_week, active_one_month):
