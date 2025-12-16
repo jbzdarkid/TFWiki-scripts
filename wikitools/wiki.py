@@ -210,7 +210,7 @@ class Wiki:
       namespaces = ['*']
     for entry in self.get_with_continue('query', 'recentchanges',
       list='recentchanges',
-      rcstart=starttime.isoformat(),
+      rcstart=starttime.replace(tzinfo=None).isoformat(),
       rcend='now',
       rcdir='newer',
       rcshow='!bot', # Ignore bot changes by default

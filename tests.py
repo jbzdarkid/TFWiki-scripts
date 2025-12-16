@@ -79,7 +79,7 @@ class Tests:
     print('Fetching from cache...')
     assert p.get_wiki_text() == 'a'
 
-    timestamp = utcnow().isoformat()
+    timestamp = utcnow().replace(tzinfo=None).isoformat()
     self.wiki.mock_recentchanges = {'Template:Foo': timestamp}
     self.wiki.update_caches_from_recent_changes()
 
