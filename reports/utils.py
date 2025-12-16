@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from queue import Empty, Queue
 from threading import Thread, Event
 from time import gmtime, strftime
