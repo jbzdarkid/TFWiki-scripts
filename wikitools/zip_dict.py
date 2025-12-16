@@ -1,6 +1,5 @@
 import atexit
-from datetime import datetime, timedelta, UTC
-from io import BytesIO
+from datetime import datetime, UTC
 from json import loads, dumps
 from readerwriterlock import rwlock
 from zipfile import ZipFile, ZIP_DEFLATED
@@ -20,7 +19,7 @@ class ZipDict:
 
     # Copy out the metadata in memory since we'll be reading/writing from it a lot.
     self.metadata = loads(self.get('metadata', '{}'))
-    
+
     # Register an atexit handler to save the zipfile before we shut down.
     # We used to use __del__ but that can close too late (i.e. while python is actively shutting down).
     atexit.register(self.close)
@@ -31,7 +30,7 @@ class ZipDict:
 
   def __getitem__(self, key):
     if not self.is_valid(key):
-      return
+      return None
   
     with self.lock.gen_rlock():
       with self.zipfile.open(key, 'r') as f:
@@ -106,6 +105,3 @@ if __name__ == '__main__':
   print(f'{p.memory_info().rss:_}, {p.memory_info().vms:_}')
   del z
   print(f'{p.memory_info().rss:_}, {p.memory_info().vms:_}')
-
-
-

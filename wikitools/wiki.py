@@ -116,7 +116,7 @@ class Wiki:
       'action': action,
       'format': 'json',
     })
-    
+
     r = self.retry(lambda: self.session.post(self.api_url, data=kwargs, files=files))
     return r.json()
 

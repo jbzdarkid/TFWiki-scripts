@@ -1,5 +1,5 @@
 import atexit
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, UTC
 from json import loads, dumps
 from pathlib import Path
 from hashlib import sha256
@@ -39,12 +39,12 @@ class FileDict:
   def __getitem__(self, key):
     if not self.cache_valid(key):
       return None # Cache has expired for the given key
-  
+
     try:
       with self._path(key).open('r', encoding='utf-8') as f:
         return f.read()
-    except FileNotFoundError:
-      raise KeyError(f'Key {key} was not found on disk')
+    except FileNotFoundError as ex:
+      raise KeyError(f'Key {key} was not found on disk') from ex
 
   def __setitem__(self, key, value):
     if key not in self.metadata: # N.B. we are actually writing an entry in the metadata for itself. Unused atm.
