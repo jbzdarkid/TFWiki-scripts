@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from time import sleep
 import functools
 import requests
@@ -117,7 +117,7 @@ class Page:
       rvdir='older', # Default, list from newest to oldest
     ):
       for revision in data['revisions']:
-        revision['timestamp'] = datetime.strptime(revision['timestamp'], '%Y-%m-%dT%H:%M:%SZ')
+        revision['timestamp'] = datetime.strptime(revision['timestamp'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=UTC)
         if revision['timestamp'] < starttime:
           return
         yield revision
