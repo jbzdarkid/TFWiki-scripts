@@ -32,6 +32,7 @@ class Wiki:
       try:
         r = action()
         sleep(1)
+        print(f'Attempt {i}: {r.request.url} {r.status_code}')
         r.raise_for_status()
         return r
       except requests.RequestException as e:
@@ -44,7 +45,6 @@ class Wiki:
         i += 1
         if i > self.MAX_RETRIES:
           raise
-        print(f'Attempt {i}: {e}')
         sleep(5)
 
   def get(self, action, **params):
