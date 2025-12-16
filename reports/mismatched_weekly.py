@@ -1,11 +1,12 @@
+from datetime import timedelta
+from .utils import utcnow
 from wikitools import wiki
-from datetime import datetime, timedelta, UTC
 
 from . import mismatched
 
 # We are overwriting page_iter so that the weekly report can just process the past week of changes.
 def page_iter(w):
-  for page in w.get_recent_changes(datetime.now(UTC) - timedelta(days=7), namespaces=['Main', 'File', 'Template', 'Help', 'Category']):
+  for page in w.get_recent_changes(utcnow() - timedelta(days=7), namespaces=['Main', 'File', 'Template', 'Help', 'Category']):
     yield page
 
 mismatched.page_iter = page_iter

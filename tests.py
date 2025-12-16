@@ -1,13 +1,14 @@
 # A very light smattering of tests
 import inspect
 import sys
-from datetime import datetime, UTC
+from datetime import datetime
 from pathlib import Path
 
 from wikitools.wiki import Wiki
 from wikitools.page import Page
 from wikitools.file_dict import FileDict
 from reports.untranslated_templates import parse_lang_templates
+from reports.utils import utcnow
 
 class MockWiki(Wiki):
   def __init__(self, *args, **kwargs):
@@ -78,7 +79,7 @@ class Tests:
     print('Fetching from cache...')
     assert p.get_wiki_text() == 'a'
 
-    timestamp = datetime.now(UTC).isoformat()
+    timestamp = utcnow().isoformat()
     self.wiki.mock_recentchanges = {'Template:Foo': timestamp}
     self.wiki.update_caches_from_recent_changes()
 

@@ -1,9 +1,9 @@
+import requests
 from queue import Queue, Empty
 from re import compile, DOTALL
 from threading import Thread, Event
 from wikitools import wiki
 from wikitools.page import Page
-import requests
 
 verbose = False
 LANGS = ['ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko', 'nl', 'no', 'pl', 'pt', 'pt-br', 'ro', 'ru', 'sv', 'tr', 'zh-hans', 'zh-hant']

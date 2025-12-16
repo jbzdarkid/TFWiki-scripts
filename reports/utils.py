@@ -1,3 +1,4 @@
+from datetime import datetime
 from queue import Empty, Queue
 from threading import Thread, Event
 from time import gmtime, strftime
@@ -13,6 +14,10 @@ class plural(metaclass=meta_plural):
 
 def time_and_date():
   return strftime(r'%H:%M, %d %B %Y (GMT)', gmtime())
+
+# Returns a 'naive' datetime in the UTC timezone.
+def utcnow():
+  return datetime.fromtimestamp(datetime.now(UTC).timestamp())
 
 def whatlinkshere(title, count, **kwargs):
   kwargs.setdefault('limit', min(50, count))
