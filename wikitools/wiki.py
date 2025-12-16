@@ -44,6 +44,7 @@ class Wiki:
         i += 1
         if i > self.MAX_RETRIES:
           raise
+        print(f'Attempt {i}: {e}')
         sleep(5)
 
   def get(self, action, **params):
