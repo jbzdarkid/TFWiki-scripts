@@ -1,5 +1,5 @@
 from __future__ import division
-from datetime import date, datetime, UTC
+from datetime import date, datetime
 from operator import itemgetter
 from time import strftime, strptime
 from .utils import time_and_date

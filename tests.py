@@ -1,7 +1,6 @@
 # A very light smattering of tests
 import inspect
 import sys
-from datetime import datetime
 from pathlib import Path
 
 from wikitools.wiki import Wiki
