@@ -220,6 +220,7 @@ class Wiki:
       namespaces = ['*']
     for entry in self.get_with_continue('query', 'recentchanges',
       list='recentchanges',
+      rclimit=500,
       rcstart=starttime.replace(tzinfo=None).isoformat(),
       rcend='now',
       rcdir='newer',
