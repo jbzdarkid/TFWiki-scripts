@@ -40,7 +40,6 @@ class Wiki:
         self.next_request = datetime.now(UTC) + timedelta(seconds=1)
         r = action()
         
-        print(f'Attempt {i}: {r.request.url} {r.status_code}')
         r.raise_for_status()
         return r
       except requests.RequestException as e:
