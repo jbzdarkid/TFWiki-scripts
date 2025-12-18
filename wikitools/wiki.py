@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, UTC
-from re import finditer
+from threading import Lock
 from time import sleep
+from re import finditer
 import requests
 
 from .page import Page
@@ -14,6 +15,8 @@ class Wiki:
     self.page_text_cache = FileDict('cache/text')
     self.page_html_cache = FileDict('cache/html')
     self.MAX_RETRIES = 60
+    self.next_request = datetime.now(UTC)
+    self.lock = Lock()
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
@@ -30,8 +33,13 @@ class Wiki:
     i = 0
     while True:
       try:
+        self.lock.acquire()
+        sleep_duration = self.next_request - datetime.now(UTC)
+        if sleep_duration > 0:
+          sleep(sleep_duration)
+        self.next_request = datetime.now(UTC) + timedelta(seconds=1)
         r = action()
-        sleep(1)
+        
         print(f'Attempt {i}: {r.request.url} {r.status_code}')
         r.raise_for_status()
         return r
@@ -45,7 +53,8 @@ class Wiki:
         i += 1
         if i > self.MAX_RETRIES:
           raise
-        sleep(5)
+      finally:
+        self.lock.release()
 
   def get(self, action, **params):
     params.update({
