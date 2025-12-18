@@ -34,7 +34,7 @@ class Wiki:
     while True:
       try:
         self.lock.acquire()
-        sleep_duration = self.next_request - datetime.now(UTC)
+        sleep_duration = (self.next_request - datetime.now(UTC)).total_seconds()
         if sleep_duration > 0:
           sleep(sleep_duration)
         self.next_request = datetime.now(UTC) + timedelta(seconds=1)
