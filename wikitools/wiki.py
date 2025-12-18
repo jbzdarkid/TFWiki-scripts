@@ -1,6 +1,7 @@
-from datetime import datetime, timedelta
-from re import finditer
+from datetime import datetime, timedelta, UTC
+from threading import Lock
 from time import sleep
+from re import finditer
 import requests
 
 from .page import Page
@@ -13,6 +14,9 @@ class Wiki:
     self.lgtoken = None
     self.page_text_cache = FileDict('cache/text')
     self.page_html_cache = FileDict('cache/html')
+    self.MAX_RETRIES = 60
+    self.next_request = datetime.now(UTC)
+    self.lock = Lock()
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
@@ -29,8 +33,13 @@ class Wiki:
     i = 0
     while True:
       try:
+        self.lock.acquire()
+        sleep_duration = (self.next_request - datetime.now(UTC)).total_seconds()
+        if sleep_duration > 0:
+          sleep(sleep_duration)
+        self.next_request = datetime.now(UTC) + timedelta(seconds=1)
         r = action()
-        sleep(1)
+        
         r.raise_for_status()
         return r
       except requests.RequestException as e:
@@ -39,11 +48,12 @@ class Wiki:
           print(e)
           raise
 
-        # For other status codes (or generic connection failures), allow up to 5 retries, with an ever-increasing sleep between attempts
+        # For other status codes (or generic connection failures), allow a number of retries, sleeping between attempts
         i += 1
-        if i > 60:
+        if i > self.MAX_RETRIES:
           raise
-        sleep(5)
+      finally:
+        self.lock.release()
 
   def get(self, action, **params):
     params.update({
@@ -74,7 +84,7 @@ class Wiki:
         entries = data[action][entry_key]
       except KeyError:
         if action not in data:
-          print(f'Entry key "{entry_key}" was not found in data. Did you mean one of these keys: {", ".join(data.keys())}')
+          print(f'Query "{action}" was not found in data. Did you mean one of these keys: {", ".join(data.keys())}')
         else:
           print(f'Entry key "{entry_key}" was not found in data[{action}]. Did you mean one of these keys: {", ".join(data[action].keys())}')
         break
@@ -117,7 +127,7 @@ class Wiki:
       'action': action,
       'format': 'json',
     })
-    
+
     r = self.retry(lambda: self.session.post(self.api_url, data=kwargs, files=files))
     return r.json()
 
@@ -211,7 +221,8 @@ class Wiki:
       namespaces = ['*']
     for entry in self.get_with_continue('query', 'recentchanges',
       list='recentchanges',
-      rcstart=starttime.isoformat(),
+      rclimit=500,
+      rcstart=starttime.replace(tzinfo=None).isoformat(),
       rcend='now',
       rcdir='newer',
       rcshow='!bot', # Ignore bot changes by default
@@ -221,23 +232,11 @@ class Wiki:
       yield Page(self, entry['title'], entry)
 
   def update_caches_from_recent_changes(self, days_ago=7):
-    start_time = datetime.utcnow() - timedelta(days=days_ago)
+    start_time = datetime.now(UTC) - timedelta(days=days_ago)
     for page in self.get_recent_changes(start_time):
       modified_time = datetime.fromisoformat(page.raw['timestamp'])
-      if page.url_title == 'Template:Backpack_item':
-        print('page', page.url_title, modified_time)
-        print('text meta', self.page_text_cache.metadata.get(page.url_title))
-        print('text valid', self.page_text_cache.cache_valid(page.url_title))
-        print('html meta', self.page_html_cache.metadata.get(page.url_title))
-        print('html valid', self.page_html_cache.cache_valid(page.url_title))
       self.page_text_cache.set_modified(page.url_title, modified_time)
       self.page_html_cache.set_modified(page.url_title, modified_time)
-      if page.url_title == 'Template:Backpack_item':
-        print('page', page.url_title, modified_time)
-        print('text meta', self.page_text_cache.metadata.get(page.url_title))
-        print('text valid', self.page_text_cache.cache_valid(page.url_title))
-        print('html meta', self.page_html_cache.metadata.get(page.url_title))
-        print('html valid', self.page_html_cache.cache_valid(page.url_title))
 
   def get_all_unused_files(self):
     for html in self.get_html_with_continue('Special:UnusedFiles'):
