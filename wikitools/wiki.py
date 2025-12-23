@@ -6,17 +6,23 @@ import requests
 
 from .page import Page
 from .file_dict import FileDict
+from .empty_cache import EmptyCache
 
 class Wiki:
-  def __init__(self, api_url, user_agent=None):
+  def __init__(self, api_url, user_agent=None, use_cache=True):
     self.api_url = api_url
     self.wiki_url = api_url.replace('api.php', 'index.php')
     self.lgtoken = None
-    self.page_text_cache = FileDict('cache/text')
-    self.page_html_cache = FileDict('cache/html')
     self.MAX_RETRIES = 60
     self.next_request = datetime.now(UTC)
     self.lock = Lock()
+
+    if use_cache:
+      self.page_text_cache = FileDict('cache/text')
+      self.page_html_cache = FileDict('cache/html')
+    else:
+      self.page_text_cache = EmptyCache()
+      self.page_html_cache = EmptyCache()
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
@@ -39,7 +45,7 @@ class Wiki:
           sleep(sleep_duration)
         self.next_request = datetime.now(UTC) + timedelta(seconds=1)
         r = action()
-        
+
         r.raise_for_status()
         return r
       except requests.RequestException as e:
