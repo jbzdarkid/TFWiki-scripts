@@ -160,7 +160,7 @@ class Page:
       print(f'WARNING: Page title "{self.title}" is not in the file namespace, page edits will not work properly')
     if fileobj.mode != 'rb':
       print(f'Failed to upload {self.title}, file must be opened in rb (was {fileobj.mode})')
-      return
+      return False
     print(f'Uploading {self.title}...')
     data = self.wiki.post_with_csrf('upload',
       filename=self.url_title,
@@ -173,8 +173,11 @@ class Page:
     if 'error' in data:
       print(f'Failed to upload {self.title}:')
       print(data['error'])
+      return False
     elif data['upload']['result'] != 'Success':
       print(f'Failed to upload {self.title}:')
       print(data['upload'])
+      return False
     else:
       print('Successfully uploaded ' + data['upload']['filename'])
+      return True
