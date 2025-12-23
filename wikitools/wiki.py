@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, timezone
 from threading import Lock
 from time import sleep
 from re import finditer
@@ -14,7 +14,7 @@ class Wiki:
     self.wiki_url = api_url.replace('api.php', 'index.php')
     self.lgtoken = None
     self.MAX_RETRIES = 60
-    self.next_request = datetime.now(UTC)
+    self.next_request = datetime.now(timezone.utc)
     self.lock = Lock()
 
     if use_cache:
@@ -40,10 +40,10 @@ class Wiki:
     while True:
       try:
         self.lock.acquire()
-        sleep_duration = (self.next_request - datetime.now(UTC)).total_seconds()
+        sleep_duration = (self.next_request - datetime.now(timezone.utc)).total_seconds()
         if sleep_duration > 0:
           sleep(sleep_duration)
-        self.next_request = datetime.now(UTC) + timedelta(seconds=1)
+        self.next_request = datetime.now(timezone.utc) + timedelta(seconds=1)
         r = action()
 
         r.raise_for_status()
@@ -238,7 +238,7 @@ class Wiki:
       yield Page(self, entry['title'], entry)
 
   def update_caches_from_recent_changes(self, days_ago=7):
-    start_time = datetime.now(UTC) - timedelta(days=days_ago)
+    start_time = datetime.now(timezone.utc) - timedelta(days=days_ago)
     for page in self.get_recent_changes(start_time):
       modified_time = datetime.fromisoformat(page.raw['timestamp'])
       self.page_text_cache.set_modified(page.url_title, modified_time)

@@ -1,5 +1,5 @@
 import atexit
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from json import loads, dumps
 from pathlib import Path
 from hashlib import sha256
@@ -49,7 +49,7 @@ class FileDict:
   def __setitem__(self, key, value):
     if key not in self.metadata: # N.B. we are actually writing an entry in the metadata for itself. Unused atm.
       self.metadata[key] = {}
-    self.metadata[key]['last_fetched'] = datetime.now(UTC).timestamp()
+    self.metadata[key]['last_fetched'] = datetime.now(timezone.utc).timestamp()
 
     self._path(key).parent.mkdir(exist_ok=True, parents=True)
     with self._path(key).open('w', encoding='utf-8') as f:
@@ -64,11 +64,11 @@ class FileDict:
     # If any piece of data is missing, assume the cache is valid.
     data = self.metadata.get(key, {})
     last_modified = data.get('last_modified', 0)
-    last_fetched = data.get('last_fetched', datetime.now(UTC).timestamp())
+    last_fetched = data.get('last_fetched', datetime.now(timezone.utc).timestamp())
 
     return last_fetched > last_modified
     """
-    one_month_ago = (datetime.now(UTC) - timedelta(days=30)).timestamp()
+    one_month_ago = (datetime.now(timezone.utc) - timedelta(days=30)).timestamp()
     return last_modified < one_month_ago or last_cached > last_modified
     """
 
