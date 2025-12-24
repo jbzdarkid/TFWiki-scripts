@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from time import sleep
-
 from wikitools import wiki
 from wikitools.page import Page
+from .utils import pagescraper_queue
 
 def pagescraper_get(page):
   page.get_revisions(datetime.now() - timedelta(days=30))
