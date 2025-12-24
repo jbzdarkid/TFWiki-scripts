@@ -43,8 +43,10 @@ class Wiki:
         sleep_duration = (self.next_request - datetime.now(timezone.utc)).total_seconds()
         if sleep_duration > 0:
           sleep(sleep_duration)
-        self.next_request = datetime.now(timezone.utc) + timedelta(seconds=1)
+        self.next_request = datetime.now(timezone.utc) + timedelta(milliseconds=1)
         r = action()
+
+        print(f'{r.request.method} {r.request.url}: {r.status_code}')
 
         r.raise_for_status()
         return r
