@@ -90,6 +90,7 @@ monthly_reports = {
   'undocumented_templates': 'Undocumented templates',
   'unlicensed_images': 'Unlicensed images',
   'unused_files': 'Unused files',
+  'bulk_test': 'Bulk test',
 }
 
 all_reports = daily_reports | weekly_reports | monthly_reports
@@ -214,4 +215,3 @@ if __name__ == '__main__':
     print(comment)
 
   exit(0 if succeeded else 1)
-
