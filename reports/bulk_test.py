@@ -7,7 +7,7 @@ from .utils import pagescraper_queue
 def pagescraper_get(page):
   page.get_revisions(datetime.now() - timedelta(days=30))
 
-def pagescraper_post(page):
+def pagescraper_post(page, w):
   Page(w, 'User:Darkid/Test').edit(page.title, 'testing')
 
 def main(w):
@@ -19,7 +19,7 @@ def main(w):
 
   sleep(10 * 60)
 
-  with pagescraper_queue(pagescraper_post, num_threads=64) as pages:
+  with pagescraper_queue(pagescraper_post, w, num_threads=64) as pages:
     for page in all_pages:
       pages.put(page)
 
