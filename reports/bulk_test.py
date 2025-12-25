@@ -26,4 +26,5 @@ def main(w):
 if __name__ == '__main__':
   verbose = True
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
+  w.MAX_RETRIES = 0
   main(w)
