@@ -17,7 +17,7 @@ def main(w):
       all_pages.append(page)
       pages.put(page)
 
-  time.sleep(10 * 60)
+  sleep(10 * 60)
 
   with pagescraper_queue(pagescraper_post, num_threads=64) as pages:
     for page in all_pages:
