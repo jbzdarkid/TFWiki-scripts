@@ -19,7 +19,7 @@ def main(w):
 
   sleep(10 * 60)
 
-  with pagescraper_queue(pagescraper_post, w, num_threads=64) as pages:
+  with pagescraper_queue(pagescraper_post, w, num_threads=1) as pages:
     for page in all_pages:
       pages.put(page)
 
