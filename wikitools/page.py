@@ -134,25 +134,17 @@ class Page:
         bot=bot,
       )
     except Exception as e:
-      print(f'Failed to edit {self.title}:\n{e}')
       return None
 
     if 'error' in data:
-      print(f'Failed to edit {self.title}:')
-      print(data['error'])
       return None
     elif data['edit']['result'] != 'Success':
-      print(f'Failed to edit {self.title}:')
-      print(data['edit'])
       return None
     elif 'new' in data['edit']:
-      print(f'Successfully created {self.title}')
       return self.wiki.wiki_url + '?diff=' + str(data['edit']['newrevid'])
     elif 'nochange' in data['edit']:
-      print(f'No change to {self.title}')
       return None
     else:
-      print(f'Successfully edited {self.title}')
       return self.wiki.wiki_url + '?diff=' + str(data['edit']['newrevid'])
 
   def upload(self, fileobj, comment=''):
