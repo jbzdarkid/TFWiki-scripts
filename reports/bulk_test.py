@@ -12,12 +12,16 @@ def pagescraper_post(page, w):
 
 def main(w):
   all_pages = []
-  with pagescraper_queue(pagescraper_get, num_threads=64) as pages:
-    for page in w.get_all_pages(namespaces=['Main', 'TFW', 'File', 'Template', 'Help', 'Category']):
-      all_pages.append(page)
+  for page in w.get_all_pages(namespaces=['Main', 'TFW', 'File', 'Template', 'Help', 'Category']):
+    all_pages.append(page)
+
+  sleep(30 * 60) # half an hour, jeez
+
+  with pagescraper_queue(pagescraper_get, num_threads=1) as pages:
+    for page in all_pages:
       pages.put(page)
 
-  sleep(10 * 60)
+  sleep(30 * 60) # half an hour, jeez
 
   with pagescraper_queue(pagescraper_post, w, num_threads=1) as pages:
     for page in all_pages:
