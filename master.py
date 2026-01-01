@@ -213,5 +213,5 @@ if __name__ == '__main__':
   elif environ['GITHUB_EVENT_NAME'] == 'schedule':
     print(comment)
 
-  succeeded = None in report_outputs.values()
-  exit(0 if succeeded else 1)
+  num_failures = list(report_outputs.values()).count(None)
+  exit(num_failures)
