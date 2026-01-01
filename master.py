@@ -4,6 +4,7 @@ from os import environ
 from random import shuffle
 from subprocess import check_output
 from sys import argv, stdout
+from time import sleep
 from traceback import print_exc
 from wikitools import wiki
 from wikitools.page import Page
