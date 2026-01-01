@@ -16,6 +16,7 @@ class Wiki:
     self.MAX_RETRIES = 60
     self.next_request = datetime.now(timezone.utc)
     self.lock = Lock()
+    self.last_network_request_time = None
 
     if use_cache:
       self.page_text_cache = FileDict('cache/text')
@@ -40,12 +41,16 @@ class Wiki:
     while True:
       try:
         self.lock.acquire()
+
+        if self.last_network_request_time and self.last_network_request_time < datetime.now(timezone.utc):
+          return None # Timeout reached; network requests can no longer be made.
+
         sleep_duration = (self.next_request - datetime.now(timezone.utc)).total_seconds()
         if sleep_duration > 0:
           sleep(sleep_duration)
-        self.next_request = datetime.now(timezone.utc) + timedelta(seconds=1)
-        r = action()
+        self.next_request = datetime.now(timezone.utc) + timedelta(milliseconds=500)
 
+        r = action()
         r.raise_for_status()
         return r
       except requests.RequestException as e:
