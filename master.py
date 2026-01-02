@@ -193,7 +193,7 @@ if __name__ == '__main__':
   w.last_network_request_time = None # Unblock network requests so we can POST again.
 
   comment = 'Please verify the following diffs:\n'
-  for name, output in report_outputs:
+  for name, output in report_outputs.items():
     if not output:
       comment += f'- [ ] Report {name} threw an exception. Please check the action logs.\n'
       continue
