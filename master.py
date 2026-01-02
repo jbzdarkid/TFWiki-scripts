@@ -1,5 +1,5 @@
 import importlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from os import environ
 from random import shuffle
 from subprocess import check_output
@@ -42,7 +42,7 @@ def edit_or_save(page_name, file_name, lang, contents, summary):
   return None
 
 def run_report(w, module, name):
-  start = datetime.now()
+  start = datetime.now(timezone.utc)
   print(f'Starting {name} at {start}')
   try:
     return importlib.import_module('reports.' + module).main(w)
@@ -50,7 +50,7 @@ def run_report(w, module, name):
     print_exc(file=stdout)
     return None
   finally:
-    duration = datetime.now() - start
+    duration = datetime.now(timezone.utc) - start
     duration -= timedelta(microseconds=duration.microseconds) # Strip microseconds
     print(f'Report {name} completed after {duration}')
 
@@ -102,9 +102,9 @@ if __name__ == '__main__':
 
     # Determine which reports to run -- note that the weekly and monthly cadences don't necessarily line up.
     modules_to_run += daily_reports.keys()
-    if datetime.now().weekday() == 0:
+    if datetime.now(timezone.utc).weekday() == 0:
       modules_to_run += weekly_reports.keys()
-    if datetime.now().day == 1:
+    if datetime.now(timezone.utc).day == 1:
       modules_to_run += monthly_reports.keys()
 
   elif event == 'pull_request':
@@ -180,7 +180,7 @@ if __name__ == '__main__':
   # All scripts must finish in 5h15m so that we have enough time to sleep and *then* upload the report files.
   # This value (on the global wiki class) acts as a soft stop for our reports,
   # so they are unable to make network requests after this time.
-  w.last_network_request_time = datetime.now() + timedelta(hours=5, minutes=15)
+  w.last_network_request_time = datetime.now(timezone.utc) + timedelta(hours=5, minutes=15)
 
   report_outputs = {}
   for module in modules_to_run:
