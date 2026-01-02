@@ -43,7 +43,7 @@ def main(w):
     if sort_by_count:
       alternate_report = f'* [[Team Fortress Wiki:Reports/Missing translations/{language}|Missing translations in {{{{lang name|name|{language}}}}}]]'
     else:
-      alternate_report = f'* [[Team Fortress Wiki:Reports/Missing translations/sorted/{language}|This report, but sorted by page usage instead of alphabetical]]
+      alternate_report = f'* [[Team Fortress Wiki:Reports/Missing translations/sorted/{language}|This report, but sorted by page usage instead of alphabetical]]'
 
     output = """\
 {{{{DISPLAYTITLE: {count} pages missing {{{{lang name|name|{lang}}}}} translation}}}}
