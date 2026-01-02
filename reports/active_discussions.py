@@ -3,8 +3,8 @@ from .utils import pagescraper_queue, time_and_date, utcnow
 from wikitools import wiki
 
 verbose = True
-one_month_ago = utcnow() - timedelta(days=30)
-one_week_ago  = utcnow() - timedelta(days=7)
+ONE_MONTH_AGO = utcnow() - timedelta(days=30)
+ONE_WEEK_AGO  = utcnow() - timedelta(days=7)
 KNOWN_BOTS = ['WelcomeBOT'] # We only need to list bots which post to talkpages.
 
 def pagescraper(page, active_one_week, active_one_month):
@@ -12,13 +12,13 @@ def pagescraper(page, active_one_week, active_one_month):
     print(f'Fetching revisions for {page}')
   weekly_users = set()
   monthly_users = set()
-  for revision in page.get_revisions(one_month_ago):
+  for revision in page.get_revisions(ONE_MONTH_AGO):
     if revision['user'] in KNOWN_BOTS:
       continue
-    if revision['timestamp'] > one_week_ago:
+    if revision['timestamp'] > ONE_WEEK_AGO:
       weekly_users.add(revision['user'])
       monthly_users.add(revision['user'])
-    elif revision['timestamp'] > one_month_ago:
+    elif revision['timestamp'] > ONE_MONTH_AGO:
       monthly_users.add(revision['user'])
 
   # A discussion is considered 'active' if it has any user in the past week, or more than 3 users in the past month.
@@ -31,7 +31,7 @@ def main(w):
   namespaces = [ns for ns in w.namespaces if 'talk' in ns.lower()]
 
   recent_pages = set()
-  for page in w.get_recent_changes(one_month_ago, namespaces=namespaces):
+  for page in w.get_recent_changes(ONE_MONTH_AGO, namespaces=namespaces):
     recent_pages.add(page)
   if verbose:
     print(f'Found {len(recent_pages)} recently modified talkpages in the past month')
@@ -68,6 +68,6 @@ There are '''<onlyinclude>{count}</onlyinclude>''' active discussions as of {dat
 if __name__ == '__main__':
   verbose = True
   w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
-  with open('wiki_all_articles.txt', 'w') as f:
+  with open('wiki_active_discussions.txt', 'w') as f:
     f.write(main(w))
   print(f'Article written to {f.name}')
