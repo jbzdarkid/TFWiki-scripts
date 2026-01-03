@@ -8,7 +8,7 @@ on:
         type: string
   pull_request:
 
-concurrency: 
+concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
@@ -30,7 +30,7 @@ jobs:
         key: tfwiki-file-cache-invalid
         restore-keys: tfwiki-file-cache- # Restores the most recent cache
     - run: python -u master.py ${{ inputs.reports }}
-      timeout-minutes: 350
+      timeout-minutes: 360
       env:
         WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
         WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}
