@@ -30,7 +30,7 @@ jobs:
         key: tfwiki-file-cache-invalid
         restore-keys: tfwiki-file-cache- # Restores the most recent cache
     - run: python -u master.py ${{ inputs.reports }}
-      timeout-minutes: 360
+      timeout-minutes: 358
       env:
         WIKI_USERNAME: ${{ secrets.WIKI_USERNAME }}
         WIKI_PASSWORD: ${{ secrets.WIKI_PASSWORD }}

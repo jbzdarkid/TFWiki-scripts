@@ -28,8 +28,8 @@ def main(w):
       count = 0
       for link in page.get_links():
         count += 1
-        if count >= 1000:
-          count = 1001
+        if count >= 100:
+          count = 101
           break
       link_counts[page] = count
     sort_key = lambda page: -link_counts[page.basename]
@@ -76,8 +76,8 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
     for page in missing_pages:
       output += f'\n# [[:{page.basename}]] ([[:{page.title}/{language}|create]])'
       if sort_by_count: # then we have link counts
-        if link_counts[page.basename] == 1001:
-          output += f' (1000+ links)'
+        if link_counts[page.basename] == 101:
+          output += f' (100+ links)'
         else:
           output += f' ({plural.links(link_counts[page.basename])})'
     outputs.append([language, output])
