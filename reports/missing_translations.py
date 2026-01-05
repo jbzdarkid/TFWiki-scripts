@@ -23,15 +23,7 @@ def main(w):
     print(f'Done processing pages, found {len(english_pages)} english pages')
 
   if sort_by_count:
-    link_counts = {}
-    for page in english_pages:
-      count = 0
-      for link in page.get_links():
-        count += 1
-        if count >= 100:
-          count = 101
-          break
-      link_counts[page] = count
+    link_counts = {page.title: sum(1 for _ in page.get_links()) for page in english_pages}
     sort_key = lambda page: -link_counts[page.basename]
   else:
     sort_key = lambda page: page.title
@@ -47,26 +39,17 @@ def main(w):
     if verbose:
       print(f'Found {len(missing_pages)} missing pages in {language}')
 
-
-    if sort_by_count:
-      alternate_report = f'* [[Team Fortress Wiki:Reports/Missing translations/{language}|Missing translations in {{{{lang name|name|{language}}}}}]]'
-    else:
-      alternate_report = f'* [[Team Fortress Wiki:Reports/Missing translations/sorted/{language}|This report, but sorted by page usage instead of alphabetical]]'
-
     output = """\
 {{{{DISPLAYTITLE: {count} pages missing {{{{lang name|name|{lang}}}}} translation}}}}
 Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.
 
-; See also:
+; See also
 * [[Team Fortress Wiki:Reports/All articles/{lang}|All articles in {{{{lang name|name|{lang}}}}}]]
-{alternate_report}
-* [[Team Fortress Wiki:Reports/Untranslated categories/{lang}|Missing categories in {{{{lang name|name|{lang}}}}}]]
-* [[Team Fortress Wiki:Reports/Untranslated templates/{lang}|Missing templates in {{{{lang name|name|{lang}}}}}]]
+* [[Team Fortress Wiki:Reports/Missing translations/sorted/{lang}|This report, but sorted by page usage instead of alphabetical]]
 * [[Special:RecentChangesLinked/Team Fortress Wiki:Reports/All articles/{lang}|Recent changes to articles in {{{{lang name|name|{lang}}}}}]]
 
 == List ==""".format(
       lang=language,
-      alternate_report=alternate_report,
       count=len(missing_pages),
       date=time_and_date())
 
@@ -76,10 +59,7 @@ Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>
     for page in missing_pages:
       output += f'\n# [[:{page.basename}]] ([[:{page.title}/{language}|create]])'
       if sort_by_count: # then we have link counts
-        if link_counts[page.basename] == 101:
-          output += f' (100+ links)'
-        else:
-          output += f' ({plural.links(link_counts[page.basename])})'
+        output += f' ({plural.links(link_counts[page.basename])})'
     outputs.append([language, output])
   return outputs
 
