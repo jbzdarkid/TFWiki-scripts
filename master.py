@@ -34,7 +34,7 @@ def edit_or_save(page_name, file_name, lang, contents, summary):
 
   # Edit failed, fall back to saving to file (will be attached as a build artifact)
   with open(f'reports/{file_name}', 'w', encoding='utf-8') as f:
-    f.write(output)
+    f.write(contents)
 
   action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/actions/runs/' + environ['GITHUB_RUN_ID']
   return f' ~~[{lang}]({action_url})~~'
