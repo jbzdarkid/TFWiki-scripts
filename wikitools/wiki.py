@@ -240,9 +240,20 @@ class Wiki:
   def update_caches_from_recent_changes(self, days_ago=7):
     start_time = datetime.now(timezone.utc) - timedelta(days=days_ago)
     for page in self.get_recent_changes(start_time):
+      if page.title == 'List of official tips':
+        print(page, page.raw['timestamp'])
+        print(self.page_text_cache[page.url_title])
+        print(self.page_text_cache.metadata[page.url_title])
+        print(self.page_html_cache[page.url_title])
+        print(self.page_html_cache.metadata[page.url_title])
       modified_time = datetime.fromisoformat(page.raw['timestamp'])
       self.page_text_cache.set_modified(page.url_title, modified_time)
       self.page_html_cache.set_modified(page.url_title, modified_time)
+    page = Page(self, 'List of official tips')
+    print(self.page_text_cache[page.url_title])
+    print(self.page_text_cache.metadata[page.url_title])
+    print(self.page_html_cache[page.url_title])
+    print(self.page_html_cache.metadata[page.url_title])
 
   def get_all_unused_files(self):
     for html in self.get_html_with_continue('Special:UnusedFiles'):

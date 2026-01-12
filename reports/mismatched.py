@@ -70,6 +70,8 @@ LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko',
 
 def pagescraper(page, translation_data):
   text = page.get_wiki_text()
+  if page.title == 'List of official tips':
+    print(text)
 
   locations = []
   for i, left, right, in pairs:
@@ -164,7 +166,7 @@ def pagescraper(page, translation_data):
 def page_iter(w):
   for page in w.get_all_pages(namespaces=['Main', 'File', 'Template', 'Help', 'Category']):
     yield page
-  
+
 def main(w):
   translation_data = {}
   with pagescraper_queue(pagescraper, translation_data) as pages:
