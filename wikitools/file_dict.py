@@ -37,13 +37,16 @@ class FileDict:
       return default
 
   def __getitem__(self, key):
+    print('<41>', key)
     if not self.cache_valid(key):
       return None # Cache has expired for the given key
 
     try:
       with self._path(key).open('r', encoding='utf-8') as f:
+        print('<46>')
         return f.read()
     except FileNotFoundError as ex:
+      print('<49>')
       raise KeyError(f'Key {key} was not found on disk') from ex
 
   def __setitem__(self, key, value):
@@ -56,6 +59,7 @@ class FileDict:
       f.write(value)
 
   def cache_valid(self, key):
+    print('<60>', key)
     if key == 'metadata':
       return True
 
@@ -65,6 +69,7 @@ class FileDict:
     data = self.metadata.get(key, {})
     last_modified = data.get('last_modified', 0)
     last_fetched = data.get('last_fetched', datetime.now(timezone.utc).timestamp())
+    print('<70>', key, data, last_modified, last_fetched)
 
     return last_fetched > last_modified
     """
