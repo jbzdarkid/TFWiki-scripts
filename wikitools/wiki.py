@@ -251,9 +251,9 @@ class Wiki:
       self.page_html_cache.set_modified(page.url_title, modified_time)
     page = Page(self, 'List of official tips')
     print(self.page_text_cache[page.url_title])
-    print(self.page_text_cache.metadata[page.url_title])
+    print(self.page_text_cache.metadata.get(page.url_title, None))
     print(self.page_html_cache[page.url_title])
-    print(self.page_html_cache.metadata[page.url_title])
+    print(self.page_html_cache.metadata.get(page.url_title, None))
 
   def get_all_unused_files(self):
     for html in self.get_html_with_continue('Special:UnusedFiles'):
