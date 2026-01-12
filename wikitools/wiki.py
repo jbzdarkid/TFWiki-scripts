@@ -243,9 +243,9 @@ class Wiki:
       if page.title == 'List of official tips':
         print(page, page.raw['timestamp'])
         print(self.page_text_cache[page.url_title])
-        print(self.page_text_cache.metadata[page.url_title])
+        print(self.page_text_cache.metadata.get(page.url_title, None))
         print(self.page_html_cache[page.url_title])
-        print(self.page_html_cache.metadata[page.url_title])
+        print(self.page_html_cache.metadata.get(page.url_title, None))
       modified_time = datetime.fromisoformat(page.raw['timestamp'])
       self.page_text_cache.set_modified(page.url_title, modified_time)
       self.page_html_cache.set_modified(page.url_title, modified_time)
