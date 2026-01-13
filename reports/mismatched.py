@@ -70,7 +70,7 @@ LANGS = ['ar', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko',
 
 def pagescraper(page, translation_data):
   text = page.get_wiki_text()
-  if page.title == 'List of official tips':
+  if page.url_title == 'List_of_official_tips':
     lines = text.split('\n')
     buff_line = [line for line in lines if 'As a Soldier, activating the Buff Banner provides' in line]
     print('<74>', buff_line)
