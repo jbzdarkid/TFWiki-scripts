@@ -74,10 +74,7 @@ class Wiki:
 
   def get_with_continue(self, action, entry_key, **kwargs):
     while True:
-      try:
-        data = self.get(action, **kwargs)
-      except requests.exceptions.RequestException:
-        return # Unable to load more info for this query
+      data = self.get(action, **kwargs)
       if data == {'batchcomplete': ''}:
         return # No entries for this query
       elif 'error' in data and data['error']['code'] == 'internal_api_error_DBConnectionError':
@@ -237,7 +234,7 @@ class Wiki:
     ):
       yield Page(self, entry['title'], entry)
 
-  def update_caches_from_recent_changes(self, days_ago=7):
+  def update_caches_from_recent_changes(self, days_ago=30):
     start_time = datetime.now(timezone.utc) - timedelta(days=days_ago)
     for page in self.get_recent_changes(start_time):
       modified_time = datetime.fromisoformat(page.raw['timestamp'])
