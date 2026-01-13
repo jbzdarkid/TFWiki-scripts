@@ -75,7 +75,6 @@ class Wiki:
   def get_with_continue(self, action, entry_key, **kwargs):
     while True:
       data = self.get(action, **kwargs)
-      print('<78>', data)
       if data == {'batchcomplete': ''}:
         return # No entries for this query
       elif 'error' in data and data['error']['code'] == 'internal_api_error_DBConnectionError':
@@ -86,7 +85,6 @@ class Wiki:
 
       try:
         entries = data[action][entry_key]
-        print(len(entries))
       except KeyError:
         if action not in data:
           print(f'Query "{action}" was not found in data. Did you mean one of these keys: {", ".join(data.keys())}')
@@ -102,10 +100,8 @@ class Wiki:
           yield entry
 
       if 'continue' in data:
-        print(data['continue'])
         kwargs.update(data['continue'])
       else:
-        print('<108>', data.keys())
         break
 
   def get_html_with_continue(self, title, **params):
@@ -241,11 +237,9 @@ class Wiki:
   def update_caches_from_recent_changes(self, days_ago=30):
     start_time = datetime.now(timezone.utc) - timedelta(days=days_ago)
     for page in self.get_recent_changes(start_time):
-      print(page.title)
       modified_time = datetime.fromisoformat(page.raw['timestamp'])
       self.page_text_cache.set_modified(page.url_title, modified_time)
       self.page_html_cache.set_modified(page.url_title, modified_time)
-    print()
 
   def get_all_unused_files(self):
     for html in self.get_html_with_continue('Special:UnusedFiles'):

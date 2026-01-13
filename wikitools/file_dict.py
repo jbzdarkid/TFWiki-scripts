@@ -42,10 +42,8 @@ class FileDict:
 
     try:
       with self._path(key).open('r', encoding='utf-8') as f:
-        print(f'<46> {key}')
         return f.read()
     except FileNotFoundError as ex:
-      print(f'<49> {key}')
       raise KeyError(f'Key {key} was not found on disk') from ex
 
   def __setitem__(self, key, value):
@@ -67,7 +65,6 @@ class FileDict:
     data = self.metadata.get(key, {})
     last_modified = data.get('last_modified', 0)
     last_fetched = data.get('last_fetched', datetime.now(timezone.utc).timestamp())
-    print(f'<70> {key} {data} {last_modified} {last_fetched}')
 
     return last_fetched > last_modified
     """
