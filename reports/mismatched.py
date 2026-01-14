@@ -164,7 +164,7 @@ def pagescraper(page, translation_data):
 def page_iter(w):
   for page in w.get_all_pages(namespaces=['Main', 'File', 'Template', 'Help', 'Category']):
     yield page
-  
+
 def main(w):
   translation_data = {}
   with pagescraper_queue(pagescraper, translation_data) as pages:
