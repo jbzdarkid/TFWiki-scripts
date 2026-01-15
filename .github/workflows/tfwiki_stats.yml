@@ -49,3 +49,9 @@ jobs:
         name: Failed uploads
         path: reports/wiki_*.txt
         if-no-files-found: ignore
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: Wikitools HTTP log
+        path: wikitools/http.log
+        if-no-files-found: ignore

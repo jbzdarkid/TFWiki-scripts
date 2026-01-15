@@ -2,6 +2,8 @@ from datetime import datetime, timedelta, timezone
 from threading import Lock
 from time import sleep
 from re import finditer
+import logging
+
 import requests
 
 from .page import Page
@@ -17,6 +19,9 @@ class Wiki:
     self.next_request = datetime.now(timezone.utc)
     self.lock = Lock()
     self.last_network_request_time = None
+
+    self.logger = logging.getLogger(__name__)
+    logging.basicConfig(filename='http.log', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s:%(message)s')
 
     if use_cache:
       self.page_text_cache = FileDict('cache/text')
@@ -51,6 +56,7 @@ class Wiki:
         self.next_request = datetime.now(timezone.utc) + timedelta(milliseconds=500)
 
         r = action()
+        self.logger.info(f'{r.status_code} {r.request.url} {r.request.params}')
         r.raise_for_status()
         return r
       except requests.RequestException as e:
