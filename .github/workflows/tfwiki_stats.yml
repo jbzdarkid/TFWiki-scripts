@@ -53,5 +53,5 @@ jobs:
       if: always()
       with:
         name: Wikitools HTTP log
-        path: **/*.log
+        path: '**/*.log'
         if-no-files-found: ignore
