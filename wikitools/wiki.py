@@ -67,6 +67,7 @@ class Wiki:
 
         # For other status codes (or generic connection failures), allow a number of retries, sleeping between attempts
         i += 1
+        sleep(60)
         if i > self.MAX_RETRIES:
           raise
       finally:
