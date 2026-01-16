@@ -21,7 +21,7 @@ class Wiki:
     self.last_network_request_time = None
 
     self.logger = logging.getLogger(__name__)
-    logging.basicConfig(filename='http.log', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s:%(message)s')
+    logging.basicConfig(filename='http.log', encoding='utf-8', level=logging.ERROR, format='%(asctime)s:%(message)s')
 
     if use_cache:
       self.page_text_cache = FileDict('cache/text')
@@ -56,7 +56,7 @@ class Wiki:
         self.next_request = datetime.now(timezone.utc) + timedelta(milliseconds=500)
 
         r = action()
-        self.logger.info(f'{r.status_code} {r.request.method} {r.request.url} {r.request.body}')
+        self.logger.error(f'{r.status_code} {r.request.method} {r.request.url} {len(r.request.body)}')
         r.raise_for_status()
         return r
       except requests.RequestException as e:
