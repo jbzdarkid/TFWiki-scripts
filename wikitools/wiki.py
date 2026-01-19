@@ -53,7 +53,7 @@ class Wiki:
         sleep_duration = (self.next_request - datetime.now(timezone.utc)).total_seconds()
         if sleep_duration > 0:
           sleep(sleep_duration)
-        self.next_request = datetime.now(timezone.utc) + timedelta(milliseconds=500)
+        self.next_request = datetime.now(timezone.utc) + timedelta(milliseconds=10)
 
         r = action()
         self.logger.error(
