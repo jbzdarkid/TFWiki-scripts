@@ -56,7 +56,14 @@ class Wiki:
         self.next_request = datetime.now(timezone.utc) + timedelta(milliseconds=500)
 
         r = action()
-        self.logger.error(f'{r.status_code} {r.request.method} {r.request.url} {r.request.headers} {len(r.request.body) if r.request.body else ""}')
+        self.logger.error(
+          '%d %s %s %s %d',
+          r.status_code,
+          r.request.method,
+          r.request.url,
+          r.request.headers,
+          len(r.request.body) if r.request.body else 0,
+        )
         r.raise_for_status()
         return r
       except requests.RequestException as e:
