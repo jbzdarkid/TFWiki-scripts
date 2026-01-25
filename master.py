@@ -191,7 +191,7 @@ if __name__ == '__main__':
     report_outputs[report_name] = run_report(w, module, report_name)
 
   print('All reports completed, sleeping then uploading outputs')
-  sleep(sleep_before_upload)
+  sleep(sleep_before_upload.total_seconds())
 
   w.last_network_request_time = None # Unblock network requests so we can POST again.
 
