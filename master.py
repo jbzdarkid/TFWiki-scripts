@@ -177,10 +177,13 @@ if __name__ == '__main__':
   shuffle(modules_to_run)
   print(f'Running reports: {modules_to_run}')
 
-  # All scripts must finish in 5h15m so that we have enough time to sleep and *then* upload the report files.
+  # All scripts must finish with enough time to sleep and *then* upload the report files.
   # This value (on the global wiki class) acts as a soft stop for our reports,
   # so they are unable to make network requests after this time.
-  w.last_network_request_time = datetime.now(timezone.utc) + timedelta(hours=5, minutes=15)
+  # 5 minutes to exit the current buffer; 30 minutes to reset buffer thresholds. Yes, it's insane.
+  # This probably doesn't matter anymore, since the reports are finishing faster.
+  sleep_before_upload = timedelta(minutes=35)
+  w.last_network_request_time = datetime.now(timezone.utc) + timedelta(hours=5, minutes=45) - sleep_before_upload
 
   report_outputs = {}
   for module in modules_to_run:
@@ -188,7 +191,7 @@ if __name__ == '__main__':
     report_outputs[report_name] = run_report(w, module, report_name)
 
   print('All reports completed, sleeping then uploading outputs')
-  sleep(35 * 60) # 5 minutes to exit the current buffer; 30 minutes to reset buffer thresholds. Yes, it's insane.
+  sleep(sleep_before_upload)
 
   w.last_network_request_time = None # Unblock network requests so we can POST again.
 
@@ -200,6 +203,7 @@ if __name__ == '__main__':
     comment += f'- [ ] Report {name} succeeded, diffs:'
     file_name = 'wiki_' + name.lower().replace(' ', '_')
     if isinstance(output, list):
+      shuffle(output)
       for lang, contents in output:
         comment += edit_or_save(f'{root}/{name}/{lang}', f'{file_name}_{lang}.txt', lang, contents, summary)
     else:
