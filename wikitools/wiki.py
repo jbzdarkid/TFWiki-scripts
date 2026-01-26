@@ -15,7 +15,7 @@ class Wiki:
     self.api_url = api_url
     self.wiki_url = api_url.replace('api.php', 'index.php')
     self.lgtoken = None
-    self.MAX_RETRIES = 60
+    self.MAX_RETRIES = 5
     self.next_request = datetime.now(timezone.utc)
     self.lock = Lock()
     self.last_network_request_time = None
