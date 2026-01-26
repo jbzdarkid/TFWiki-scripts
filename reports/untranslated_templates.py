@@ -32,7 +32,7 @@ def parse_lang_templates(page):
       # The 'base' of the stack should not ever be popped (since it represents text at root scope)
       # If we get a mismatch just... do our best. Mismatched parens will be reported elsewhere.
       if len(stack) > 1:
-        stack.pop() 
+        stack.pop()
       continue
 
     # Add this character to the buffer for the current stack (or create the buffer if it doesn't exist)
@@ -120,10 +120,11 @@ def main(w):
 {{{{DISPLAYTITLE: {count} templates missing {{{{lang name|name|{lang}}}}} translation}}}}
 Pages missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.
 
-; See also
-* [[TFW:Reports/All articles/{lang}|All articles in {{{{lang name|name|{lang}}}}}]]
-* [[TFW:Reports/Missing translations/{lang}|Missing article translations in {{{{lang name|name|{lang}}}}}]]
-* [[Special:RecentChangesLinked/Project:Reports/All articles/{lang}|Recent changes to articles in {{{{lang name|name|{lang}}}}}]]
+; See also:
+* [[Team Fortress Wiki:Reports/All articles/{lang}|All articles in {{{{lang name|name|{lang}}}}}]]
+* [[Team Fortress Wiki:Reports/Missing translations/{lang}|Missing translations in {{{{lang name|name|{lang}}}}}]]
+* [[Team Fortress Wiki:Reports/Untranslated categories/{lang}|Missing categories in {{{{lang name|name|{lang}}}}}]]
+* [[Special:RecentChangesLinked/Team Fortress Wiki:Reports/All articles/{lang}|Recent changes to articles in {{{{lang name|name|{lang}}}}}]]
 
 == List ==""".format(
       lang=language,

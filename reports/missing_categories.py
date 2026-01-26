@@ -62,10 +62,11 @@ There are <onlyinclude>{count}</onlyinclude> categories which are not translated
 {{{{DISPLAYTITLE: {count} categories missing {{{{lang name|name|{lang}}}}} translation}}}}
 Categories missing in {{{{lang info|{lang}}}}}: '''<onlyinclude>{count}</onlyinclude>''' in total. Data as of {date}.
 
-; See also
-* [[Project:Reports/All articles/{lang}|All articles in {{{{lang name|name|{lang}}}}}]]
-* [[Project:Reports/Missing translations/{lang}|Missing translations in {{{{lang name|name|{lang}}}}}]]
-* [[Special:RecentChangesLinked/Project:Reports/All articles/{lang}|Recent changes to articles in {{{{lang name|name|{lang}}}}}]]
+; See also:
+* [[Team Fortress Wiki:Reports/All articles/{lang}|All articles in {{{{lang name|name|{lang}}}}}]]
+* [[Team Fortress Wiki:Reports/Missing translations/{lang}|Missing translations in {{{{lang name|name|{lang}}}}}]]
+* [[Team Fortress Wiki:Reports/Untranslated templates/{lang}|Missing templates in {{{{lang name|name|{lang}}}}}]]
+* [[Special:RecentChangesLinked/Team Fortress Wiki:Reports/All articles/{lang}|Recent changes to articles in {{{{lang name|name|{lang}}}}}]]
 
 == List ==""".format(
       lang=language,
