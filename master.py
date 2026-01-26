@@ -203,7 +203,6 @@ if __name__ == '__main__':
     comment += f'- [ ] Report {name} succeeded, diffs:'
     file_name = 'wiki_' + name.lower().replace(' ', '_')
     if isinstance(output, list):
-      shuffle(output)
       for lang, contents in output:
         comment += edit_or_save(f'{root}/{name}/{lang}', f'{file_name}_{lang}.txt', lang, contents, summary)
     else:
