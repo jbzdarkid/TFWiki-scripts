@@ -180,9 +180,8 @@ if __name__ == '__main__':
   # All scripts must finish with enough time to sleep and *then* upload the report files.
   # This value (on the global wiki class) acts as a soft stop for our reports,
   # so they are unable to make network requests after this time.
-  # 5 minutes to exit the current buffer; 30 minutes to reset buffer thresholds. Yes, it's insane.
-  # This probably doesn't matter anymore, since the reports are finishing faster.
-  sleep_before_upload = timedelta(minutes=35)
+  # I'm just using a flat 30 minutes here, while accounting for 10 minutes before the actual github timelimit.
+  sleep_before_upload = timedelta(minutes=30)
   w.last_network_request_time = datetime.now(timezone.utc) + timedelta(hours=5, minutes=45) - sleep_before_upload
 
   report_outputs = {}
@@ -196,15 +195,15 @@ if __name__ == '__main__':
   w.last_network_request_time = None # Unblock network requests so we can POST again.
 
   comment = 'Please verify the following diffs:\n'
-  for name, output in report_outputs.items():
+  for report_name, output in report_outputs.items():
     if not output:
-      comment += f'- [ ] Report {name} threw an exception. Please check the action logs.\n'
+      comment += f'- [ ] Report {report_name} threw an exception. Please check the action logs.\n'
       continue
-    comment += f'- [ ] Report {name} succeeded, diffs:'
-    file_name = 'wiki_' + name.lower().replace(' ', '_')
+    comment += f'- [ ] Report {report_name} succeeded, diffs:'
+    file_name = 'wiki_' + report_name.lower().replace(' ', '_')
     if isinstance(output, list):
       for lang, contents in output:
-        comment += edit_or_save(f'{root}/{name}/{lang}', f'{file_name}_{lang}.txt', lang, contents, summary)
+        comment += edit_or_save(f'{root}/{report_name}/{lang}', f'{file_name}_{lang}.txt', lang, contents, summary)
     else:
       comment += edit_or_save(f'{root}/{report_name}', f'{file_name}.txt', 'en', output, summary)
     comment += '\n'
