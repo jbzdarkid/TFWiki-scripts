@@ -182,7 +182,7 @@ if __name__ == '__main__':
   # so they are unable to make network requests after this time.
   # I'm just using a flat 30 minutes here, while accounting for 10 minutes before the actual github timelimit.
   sleep_before_upload = timedelta(minutes=30)
-  w.last_network_request_time = datetime.now(timezone.utc) + timedelta(hours=5, minutes=45) - sleep_before_upload
+  w.last_network_request_time = datetime.now(timezone.utc) + timedelta(hours=5, minutes=40) - sleep_before_upload
 
   report_outputs = {}
   for module in modules_to_run:
@@ -193,6 +193,7 @@ if __name__ == '__main__':
   sleep(sleep_before_upload.total_seconds())
 
   w.last_network_request_time = None # Unblock network requests so we can POST again.
+  w.MAX_RETRIES = 2 # Only 2 attempts at POST-ing. I think it's just working and returning 502, not actually faililng.
 
   comment = 'Please verify the following diffs:\n'
   for report_name, output in report_outputs.items():
