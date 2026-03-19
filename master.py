@@ -69,7 +69,7 @@ weekly_reports = {
   'incorrectly_categorized': 'Pages with incorrect categorization',
   'incorrectly_linked': 'Pages with incorrect links',
   'lang_duplicates': 'Lang duplicates',
-  'lang_quality': 'Lang errors',
+  # 'lang_quality': 'Lang errors', # Disabled 2026-03-18 due to timeouts
   'mismatched_weekly': 'Mismatched parenthesis',
   'missing_categories': 'Untranslated categories',
   'missing_translations_weekly': 'Missing translations/sorted',
