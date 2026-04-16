@@ -27,25 +27,19 @@ import open_pr_comment
 # Threading for navboxes.py?
 # Might be more smarts to do in lang_quality.py, e.g. non-ascii characters in 'en', or check for only quote characters (or other lang incomplete hints)
 
-def edit_or_save(page_name, file_name, lang, contents, summary):
-  wiki_diff_url = Page(w, page_name).edit(contents, bot=True, summary=summary)
-  if wiki_diff_url:
-    return f' [{lang}]({wiki_diff_url})'
-
-  # Edit failed, fall back to saving to file (will be attached as a build artifact)
-  with open(f'reports/{file_name}', 'w', encoding='utf-8') as f:
-    f.write(contents)
-
-  action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/actions/runs/' + environ['GITHUB_RUN_ID']
-  return f' ~~[{lang}]({action_url})~~'
-
-  return None
-
 def run_report(w, module, name):
   start = datetime.now(timezone.utc)
   print(f'Starting {name} at {start}')
   try:
-    return importlib.import_module('reports.' + module).main(w)
+    output = {}
+    raw_output = importlib.import_module('reports.' + module).main(w)
+    # Fixup for report format (TBD; will push into reports once stable)
+    if isinstance(output, list):
+      for lang, contents in raw_output:
+        output[lang] = contents
+    else:
+      output['en'] = raw_output
+    return output
   except Exception:
     print_exc(file=stdout)
     return None
@@ -193,21 +187,53 @@ if __name__ == '__main__':
   sleep(sleep_before_upload.total_seconds())
 
   w.last_network_request_time = None # Unblock network requests so we can POST again.
-  w.MAX_RETRIES = 2 # Only 2 attempts at POST-ing. I think it's just working and returning 502, not actually faililng.
+  w.MAX_RETRIES = 1 # We will be retrying via outer loop.
 
-  comment = 'Please verify the following diffs:\n'
+  action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/actions/runs/' + environ['GITHUB_RUN_ID']
+
+  reports_to_upload = []
+  comment_with_placeholders = 'Please verify the following diffs:\n'
   for report_name, output in report_outputs.items():
     if not output:
-      comment += f'- [ ] Report {report_name} threw an exception. Please check the action logs.\n'
+      comment_with_placeholders += f'- [ ] Report {report_name} threw an exception. Please check the [action logs]({action_url}).\n'
       continue
-    comment += f'- [ ] Report {report_name} succeeded, diffs:'
-    file_name = 'wiki_' + report_name.lower().replace(' ', '_')
-    if isinstance(output, list):
-      for lang, contents in output:
-        comment += edit_or_save(f'{root}/{report_name}/{lang}', f'{file_name}_{lang}.txt', lang, contents, summary)
-    else:
-      comment += edit_or_save(f'{root}/{report_name}', f'{file_name}.txt', 'en', output, summary)
-    comment += '\n'
+
+    comment_with_placeholders += f'- [ ] Report {report_name} succeeded, diffs:'
+    for lang, _ in output:
+      comment_with_placeholders += f' %{report_name}_{lang}%'
+      reports_to_upload.append((report_name, lang))
+    comment_with_placeholders += '\n'
+
+  for i in range(5):
+    print(f'Still have {len(reports_to_upload)} reports to upload on attempt {i+1}/5')
+    for report_name, lang in list(reports_to_upload):
+      if lang != 'en':
+        page_name = f'{root}/{report_name}/{lang}'
+      else:
+        page_name = f'{root}/{report_name}'
+
+      contents = report_outputs[report_name][lang]
+      wiki_diff_url = Page(w, page_name).edit(contents, bot=True, summary=summary)
+      if wiki_diff_url:
+        comment_with_placeholders.replace(f'%{report_name}_{lang}%', f'[{lang}]({wiki_diff_url})')
+        reports_to_upload.remove((report_name, lang))
+
+    for page in w.get_user_contribs(w.get_current_user())
+      reports_to_upload.remove((page.basename, page.lang))
+
+    if len(reports_to_upload) == 0:
+      break
+
+  # Tried 5 times, give up on anything not uploaded
+  for report_name, lang in reports_to_upload:
+    comment_with_placeholder.replace(f'%{report_name}_{lang}%', f'~~[{lang}]({action_url})~~')
+
+    # Save the contents to a file (will be attached as a build artifact)
+    file_name = f'reports/wiki_{report_name.lower().replace(" ", "_")}_{lang}.txt'
+    with open(file_name, 'w', encoding='utf-8') as f:
+      f.write(report_outputs[report_name][lang])
+
+  comment = comment_with_placeholder
 
   if event == 'pull_request':
     open_pr_comment.create_pr_comment(comment)
