@@ -170,6 +170,9 @@ class Wiki:
       namespaces['TFW'] = namespaces['Team Fortress Wiki']
     return namespaces
 
+  def get_current_user(self):
+    return self.get('query', meta='userinfo')['query']['userinfo']['name']
+
   def get_all_templates(self):
     for entry in self.get_with_continue('query', 'allpages',
       list='allpages',
@@ -235,6 +238,19 @@ class Wiki:
       generator='allimages',
       gailimit=500,
       prop='duplicatefiles', # Include info about duplicates
+    ):
+      yield Page(self, entry['title'], entry)
+
+  def get_user_contribs(self, username, starttime):
+    for entry in self.get_with_continue('query', 'usercontribs',
+      list='usercontribs',
+      uclimit=500,
+      ucstart=starttime.replace(tzinfo=None).isoformat(),
+      ucend='now',
+      ucdir='newer',
+      ucuser=username,
+      ucprop='title', # Only return page titles, not page IDs
+      ucshow='top', # Only show changes which are the most recent edit to avoid listing pages twice
     ):
       yield Page(self, entry['title'], entry)
 
