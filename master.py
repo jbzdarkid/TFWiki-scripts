@@ -218,7 +218,7 @@ if __name__ == '__main__':
         comment_with_placeholders.replace(f'%{report_name}_{lang}%', f'[{lang}]({wiki_diff_url})')
         reports_to_upload.remove((report_name, lang))
 
-    for page in w.get_user_contribs(w.get_current_user())
+    for page in w.get_user_contribs(w.get_current_user()):
       reports_to_upload.remove((page.basename, page.lang))
 
     if len(reports_to_upload) == 0:
