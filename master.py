@@ -176,7 +176,8 @@ if __name__ == '__main__':
   # so they are unable to make network requests after this time.
   # I'm just using a flat 30 minutes here, while accounting for 10 minutes before the actual github timelimit.
   sleep_before_upload = timedelta(minutes=30)
-  w.last_network_request_time = datetime.now(timezone.utc) + timedelta(hours=5, minutes=40) - sleep_before_upload
+  report_start = datetime.now(timezone.utc)
+  w.last_network_request_time = report_start + timedelta(hours=5, minutes=40) - sleep_before_upload
 
   report_outputs = {}
   for module in modules_to_run:
@@ -218,7 +219,7 @@ if __name__ == '__main__':
         comment_with_placeholders.replace(f'%{report_name}_{lang}%', f'[{lang}]({wiki_diff_url})')
         reports_to_upload.remove((report_name, lang))
 
-    for page in w.get_user_contribs(w.get_current_user()):
+    for page in w.get_user_contribs(w.get_current_user(), report_start):
       reports_to_upload.remove((page.basename, page.lang))
 
     if len(reports_to_upload) == 0:
@@ -226,14 +227,14 @@ if __name__ == '__main__':
 
   # Tried 5 times, give up on anything not uploaded
   for report_name, lang in reports_to_upload:
-    comment_with_placeholder.replace(f'%{report_name}_{lang}%', f'~~[{lang}]({action_url})~~')
+    comment_with_placeholders.replace(f'%{report_name}_{lang}%', f'~~[{lang}]({action_url})~~')
 
     # Save the contents to a file (will be attached as a build artifact)
     file_name = f'reports/wiki_{report_name.lower().replace(" ", "_")}_{lang}.txt'
     with open(file_name, 'w', encoding='utf-8') as f:
       f.write(report_outputs[report_name][lang])
 
-  comment = comment_with_placeholder
+  comment = comment_with_placeholders
 
   if event == 'pull_request':
     open_pr_comment.create_pr_comment(comment)
