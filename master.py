@@ -143,7 +143,7 @@ if __name__ == '__main__':
     summary = 'Manually triggered update from https://github.com/jbzdarkid/TFWiki-scripts'
 
     # On manual triggers, run everything, unless a specific report was specified.
-    modules_to_run = argv[1].split(' ') if len(argv) > 1 else all_reports.keys()
+    modules_to_run = argv[1:] if len(argv) > 1 else all_reports.keys()
 
   elif event == 'local_run':
     print('Local run; executing all reports')
