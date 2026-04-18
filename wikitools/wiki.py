@@ -10,6 +10,10 @@ from .page import Page
 from .file_dict import FileDict
 from .empty_cache import EmptyCache
 
+class EmptyResponse():
+    def json(self):
+        return dict()
+
 class Wiki:
   def __init__(self, api_url, user_agent=None, use_cache=True):
     self.api_url = api_url
@@ -48,8 +52,7 @@ class Wiki:
         self.lock.acquire()
 
         if self.last_network_request_time and self.last_network_request_time < datetime.now(timezone.utc):
-          return type('obj', (object,), {'json': lambda: dict()})
-          # return None # Timeout reached; network requests can no longer be made.
+          return EmptyResponse() # Timeout reached; network requests can no longer be made.
 
         sleep_duration = (self.next_request - datetime.now(timezone.utc)).total_seconds()
         if sleep_duration > 0:
