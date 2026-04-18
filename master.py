@@ -34,7 +34,7 @@ def run_report(w, module, name):
     output = {}
     raw_output = importlib.import_module('reports.' + module).main(w)
     # Fixup for report format (TBD; will push into reports once stable)
-    if isinstance(output, list):
+    if isinstance(raw_output, list):
       for lang, contents in raw_output:
         output[lang] = contents
     else:

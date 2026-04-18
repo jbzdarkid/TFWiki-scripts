@@ -48,7 +48,8 @@ class Wiki:
         self.lock.acquire()
 
         if self.last_network_request_time and self.last_network_request_time < datetime.now(timezone.utc):
-          return None # Timeout reached; network requests can no longer be made.
+          return type('obj', (object,), {'json': lambda: dict()})
+          # return None # Timeout reached; network requests can no longer be made.
 
         sleep_duration = (self.next_request - datetime.now(timezone.utc)).total_seconds()
         if sleep_duration > 0:
