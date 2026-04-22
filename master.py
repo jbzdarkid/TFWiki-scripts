@@ -84,6 +84,7 @@ monthly_reports = {
   'duplicate_files': 'Duplicate files',
   'edit_stats': 'Users by edit count',
   'external_links2': 'External links',
+  'meta_redirect': 'Meta report',
   'mismatched': 'Mismatched parenthesis',
   'undocumented_templates': 'Undocumented templates',
   'unlicensed_images': 'Unlicensed images',
@@ -152,11 +153,25 @@ if __name__ == '__main__':
     modules_to_run = argv[1].split(' ') if len(argv) > 1 else all_reports.keys()
 
   elif event == 'local_run':
-    print('Local run; executing all reports')
-    w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
-    for report in all_reports:
+    modules_to_run = argv[1].split(' ') if len(argv) > 1 else all_reports.keys()
+
+    print('Local run; executing', modules_to_run)
+    w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php', environ.get('USER_AGENT', None))
+    for report in modules_to_run:
       # Run the report but don't try to upload it, since we're not logged in.
-      run_report(w, report, all_reports[report])
+
+      report_name = all_reports[report]
+      output = run_report(w, report, report_name)
+
+      if isinstance(output, list):
+        for lang, contents in output:
+          file_name = 'wiki_' + report_name.lower().replace(' ', '_') + '_' + lang + '.txt'
+          with open(file_name, 'w', encoding='utf-8') as f:
+            f.write(contents)
+      else:
+        file_name = 'wiki_' + report_name.lower().replace(' ', '_') + '.txt'
+        with open(file_name, 'w', encoding='utf-8') as f:
+          f.write(output)
     exit(0)
 
   else:
