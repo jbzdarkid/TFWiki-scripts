@@ -65,7 +65,7 @@ daily_reports = {
 # English-only but otherwise frequently changing reports
 weekly_reports = {
   'displaytitles_weekly': 'Duplicate displaytitles',
-  'incorrect_redirects': 'Mistranslated redirects',
+  # 'incorrect_redirects': 'Mistranslated redirects', # Disabled 2026-04-27 due to timeouts
   'incorrectly_categorized': 'Pages with incorrect categorization',
   'incorrectly_linked': 'Pages with incorrect links',
   'lang_duplicates': 'Lang duplicates',
