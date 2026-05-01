@@ -104,8 +104,10 @@ if __name__ == '__main__':
     modules_to_run += daily_reports.keys()
     if datetime.now(timezone.utc).weekday() == 0:
       modules_to_run += weekly_reports.keys()
-    if datetime.now(timezone.utc).day == 1:
-      modules_to_run += monthly_reports.keys()
+
+    for i, key in enumerate(monthly_reports.keys()):
+      if datetime.now(timezone.utc).day == i + 1:
+        modules_to_run.append(key)
 
   elif event == 'pull_request':
     root = 'User:Darkid/Reports'
