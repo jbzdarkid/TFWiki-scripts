@@ -117,7 +117,7 @@ class Page:
       rvdir='older', # Default, list from newest to oldest
     ):
       for revision in data['revisions']:
-        revision['timestamp'] = datetime.strptime(revision['timestamp'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.UTC)
+        revision['timestamp'] = datetime.strptime(revision['timestamp'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc)
         if revision['timestamp'] < starttime:
           return
         yield revision

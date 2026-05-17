@@ -2,6 +2,8 @@ from datetime import datetime, timedelta, timezone
 from threading import Lock
 from time import sleep
 from re import finditer
+import logging
+
 import requests
 
 from .page import Page
@@ -13,9 +15,13 @@ class Wiki:
     self.api_url = api_url
     self.wiki_url = api_url.replace('api.php', 'index.php')
     self.lgtoken = None
-    self.MAX_RETRIES = 60
+    self.MAX_RETRIES = 5
     self.next_request = datetime.now(timezone.utc)
     self.lock = Lock()
+    self.last_network_request_time = None
+
+    self.logger = logging.getLogger(__name__)
+    logging.basicConfig(filename='http.log', encoding='utf-8', level=logging.ERROR, format='%(asctime)s:%(message)s')
 
     if use_cache:
       self.page_text_cache = FileDict('cache/text')
@@ -40,12 +46,24 @@ class Wiki:
     while True:
       try:
         self.lock.acquire()
+
+        if self.last_network_request_time and self.last_network_request_time < datetime.now(timezone.utc):
+          return None # Timeout reached; network requests can no longer be made.
+
         sleep_duration = (self.next_request - datetime.now(timezone.utc)).total_seconds()
         if sleep_duration > 0:
           sleep(sleep_duration)
-        self.next_request = datetime.now(timezone.utc) + timedelta(seconds=1)
-        r = action()
+        self.next_request = datetime.now(timezone.utc) + timedelta(milliseconds=10)
 
+        r = action()
+        self.logger.error(
+          '%d %s %s %s %d',
+          r.status_code,
+          r.request.method,
+          r.request.url,
+          r.request.headers,
+          len(r.request.body) if r.request.body else 0,
+        )
         r.raise_for_status()
         return r
       except requests.RequestException as e:
@@ -56,6 +74,7 @@ class Wiki:
 
         # For other status codes (or generic connection failures), allow a number of retries, sleeping between attempts
         i += 1
+        sleep(1)
         if i > self.MAX_RETRIES:
           raise
       finally:
@@ -74,10 +93,7 @@ class Wiki:
 
   def get_with_continue(self, action, entry_key, **kwargs):
     while True:
-      try:
-        data = self.get(action, **kwargs)
-      except requests.exceptions.RequestException:
-        return # Unable to load more info for this query
+      data = self.get(action, **kwargs)
       if data == {'batchcomplete': ''}:
         return # No entries for this query
       elif 'error' in data and data['error']['code'] == 'internal_api_error_DBConnectionError':
@@ -237,7 +253,7 @@ class Wiki:
     ):
       yield Page(self, entry['title'], entry)
 
-  def update_caches_from_recent_changes(self, days_ago=7):
+  def update_caches_from_recent_changes(self, days_ago=30):
     start_time = datetime.now(timezone.utc) - timedelta(days=days_ago)
     for page in self.get_recent_changes(start_time):
       modified_time = datetime.fromisoformat(page.raw['timestamp'])

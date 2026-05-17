@@ -1,9 +1,10 @@
 import importlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from os import environ
 from random import shuffle
 from subprocess import check_output
 from sys import argv, stdout
+from time import sleep
 from traceback import print_exc
 from wikitools import wiki
 from wikitools.page import Page
@@ -26,35 +27,32 @@ import open_pr_comment
 # Threading for navboxes.py?
 # Might be more smarts to do in lang_quality.py, e.g. non-ascii characters in 'en', or check for only quote characters (or other lang incomplete hints)
 
-def edit_or_save(page_name, file_name, output, summary):
-  wiki_diff_url = Page(w, page_name).edit(output, bot=True, summary=summary)
+def edit_or_save(page_name, file_name, lang, contents, summary):
+  wiki_diff_url = Page(w, page_name).edit(contents, bot=True, summary=summary)
   if wiki_diff_url:
-    return wiki_diff_url
+    return f' [{lang}]({wiki_diff_url})'
 
   # Edit failed, fall back to saving to file (will be attached as a build artifact)
   with open(f'reports/{file_name}', 'w', encoding='utf-8') as f:
-    f.write(output)
+    f.write(contents)
+
+  action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/actions/runs/' + environ['GITHUB_RUN_ID']
+  return f' ~~[{lang}]({action_url})~~'
 
   return None
 
-def publish_report(w, module, report_name, root, summary):
-  link_map = {}
-  report_file_name = 'wiki_' + report_name.lower().replace(' ', '_')
+def run_report(w, module, name):
+  start = datetime.now(timezone.utc)
+  print(f'Starting {name} at {start}')
   try:
-    report_output = importlib.import_module('reports.' + module).main(w)
-
-    if isinstance(report_output, list):
-      shuffle(report_output) # Shuffle the order so that we don't always upload the same language first, to ensure even coverage of 502s
-      for lang, output in report_output:
-        link_map[lang] = edit_or_save(f'{root}/{report_name}/{lang}', f'{report_file_name}_{lang}.txt', output, summary)
-    else:
-      link_map['en'] = edit_or_save(f'{root}/{report_name}', f'{report_file_name}.txt', report_output, summary)
-
+    return importlib.import_module('reports.' + module).main(w)
   except Exception:
-    print(f'Failed to update {report_name}')
     print_exc(file=stdout)
-
-  return link_map
+    return None
+  finally:
+    duration = datetime.now(timezone.utc) - start
+    duration -= timedelta(microseconds=duration.microseconds) # Strip microseconds
+    print(f'Report {name} completed after {duration}')
 
 # Multi-language reports need frequent updates since we have many translators
 daily_reports = {
@@ -67,11 +65,11 @@ daily_reports = {
 # English-only but otherwise frequently changing reports
 weekly_reports = {
   'displaytitles_weekly': 'Duplicate displaytitles',
-  'incorrect_redirects': 'Mistranslated redirects',
+  # 'incorrect_redirects': 'Mistranslated redirects', # Disabled 2026-04-27 due to timeouts
   'incorrectly_categorized': 'Pages with incorrect categorization',
   'incorrectly_linked': 'Pages with incorrect links',
   'lang_duplicates': 'Lang duplicates',
-  'lang_quality': 'Lang errors',
+  # 'lang_quality': 'Lang errors', # Disabled 2026-03-18 due to timeouts
   'mismatched_weekly': 'Mismatched parenthesis',
   'missing_categories': 'Untranslated categories',
   'missing_translations_weekly': 'Missing translations/sorted',
@@ -104,10 +102,12 @@ if __name__ == '__main__':
 
     # Determine which reports to run -- note that the weekly and monthly cadences don't necessarily line up.
     modules_to_run += daily_reports.keys()
-    if datetime.now().weekday() == 0:
+    if datetime.now(timezone.utc).weekday() == 0:
       modules_to_run += weekly_reports.keys()
-    if datetime.now().day == 1:
-      modules_to_run += monthly_reports.keys()
+
+    for i, key in enumerate(monthly_reports.keys()):
+      if datetime.now(timezone.utc).day == i + 1:
+        modules_to_run.append(key)
 
   elif event == 'pull_request':
     root = 'User:Darkid/Reports'
@@ -157,10 +157,8 @@ if __name__ == '__main__':
     print('Local run; executing all reports')
     w = wiki.Wiki('https://wiki.teamfortress.com/w/api.php')
     for report in all_reports:
-      # Root and summary don't matter because we can't publish anyways.
-      print(report)
-      publish_report(w, report, all_reports[report], '', '')
-      break
+      # Run the report but don't try to upload it, since we're not logged in.
+      run_report(w, report, all_reports[report])
     exit(0)
 
   else:
@@ -181,30 +179,37 @@ if __name__ == '__main__':
   shuffle(modules_to_run)
   print(f'Running reports: {modules_to_run}')
 
-  comment = 'Please verify the following diffs:\n'
-  succeeded = True
+  # All scripts must finish with enough time to sleep and *then* upload the report files.
+  # This value (on the global wiki class) acts as a soft stop for our reports,
+  # so they are unable to make network requests after this time.
+  # I'm just using a flat 30 minutes here, while accounting for 10 minutes before the actual github timelimit.
+  sleep_before_upload = timedelta(minutes=30)
+  w.last_network_request_time = datetime.now(timezone.utc) + timedelta(hours=5, minutes=40) - sleep_before_upload
 
+  report_outputs = {}
   for module in modules_to_run:
     report_name = all_reports[module]
-    start = datetime.now()
-    print(f'Starting {report_name} at {start}')
-    link_map = publish_report(w, module, report_name, root, summary)
-    duration = datetime.now() - start
-    duration -= timedelta(microseconds=duration.microseconds) # Strip microseconds
-    if not link_map:
-      action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/actions/runs/' + environ['GITHUB_RUN_ID']
-      comment += f'- [ ] {report_name} failed after {duration}: {action_url}\n'
-      succeeded = False
+    report_outputs[report_name] = run_report(w, module, report_name)
+
+  print('All reports completed, sleeping then uploading outputs')
+  sleep(sleep_before_upload.total_seconds())
+
+  w.last_network_request_time = None # Unblock network requests so we can POST again.
+  w.MAX_RETRIES = 2 # Only 2 attempts at POST-ing. I think it's just working and returning 502, not actually faililng.
+
+  comment = 'Please verify the following diffs:\n'
+  for report_name, output in report_outputs.items():
+    if not output:
+      comment += f'- [ ] Report {report_name} threw an exception. Please check the action logs.\n'
+      continue
+    comment += f'- [ ] Report {report_name} succeeded, diffs:'
+    file_name = 'wiki_' + report_name.lower().replace(' ', '_')
+    if isinstance(output, list):
+      for lang, contents in output:
+        comment += edit_or_save(f'{root}/{report_name}/{lang}', f'{file_name}_{lang}.txt', lang, contents, summary)
     else:
-      comment += f'- [ ] {report_name} succeeded in {duration}:'
-      languages = sorted(link_map.keys(), key=lambda lang: (lang != 'en', lang)) # Sort languages, keeping english first
-      for language in languages:
-        link = link_map.get(language, None)
-        if link:
-          comment += f' [{language}]({link_map[language]})'
-        else:
-          comment += f' ~~[{language}](## "Upload failed")~~'
-      comment += '\n'
+      comment += edit_or_save(f'{root}/{report_name}', f'{file_name}.txt', 'en', output, summary)
+    comment += '\n'
 
   if event == 'pull_request':
     open_pr_comment.create_pr_comment(comment)
@@ -213,4 +218,5 @@ if __name__ == '__main__':
   elif environ['GITHUB_EVENT_NAME'] == 'schedule':
     print(comment)
 
-  exit(0 if succeeded else 1)
+  num_failures = list(report_outputs.values()).count(None)
+  exit(num_failures)
