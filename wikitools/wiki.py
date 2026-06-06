@@ -10,6 +10,9 @@ from .page import Page
 from .file_dict import FileDict
 from .empty_cache import EmptyCache
 
+class TimeoutReached(Exception):
+  pass
+
 class Wiki:
   def __init__(self, api_url, user_agent=None, use_cache=True):
     self.api_url = api_url
@@ -44,17 +47,17 @@ class Wiki:
   def retry(self, action):
     i = 0
     while True:
-      try:
-        self.lock.acquire()
-
+      with self.lock:
         if self.last_network_request_time and self.last_network_request_time < datetime.now(timezone.utc):
-          return None # Timeout reached; network requests can no longer be made.
+          raise TimeoutReached # Deadline passed; network requests can no longer be made.
 
         sleep_duration = (self.next_request - datetime.now(timezone.utc)).total_seconds()
         if sleep_duration > 0:
           sleep(sleep_duration)
-        self.next_request = datetime.now(timezone.utc) + timedelta(milliseconds=10)
+        self.next_request = datetime.now(timezone.utc) + timedelta(seconds=1)
 
+      # Release the lock before starting a network request so we don't include request duration as part of our sleep
+      try:
         r = action()
         self.logger.error(
           '%d %s %s %s %d',
@@ -77,8 +80,6 @@ class Wiki:
         sleep(1)
         if i > self.MAX_RETRIES:
           raise
-      finally:
-        self.lock.release()
 
   def get(self, action, **params):
     params.update({
