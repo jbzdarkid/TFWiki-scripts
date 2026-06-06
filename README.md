@@ -33,3 +33,8 @@ This version of the scripts uses python3, which unfortunately broke our old wiki
 - `undocumented_templates.py`: Parses all templates to see if they have sufficient text in <noinclude> or {{documentation}}.
 - `unlicensed_images.py`: Scans all pages in the File: namespace to see if they have a license template.
 - `unused_files.py`: Reparses Special:UnusedFiles, and re-sorts the data, along with removing some known exceptions.
+
+## Running a report locally
+While the reports are designed to be run through CI, you can also run them locally (to test).
+1. You can run all reports through the master script via `python master.py`
+2. You can run an individual report via `python -m reports.report_name`
