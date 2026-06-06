@@ -3,6 +3,8 @@ from queue import Empty, Queue
 from threading import Thread, Event
 from time import gmtime, strftime
 
+from wikitools.wiki import TimeoutReached
+
 class meta_plural(type):
   def __getattr__(cls, word):
     if word.endswith('s'):
@@ -71,7 +73,7 @@ class pagescraper_queue:
 
       try:
         self.thread_func(obj, *self.thread_func_args)
-      except KeyboardInterrupt:
+      except (TimeoutReached, KeyboardInterrupt) as ex:
         self.done.set()
         self.q = Queue() # "Clear" the queue
         self.failures.append(ex)
