@@ -54,7 +54,7 @@ class Wiki:
         sleep_duration = (self.next_request - datetime.now(timezone.utc)).total_seconds()
         if sleep_duration > 0:
           sleep(sleep_duration)
-        self.next_request = datetime.now(timezone.utc) + timedelta(seconds=1)
+        self.next_request = datetime.now(timezone.utc) + timedelta(milliseconds=10)
 
       # Release the lock before starting a network request so we don't include request duration as part of our sleep
       try:
