@@ -39,12 +39,13 @@ class Page:
   def join_namespaces(self, namespaces):
     if not namespaces:
       return self.wiki.namespaces['Main']
-    return '|'.join((str(self.wiki.namespaces[ns]) for ns in namespaces))
+    return '|'.join((str(self.wiki.namespaces[ns]) for ns in sorted(namespaces)))
 
   def get_wiki_text(self):
     cached_text = self.wiki.page_text_cache.get(self.url_title, None)
-    if cached_text:
+    if cached_text is not None:
       return cached_text
+
     try:
       raw = self.wiki.get('parse', page=self.url_title, prop='wikitext')
       if 'error' in raw:
@@ -58,8 +59,9 @@ class Page:
 
   def get_raw_html(self):
     cached_html = self.wiki.page_html_cache.get(self.url_title, None)
-    if cached_html:
+    if cached_html is not None:
       return cached_html
+
     try:
       r = requests.get(self.wiki.wiki_url, allow_redirects=True, params={'title': self.url_title})
       self.wiki.page_html_cache[self.url_title] = r.text
@@ -89,13 +91,24 @@ class Page:
       yield Page(self.wiki, entry['title'], entry)
 
   def get_links(self, *, namespaces=None):
+    namespaces = self.join_namespaces(namespaces)
+    cached_links = self.wiki.page_link_cache.get(self.url_title, None, subkey=namespaces)
+    if cached_links is not None:
+      for title in cached_links.split('\n'):
+        yield Page(self.wiki, title)
+      return
+
+    links = []
     for entry in self.wiki.get_with_continue('query', 'pages',
       generator='links',
-      gplnamespace=self.join_namespaces(namespaces),
+      gplnamespace=namespaces,
       gpllimit=500,
       titles=self.url_title,
     ):
+      links.append(entry['title'])
       yield Page(self.wiki, entry['title'], entry)
+
+    self.wiki.page_link_cache.set(self.url_title, '\n'.join(links), subkey=namespaces)
 
   def get_file_link_count(self):
     # Unfortunately, the mediawiki APIs don't include file links, so we have to scrape the HTML.
