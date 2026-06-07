@@ -14,26 +14,32 @@ class MockWiki(Wiki):
     super().__init__(*args, **kwargs)
 
     self.mock_wikitext = {}
-    self.mock_recentchanges = {}
+    self.mock_touched = {}
+    self.mock_links = {}
 
     for file in Path('cache/mock/').glob('**/*.txt'):
       file.unlink() # Clean up any cached state
     self.page_text_cache = FileDict('cache/mock/text')
     self.page_html_cache = FileDict('cache/mock/html')
+    self.page_link_cache = FileDict('cache/mock/link')
 
   def get_namespaces(self):
-    # This would usually incur a network call, so we mock it here.
-    return {
-      '*': '*',
-    }
+    # This would usually incur a network call, so we mock it here.=
+    class IdentityDict:
+      def __getitem__(self, key):
+        return key
+    return IdentityDict()
 
   def get(self, action, **params):
     if action == 'parse' and params['prop'] == 'wikitext':
       text = self.mock_wikitext[params['page']]
       return {'parse': {'wikitext': {'*': text} } }
-    elif action == 'query' and params['list'] == 'recentchanges':
-      pages = [{'title': title, 'timestamp': timestamp} for title, timestamp in self.mock_recentchanges.items()]
-      return {'query': {'recentchanges': pages} }
+    elif action == 'query' and params['generator'] == 'allpages':
+      pages = [{'title': title, 'touched': touched} for title, touched in self.mock_touched.items()]
+      return {'query': {'pages': pages} }
+    elif action == 'query' and params['generator'] == 'links':
+      links = self.mock_links.get(params['titles'], [])
+      return {'query': {'pages': [{'title': title} for title in links]} }
 
     raise ValueError(f'action={action}: {params}')
 
@@ -71,24 +77,58 @@ class Tests:
 
   def test_cache_invalidation(self):
     p = Page(self.wiki, 'Template:Foo')
-    self.wiki.mock_wikitext['Template:Foo'] = 'a'
     print('Fetching from network...')
+    self.wiki.mock_wikitext['Template:Foo'] = 'a'
     assert p.get_wiki_text() == 'a'
-    self.wiki.mock_wikitext.pop('Template:Foo')
+
     print('Fetching from cache...')
+    self.wiki.mock_wikitext.pop('Template:Foo')
     assert p.get_wiki_text() == 'a'
 
     timestamp = utcnow().replace(tzinfo=None).isoformat()
-    self.wiki.mock_recentchanges = {'Template:Foo': timestamp}
-    self.wiki.update_caches_from_recent_changes()
+    self.wiki.mock_touched = {'Template:Foo': timestamp}
+    self.wiki.populate_touched_cache()
 
-    self.wiki.mock_wikitext['Template:Foo'] = 'b'
     print('Cache invalidated, freshly fetching from network...')
-    assert p.get_wiki_text() == 'b'
-    self.wiki.mock_wikitext.pop('Template:Foo')
-    print('Fetching from cache again...')
+    self.wiki.mock_wikitext['Template:Foo'] = 'b'
     assert p.get_wiki_text() == 'b'
 
+    print('Fetching from cache again...')
+    self.wiki.mock_wikitext.pop('Template:Foo')
+    assert p.get_wiki_text() == 'b'
+
+  def test_cache_subkeys(self):
+    p = Page(self.wiki, 'Template:Foo')
+    def assert_links(namespace, expected):
+      actual = list(p.get_links(namespaces=[namespace]))
+      expected = [Page(self.wiki, expected)]
+      assert expected == actual, actual
+
+    print('Fetching from network...')
+    self.wiki.mock_links['Template:Foo'] = ['a']
+    assert_links('1', 'a')
+    self.wiki.mock_links['Template:Foo'] = ['b']
+    assert_links('2', 'b')
+
+    print('Fetching from cache...')
+    self.wiki.mock_links.pop('Template:Foo')
+    assert_links('1', 'a')
+    assert_links('2', 'b')
+
+    timestamp = utcnow().replace(tzinfo=None).isoformat()
+    self.wiki.mock_touched = {'Template:Foo': timestamp}
+    self.wiki.populate_touched_cache()
+
+    print('Cache invalidated, freshly fetching from network...')
+    self.wiki.mock_links['Template:Foo'] = ['c']
+    assert_links('1', 'c')
+    self.wiki.mock_links['Template:Foo'] = ['d']
+    assert_links('2', 'd')
+
+    print('Fetching from cache again...')
+    self.wiki.mock_links.pop('Template:Foo')
+    assert_links('1', 'c')
+    assert_links('2', 'd')
 
 if __name__ == '__main__':
   tests = Tests()

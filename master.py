@@ -169,8 +169,8 @@ if __name__ == '__main__':
   if not w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD']):
     exit(1)
 
-  print('Successfully logged in, fetching RC log to invalidate the cache')
-  w.update_caches_from_recent_changes()
+  print('Successfully logged in, scanning page timestamps to invalidate the caches')
+  w.populate_touched_cache()
 
   # I am working on a caching story, but it's not 100% ready yet.
   # Until then, shuffle the order of reports to guarantee a more even coverage,

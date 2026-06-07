@@ -26,9 +26,11 @@ class Wiki:
     if use_cache:
       self.page_text_cache = FileDict('cache/text')
       self.page_html_cache = FileDict('cache/html')
+      self.page_link_cache = FileDict('cache/link')
     else:
       self.page_text_cache = EmptyCache()
       self.page_html_cache = EmptyCache()
+      self.page_link_cache = EmptyCache()
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
@@ -193,15 +195,16 @@ class Wiki:
     redirect_filter = {
       False: 'nonredirects',
       True: 'redirects',
-      None: 'all',
+      'both': 'all',
     }[redirects]
 
     for namespace in namespaces:
-      for entry in self.get_with_continue('query', 'allpages',
-        list='allpages',
-        aplimit=500,
-        apnamespace=self.namespaces[namespace],
-        apfilterredir=redirect_filter,
+      for entry in self.get_with_continue('query', 'pages',
+        generator='allpages',
+        gaplimit=500,
+        gapnamespace=self.namespaces[namespace],
+        gapfilterredir=redirect_filter,
+        prop='info', # Includes last touched timestamp
       ):
         title = entry['title']
         if title.endswith('.js') or title.endswith('.css'):
@@ -253,12 +256,12 @@ class Wiki:
     ):
       yield Page(self, entry['title'], entry)
 
-  def update_caches_from_recent_changes(self, days_ago=30):
-    start_time = datetime.now(timezone.utc) - timedelta(days=days_ago)
-    for page in self.get_recent_changes(start_time):
-      modified_time = datetime.fromisoformat(page.raw['timestamp'])
-      self.page_text_cache.set_modified(page.url_title, modified_time)
-      self.page_html_cache.set_modified(page.url_title, modified_time)
+  def populate_touched_cache(self):
+    for page in self.get_all_pages(namespaces='*', redirects='both'):
+      modified = datetime.fromisoformat(page.raw['touched'])
+      self.page_html_cache.set_modified(page.url_title, modified)
+      self.page_text_cache.set_modified(page.url_title, modified)
+      self.page_link_cache.set_modified(page.url_title, modified)
 
   def get_all_unused_files(self):
     for html in self.get_html_with_continue('Special:UnusedFiles'):
