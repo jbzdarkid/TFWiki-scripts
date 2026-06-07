@@ -25,6 +25,7 @@ class MockWiki(Wiki):
 
   def get_namespaces(self):
     # This would usually incur a network call, so we mock it here.=
+    self.content_namespaces = ['Main']
     class IdentityDict:
       def __getitem__(self, key):
         return key

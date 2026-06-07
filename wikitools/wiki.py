@@ -161,11 +161,14 @@ class Wiki:
 
   def get_namespaces(self):
     namespaces = {}
+    self.content_namespaces = []
     for namespace in self.get_with_continue('query', 'namespaces',
       meta='siteinfo',
       siprop='namespaces'
     ):
       namespaces[namespace['*']] = namespace['id']
+      if namespace['id'] >= 0:
+        self.content_namespaces.append(namespace['*'])
     namespaces['*'] = '*' # 'All', in many queries
     namespaces['Main'] = namespaces['']
     if 'Team Fortress Wiki' in namespaces:
@@ -257,7 +260,8 @@ class Wiki:
       yield Page(self, entry['title'], entry)
 
   def populate_touched_cache(self):
-    for page in self.get_all_pages(namespaces='*', redirects='both'):
+    # The AllPages API does not support multiple namespaces, so we need the full list here.
+    for page in self.get_all_pages(namespaces=self.content_namespaces, redirects='both'):
       modified = datetime.fromisoformat(page.raw['touched'])
       self.page_html_cache.set_modified(page.url_title, modified)
       self.page_text_cache.set_modified(page.url_title, modified)
