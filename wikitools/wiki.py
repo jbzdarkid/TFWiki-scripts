@@ -96,29 +96,25 @@ class Wiki:
   def get_with_continue(self, action, entry_key, **kwargs):
     while True:
       data = self.get(action, **kwargs)
-      if data == {'batchcomplete': ''}:
-        return # No entries for this query
-      elif 'error' in data and data['error']['code'] == 'internal_api_error_DBConnectionError':
+      if 'error' in data and data['error']['code'] == 'internal_api_error_DBConnectionError':
         continue # Some sort of transient wiki error. Just retry.
       if 'error' in data:
         print('Error: ' + str(data['error']))
         break
 
-      try:
+      if action in data and entry_key in data[action]:
         entries = data[action][entry_key]
-      except KeyError:
-        if action not in data:
-          print(f'Query "{action}" was not found in data. Did you mean one of these keys: {", ".join(data.keys())}')
-        else:
-          print(f'Entry key "{entry_key}" was not found in data[{action}]. Did you mean one of these keys: {", ".join(data[action].keys())}')
-        break
 
-      if isinstance(entries, list):
-        for entry in entries:
-          yield entry
-      elif isinstance(entries, dict):
-        for entry in entries.values():
-          yield entry
+        if isinstance(entries, list):
+          for entry in entries:
+            yield entry
+        elif isinstance(entries, dict):
+          for entry in entries.values():
+            yield entry
+      elif 'batchcomplete' not in data:
+        print(f'Query "{action}" was not found in data. Did you mean one of these keys: {", ".join(data.keys())}')
+        print(f'Entry key "{entry_key}" was not found in data[{action}]. Did you mean one of these keys: {", ".join(data[action].keys())}')
+        raise ValueError('Could not parse API response.')
 
       if 'continue' in data:
         kwargs.update(data['continue'])
