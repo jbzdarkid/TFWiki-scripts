@@ -57,3 +57,37 @@ print('=' * 100)
 for label, cache in caches:
   inspect(label, cache, url_title)
   print()
+
+print('=' * 100)
+print('--- Cache-wide health summary ---')
+for label, cache in caches:
+  total = 0
+  modified_only = 0  # has last_modified but no last_fetched (the bug)
+  fetched_only = 0   # has last_fetched but no last_modified (never marked stale)
+  both = 0
+  neither = 0
+  stale_under_old = 0  # would be served stale by old buggy default
+  stale_under_old_examples = []
+  for key, data in cache.metadata.items():
+    if key == 'metadata':
+      continue
+    total += 1
+    has_mod = 'last_modified' in data
+    has_fetch = 'last_fetched' in data
+    if has_mod and has_fetch:
+      both += 1
+    elif has_mod:
+      modified_only += 1
+      if cache._path(key).exists():
+        stale_under_old += 1
+        if len(stale_under_old_examples) < 5:
+          stale_under_old_examples.append(key)
+    elif has_fetch:
+      fetched_only += 1
+    else:
+      neither += 1
+  print(f'[{label}]  total={total}  both={both}  modified_only={modified_only}  fetched_only={fetched_only}  neither={neither}')
+  print(f'[{label}]  modified_only AND file_exists (served stale by old code): {stale_under_old}')
+  if stale_under_old_examples:
+    print(f'[{label}]  examples: {stale_under_old_examples}')
+  print()
