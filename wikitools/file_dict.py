@@ -68,7 +68,7 @@ class FileDict:
 
     # Look up the last modification time and last time we wrote to the cache.
     # If the data has been modified since we cached it, it is not valid.
-    # If any piece of data is missing, assume the cache is valid.
+    # If any piece of data is missing, assume the cache is invalid.
 
     # The root key is updated when the data is modified, so it resets with or without a subkey.
     last_modified = self.metadata.get(key, {}).get('last_modified', 0)
@@ -76,13 +76,9 @@ class FileDict:
     # The subkey is updated when the data is fetched, so it only tracks for this subkey fetch.
     if subkey:
       key += '-' + subkey
-    last_fetched = self.metadata.get(key, {}).get('last_fetched', datetime.now(timezone.utc).timestamp())
+    last_fetched = self.metadata.get(key, {}).get('last_fetched', 0)
 
     return last_fetched > last_modified
-    """
-    one_month_ago = (datetime.now(timezone.utc) - timedelta(days=30)).timestamp()
-    return last_modified < one_month_ago or last_cached > last_modified
-    """
 
   # Evict a cache entry if it's not more recent than |dt|
   # This is a soft eviction (i.e. the file continues to exist).
