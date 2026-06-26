@@ -4,27 +4,27 @@ from wikitools.page import Page
 
 verbose = False
 
-def main(w):
-  image_templates = [
-    'ScreenshotTF2',
-    'AudioTF2',
-    'ArtworkTF2',
-    'ExtractTF2',
-    'Valve content',
-    'TFC image',
-    'ArtworkTF2-Pre',
-    'PD',
-    'QTF image',
-    'PD-self',
-    'Fairuse',
-    'CC',
-    'L4D image',
-    'FAL',
-    'GDFL',
-    'GPL',
-    'LGPL',
-  ]
+image_templates = [
+  'ScreenshotTF2',
+  'AudioTF2',
+  'ArtworkTF2',
+  'ExtractTF2',
+  'Valve content',
+  'Valve content/game',
+  'TFC image',
+  'ArtworkTF2-Pre',
+  'PD',
+  'QTF image',
+  'PD-self',
+  'FairUse',
+  'CC',
+  'FAL',
+  'GFDL',
+  'GPL',
+  'LGPL',
+]
 
+def main(w):
   all_files = {}
   for file in w.get_all_pages(namespaces = ['File']):
     all_files[file] = []
@@ -51,6 +51,7 @@ def main(w):
   output = """\
 {{{{DISPLAYTITLE: {count} files with incorrect licensing}}}}
 Found '''<onlyinclude>{count}</onlyinclude>''' files which have an incorrect licensing. Data as of {date}.
+__TOC__
 """.format(
   count=len(non_files_with_transclusions) + len(files_with_multiple_templates) + len(files_with_no_template),
   date=time_and_date())

@@ -29,6 +29,7 @@ This version of the scripts uses python3, which unfortunately broke our old wiki
 - `duplicate_files.py`: Finds all identical files, and sorts them by usage count.
 - `edit_stats.py`: Provides some statistics about user editing habits on the wiki, along with a list of the top 100 editors by edit count.
 - `external_links2.py`: Searches all articles for links outside the tf2 wiki, and checks to see if those links are still valid (HTTP 200).
+- `meta_report.py`: Sanity checks lists of pages in other reports, to avoid link rot.
 - `mismatched.py`: Searches all articles for incorrect pairs of parenthesis, to help catch broken links, tags, and templates.
 - `undocumented_templates.py`: Parses all templates to see if they have sufficient text in <noinclude> or {{documentation}}.
 - `unlicensed_images.py`: Scans all pages in the File: namespace to see if they have a license template.
