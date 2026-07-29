@@ -34,6 +34,7 @@ This version of the scripts uses python3, which unfortunately broke our old wiki
 - `undocumented_templates.py`: Parses all templates to see if they have sufficient text in <noinclude> or {{documentation}}.
 - `unlicensed_images.py`: Scans all pages in the File: namespace to see if they have a license template.
 - `unused_files.py`: Reparses Special:UnusedFiles, and re-sorts the data, along with removing some known exceptions.
+- `wrong_date.py`: Parses {{Patch name}} to try and spot patches which are out of chronological order, or are swapping month and day.
 
 ## Running a report locally
 While the reports are designed to be run through CI, you can also run them locally (to test).

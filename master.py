@@ -89,6 +89,7 @@ monthly_reports = {
   'undocumented_templates': 'Undocumented templates',
   'unlicensed_images': 'Unlicensed images',
   'unused_files': 'Unused files',
+  'wrong_date': 'Incorrect patch dates',
 }
 
 all_reports = daily_reports | weekly_reports | monthly_reports
