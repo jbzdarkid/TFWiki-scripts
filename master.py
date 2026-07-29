@@ -80,6 +80,7 @@ weekly_reports = {
 
 # Everything else (especially reports which require all HTML contents)
 monthly_reports = {
+  'bad_tags': 'Misused template tags',
   'displaytitles': 'Duplicate displaytitles',
   'duplicate_files': 'Duplicate files',
   'edit_stats': 'Users by edit count',

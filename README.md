@@ -25,6 +25,7 @@ This version of the scripts uses python3, which unfortunately broke our old wiki
 - `wanted_templates.py`: Searches for template transclusions which don't exist, usually indicative of a typo.
 
 ## Monthly reports
+- `bad_tags.py`: Searches for non-template pages which use `<noinclude>` (and similar) since they should only be used on template pages.
 - `displaytitles.py`: Searches for pages with duplicate displaytitles, which show a gross-looking error message.
 - `duplicate_files.py`: Finds all identical files, and sorts them by usage count.
 - `edit_stats.py`: Provides some statistics about user editing habits on the wiki, along with a list of the top 100 editors by edit count.
