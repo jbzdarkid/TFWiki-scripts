@@ -1,7 +1,5 @@
-from collections import defaultdict
 from .utils import pagescraper_queue, time_and_date
 from wikitools import wiki
-from wikitools.page import Page
 
 verbose = False
 
@@ -35,7 +33,7 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages which are using HTML tags t
   for tag, pages in usage.items():
     if pages:
       output += f'== <nowiki>{tag}</nowiki> ==\n'
-      for p in sorted(pages, key = lambda page: page.url_title):
+      for page in sorted(pages, key = lambda page: page.url_title):
         output += f'* [{page.get_edit_url()} {page.title}]\n'
 
   return output

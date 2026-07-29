@@ -1,4 +1,3 @@
-from collections import defaultdict
 from re import search
 
 from .utils import pagescraper_queue, time_and_date
@@ -10,7 +9,7 @@ LANGS = ['en', 'ar', 'cs', 'da', 'de', 'es', 'fi', 'fr', 'hu', 'it', 'ja', 'ko',
 
 def pagescraper(page, patches_per_page):
   text = page.get_wiki_text()
-  
+
   patches = []
   depth = 0
   history_start = False
