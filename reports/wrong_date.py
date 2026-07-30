@@ -20,11 +20,11 @@ def pagescraper(page, patches_per_page):
     if not history_start:
       continue
 
-    # TODO: Special handling for sub-patches?
+    # TODO: I'm not doing anything special for extra Patch Name args here... but I could?
     m = search(r'{{[Pp]atch name\|(\d+)\|(\d+)\|(\d+)(.*?)}}', line)
     if m:
-      # Normalize to a single key for simplicity
-      patches.append(f'{m.group(3)}-{int(m.group(1)):02}-{int(m.group(2)):02}')
+      # Normalize to (year, month, day) order for sorting
+      patches.append((int(m.group(3)), int(m.group(1)), int(m.group(2))))
 
     # Assuming mismatched is doing its job, there should be an even count of {} within the page.
     # That means we can exit the loop once depth reaches 0 (and we exit the Update history section).
@@ -64,12 +64,12 @@ def main(w):
           print(f'Page {page.title} has patches out of order')
         continue
 
-      if page.basename in expected_patches:
+      if expected := expected_patches.get(page.basename, None):
         for patch in patches:
-          if patch not in expected_patches[page.basename]:
+          if patch not in expected and (patch[0], patch[2], patch[1]) in expected:
             bad_order[lang].append(page)
             if verbose:
-              print(f'Page {page.title} has a patch not in the english version')
+              print(f'Page {page.title} has a (probable) day/month swapped patch')
             break
 
   output = """\
@@ -91,11 +91,12 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages where the patch links do no
       output += f'=== [[{page.title}]] ===\n'
 
       patches = patches_per_page[lang][page]
+      expected = expected_patches.get(page.basename, set())
       for i in range(len(patches)):
         if i < len(patches) - 1 and patches[i+1] < patches[i]:
-          output += f'Patch {patches[i]} is listed before {patches[i+1]}\n'
-        if page.basename in expected_patches and patches[i] not in expected_patches[page.basename]:
-          output += f'Patch {patches[i]} is not listed on the english page\n'
+          output += f'* Patch {patches[i]} is listed before {patches[i+1]}\n'
+        if patches[i] in expected and (patches[i][0], patches[i][2], patches[i][1]) in expected:
+          output += f'* Patch {patches[i]} is likely backwards (day|month) compared to the english page\n'
 
   return output
 

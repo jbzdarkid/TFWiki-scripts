@@ -9,7 +9,7 @@ def pagescraper(page, usage):
     if f'<{tag}>' in text or f'</{tag}>' in text:
       if verbose:
         print(f'Page {page.title} uses <{tag}>')
-      transclusions = page.get_transclusion_count()
+      transclusions = page.get_transclusion_count(namespaces=['Main', 'Help', 'TFW'])
       if transclusions > 0:
         if verbose:
           print(f'Page {page.title} allowed; it is transcluded on {transclusions} pages')
