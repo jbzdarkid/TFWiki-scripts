@@ -52,10 +52,9 @@ def main(w):
 
   for template in image_adjacent_templates:
     for file in Page(w, f'Template:{template}').get_transclusions(namespaces=['File']):
+      # Soft inclusion only -- we do not need to mark every 3D image with {{ExtractTF2}}
       if file not in all_files:
         all_files[file] = [template]
-      else:
-        all_files[file].append(template)
 
   if verbose:
     print('Processed all templates')
