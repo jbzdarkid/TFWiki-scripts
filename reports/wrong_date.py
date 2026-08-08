@@ -89,7 +89,7 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages where the patch links do no
     date=time_and_date())
 
   for lang in LANGS:
-    pages = bad_order[lang].keys() + flipped[lang].keys()
+    pages = list(bad_order[lang].keys()) + list(flipped[lang].keys())
     if len(pages) == 0:
       continue
 

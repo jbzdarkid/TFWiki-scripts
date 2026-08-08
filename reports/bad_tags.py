@@ -34,7 +34,7 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages which are using HTML tags t
     if pages:
       output += f'== <nowiki>{tag}</nowiki> ==\n'
       for page in sorted(pages.keys(), key = lambda page: page.url_title):
-        output += f'* [{page.get_edit_url()} {page.title}] ({pages[page]} transclusions)\n'
+        output += f'* [{page.get_edit_url()} {page.title}]\n'
 
   return output
 
