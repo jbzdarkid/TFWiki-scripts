@@ -1,3 +1,4 @@
+from collections import defaultdict
 from re import search
 
 from .utils import pagescraper_queue, time_and_date
@@ -50,7 +51,8 @@ def main(w):
     expected_patches[page.title] = set(patches)
 
   # Next, check for errors.
-  bad_order = {lang: [] for lang in LANGS}
+  bad_order = {lang: defaultdict(dict) for lang in LANGS}
+  flipped = {lang: defaultdict(dict) for lang in LANGS}
   for lang in LANGS:
     for page, patches in patches_per_page[lang].items():
       # I only want to report two cases:
@@ -59,15 +61,19 @@ def main(w):
       # I don't actually care about stale translations, nor even really about excessive translation, since both are just 'update your translation'.
 
       if patches != sorted(patches):
-        bad_order[lang].append(page)
+        for i, patch in enumerate(patches[:-1]):
+          next_patch = patches[i+1]
+          if patch > next_patch:
+            bad_order[lang][page].append((f'{patch[0]}-{patch[1]}-{patch[2]}', f'{next_patch[0]}-{next_patch[2]}-{next_patch[1]}'))
         if verbose:
           print(f'Page {page.title} has patches out of order')
         continue
 
       if expected := expected_patches.get(page.basename, None):
         for patch in patches:
-          if patch not in expected and (patch[0], patch[2], patch[1]) in expected:
-            bad_order[lang].append(page)
+          flipped_patch = (patch[0], patch[2], patch[1])
+          if patch not in expected and patch[1] != patch[2] and flipped_patch in expected and flipped_patch not in patches:
+            flipped[lang][page].append((f'{patch[0]}-{patch[1]}-{patch[2]}', f'{patch[0]}-{patch[2]}-{patch[1]}'))
             if verbose:
               print(f'Page {page.title} has a (probable) day/month swapped patch')
             break
@@ -83,20 +89,20 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages where the patch links do no
     date=time_and_date())
 
   for lang in LANGS:
-    if len(bad_order[lang]) == 0:
+    pages = bad_order[lang].keys() + flipped[lang].keys()
+    if len(pages) == 0:
       continue
 
     output += '== {{lang name|name|%s}} ==\n' % lang
-    for page in sorted(bad_order[lang]):
+    for page in sorted(pages):
       output += f'=== [[{page.title}]] ===\n'
 
-      patches = patches_per_page[lang][page]
-      expected = expected_patches.get(page.basename, set())
-      for i in range(len(patches)):
-        if i < len(patches) - 1 and patches[i+1] < patches[i]:
-          output += f'* Patch {patches[i]} is listed before {patches[i+1]}\n'
-        if patches[i] in expected and (patches[i][0], patches[i][2], patches[i][1]) in expected:
-          output += f'* Patch {patches[i]} is likely backwards (day|month) compared to the english page\n'
+      if page in bad_order[lang]:
+        for error in bad_order[lang][page]:
+          output += f'* Patch {error[0]} is listed before {error[1]}\n'
+      if page in flipped[lang]:
+        for error in flipped[lang][page]:
+          output += f'* Page contains {error[0]}, but the english page only contains {error[1]}'
 
   return output
 

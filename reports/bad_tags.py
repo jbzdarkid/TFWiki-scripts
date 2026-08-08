@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from .utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
@@ -14,10 +16,10 @@ def pagescraper(page, usage):
         if verbose:
           print(f'Page {page.title} allowed; it is transcluded on {transclusions} pages')
         continue
-      usage[tag].append(page)
+      usage[tag][page] = transclusions
 
 def main(w):
-  usage = {'noinclude': [], 'includeonly': [], 'onlyinclude': []}
+  usage = {'noinclude': defaultdict(dict), 'includeonly': defaultdict(dict), 'onlyinclude': defaultdict(dict)}
   with pagescraper_queue(pagescraper, usage) as pages:
     for page in w.get_all_pages(namespaces=['Main', 'Help', 'TFW']):
       pages.put(page)
@@ -33,8 +35,8 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages which are using HTML tags t
   for tag, pages in usage.items():
     if pages:
       output += f'== <nowiki>{tag}</nowiki> ==\n'
-      for page in sorted(pages, key = lambda page: page.url_title):
-        output += f'* [{page.get_edit_url()} {page.title}]\n'
+      for page in sorted(pages.keys(), key = lambda page: page.url_title):
+        output += f'* [{page.get_edit_url()} {page.title}] ({pages[page]} transclusions)\n'
 
   return output
 
