@@ -4,32 +4,35 @@ from wikitools.page import Page
 
 verbose = False
 
-def main(w):
-  image_templates = [
-    '3D viewer', # 3D models
-    'Achievement image', # Transcludes ExtractTF2
-    'ArtworkTF2',
-    'ArtworkTF2-Pre',
-    'AudioTF2',
-    'CC',
-    'ExtractTF2',
-    'FAL',
-    'FairUse',
-    'Fairuse',
-    'GDFL',
-    'GPL',
-    'LGPL',
-    'PD',
-    'PD-self',
-    'QTF image',
-    'ScreenshotTF2',
-    'Steam mod content',
-    'TFC image',
-    'Trademark',
-    'Valve content',
-    'Valve content/game',
-  ]
+image_adjacent_templates = [
+  '3D viewer', # 3D models
+]
 
+image_templates = [
+  'Achievement image', # Transcludes ExtractTF2
+  'ArtworkTF2',
+  'ArtworkTF2-Pre',
+  'AudioTF2',
+  'CC',
+  'ExtractTF2',
+  'FAL',
+  'FairUse',
+  'Fairuse',
+  'GDFL',
+  'GPL',
+  'LGPL',
+  'PD',
+  'PD-self',
+  'QTF image',
+  'ScreenshotTF2',
+  'Steam mod content',
+  'TFC image',
+  'Trademark',
+  'Valve content',
+  'Valve content/game',
+]
+
+def main(w):
   all_files = {}
   for file in w.get_all_pages(namespaces = ['File']):
     all_files[file] = []
@@ -43,6 +46,13 @@ def main(w):
     for file in Page(w, f'Template:{template}').get_transclusions(namespaces=['*']):
       if file not in all_files:
         non_files_with_transclusions.append(file)
+        all_files[file] = [template]
+      else:
+        all_files[file].append(template)
+
+  for template in image_adjacent_templates:
+    for file in Page(w, f'Template:{template}').get_transclusions(namespaces=['File']):
+      if file not in all_files:
         all_files[file] = [template]
       else:
         all_files[file].append(template)
