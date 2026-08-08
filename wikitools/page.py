@@ -78,8 +78,8 @@ class Page:
   def get_edit_url(self):
     return self.get_page_url(action='edit')
 
-  def get_transclusion_count(self):
-    return sum(1 for _ in self.get_transclusions())
+  def get_transclusion_count(self, *, namespaces=None):
+    return sum(1 for _ in self.get_transclusions(namespaces=namespaces))
 
   def get_transclusions(self, *, namespaces=None):
     for entry in self.wiki.get_with_continue('query', 'embeddedin',
