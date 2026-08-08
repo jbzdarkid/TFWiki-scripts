@@ -6,6 +6,7 @@ verbose = False
 
 def main(w):
   image_templates = [
+    'Achievement image', # Transcludes ExtractTF2
     'ScreenshotTF2',
     'AudioTF2',
     'ArtworkTF2',
@@ -19,6 +20,7 @@ def main(w):
     'QTF image',
     'PD-self',
     'Fairuse',
+    'FairUse',
     'CC',
     'Trademark',
     'FAL',
@@ -53,6 +55,7 @@ def main(w):
   output = """\
 {{{{DISPLAYTITLE: {count} files with incorrect licensing}}}}
 Found '''<onlyinclude>{count}</onlyinclude>''' files which have an incorrect licensing. Data as of {date}.
+__TOC__
 """.format(
   count=len(non_files_with_transclusions) + len(files_with_multiple_templates) + len(files_with_no_template),
   date=time_and_date())
