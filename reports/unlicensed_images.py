@@ -6,27 +6,28 @@ verbose = False
 
 def main(w):
   image_templates = [
+    '3D viewer', # 3D models
     'Achievement image', # Transcludes ExtractTF2
-    'ScreenshotTF2',
-    'AudioTF2',
     'ArtworkTF2',
-    'ExtractTF2',
-    'Valve content',
-    'Valve content/game',
-    'TFC image',
     'ArtworkTF2-Pre',
-    'PD',
-    'Steam mod content',
-    'QTF image',
-    'PD-self',
-    'Fairuse',
-    'FairUse',
+    'AudioTF2',
     'CC',
-    'Trademark',
+    'ExtractTF2',
     'FAL',
+    'FairUse',
+    'Fairuse',
     'GDFL',
     'GPL',
     'LGPL',
+    'PD',
+    'PD-self',
+    'QTF image',
+    'ScreenshotTF2',
+    'Steam mod content',
+    'TFC image',
+    'Trademark',
+    'Valve content',
+    'Valve content/game',
   ]
 
   all_files = {}
