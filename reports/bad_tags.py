@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 from .utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
@@ -19,7 +17,7 @@ def pagescraper(page, usage):
       usage[tag][page] = transclusions
 
 def main(w):
-  usage = {'noinclude': defaultdict(dict), 'includeonly': defaultdict(dict), 'onlyinclude': defaultdict(dict)}
+  usage = {'noinclude': {}, 'includeonly': {}, 'onlyinclude': {}}
   with pagescraper_queue(pagescraper, usage) as pages:
     for page in w.get_all_pages(namespaces=['Main', 'Help', 'TFW']):
       pages.put(page)

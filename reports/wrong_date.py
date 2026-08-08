@@ -51,8 +51,8 @@ def main(w):
     expected_patches[page.title] = set(patches)
 
   # Next, check for errors.
-  bad_order = {lang: defaultdict(dict) for lang in LANGS}
-  flipped = {lang: defaultdict(dict) for lang in LANGS}
+  bad_order = {lang: defaultdict(list) for lang in LANGS}
+  flipped = {lang: defaultdict(list) for lang in LANGS}
   for lang in LANGS:
     for page, patches in patches_per_page[lang].items():
       # I only want to report two cases:
