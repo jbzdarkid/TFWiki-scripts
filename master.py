@@ -224,7 +224,10 @@ if __name__ == '__main__':
         reports_to_upload.remove((report_name, lang))
 
     for page in w.get_user_contribs(w.get_current_user(), report_start):
-      reports_to_upload.remove((page.basename, page.lang))
+      try:
+        reports_to_upload.remove((page.basename, page.lang))
+      except ValueError:
+        print(f'Not removing {page.basename}/{page.lang}')
 
     if len(reports_to_upload) == 0:
       break
