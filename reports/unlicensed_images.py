@@ -4,27 +4,35 @@ from wikitools.page import Page
 
 verbose = False
 
-def main(w):
-  image_templates = [
-    'ScreenshotTF2',
-    'AudioTF2',
-    'ArtworkTF2',
-    'ExtractTF2',
-    'Valve content',
-    'TFC image',
-    'ArtworkTF2-Pre',
-    'PD',
-    'QTF image',
-    'PD-self',
-    'Fairuse',
-    'CC',
-    'L4D image',
-    'FAL',
-    'GDFL',
-    'GPL',
-    'LGPL',
-  ]
+image_adjacent_templates = [
+  '3D viewer', # 3D models
+]
 
+image_templates = [
+  'Achievement image', # Transcludes ExtractTF2
+  'ArtworkTF2',
+  'ArtworkTF2-Pre',
+  'AudioTF2',
+  'CC',
+  'ExtractTF2',
+  'FAL',
+  'FairUse',
+  'Fairuse',
+  'GDFL',
+  'GPL',
+  'LGPL',
+  'PD',
+  'PD-self',
+  'QTF image',
+  'ScreenshotTF2',
+  'Steam mod content',
+  'TFC image',
+  'Trademark',
+  'Valve content',
+  'Valve content/game',
+]
+
+def main(w):
   all_files = {}
   for file in w.get_all_pages(namespaces = ['File']):
     all_files[file] = []
@@ -42,6 +50,12 @@ def main(w):
       else:
         all_files[file].append(template)
 
+  for template in image_adjacent_templates:
+    for file in Page(w, f'Template:{template}').get_transclusions(namespaces=['File']):
+      # Soft inclusion only -- we do not need to mark every 3D image with {{ExtractTF2}}
+      if file not in all_files:
+        all_files[file] = [template]
+
   if verbose:
     print('Processed all templates')
 
@@ -51,6 +65,7 @@ def main(w):
   output = """\
 {{{{DISPLAYTITLE: {count} files with incorrect licensing}}}}
 Found '''<onlyinclude>{count}</onlyinclude>''' files which have an incorrect licensing. Data as of {date}.
+__TOC__
 """.format(
   count=len(non_files_with_transclusions) + len(files_with_multiple_templates) + len(files_with_no_template),
   date=time_and_date())

@@ -25,6 +25,7 @@ This version of the scripts uses python3, which unfortunately broke our old wiki
 - `wanted_templates.py`: Searches for template transclusions which don't exist, usually indicative of a typo.
 
 ## Monthly reports
+- `bad_tags.py`: Searches for non-template pages which use `<noinclude>` (and similar) since they should only be used on template pages.
 - `displaytitles.py`: Searches for pages with duplicate displaytitles, which show a gross-looking error message.
 - `duplicate_files.py`: Finds all identical files, and sorts them by usage count.
 - `edit_stats.py`: Provides some statistics about user editing habits on the wiki, along with a list of the top 100 editors by edit count.
@@ -33,3 +34,9 @@ This version of the scripts uses python3, which unfortunately broke our old wiki
 - `undocumented_templates.py`: Parses all templates to see if they have sufficient text in <noinclude> or {{documentation}}.
 - `unlicensed_images.py`: Scans all pages in the File: namespace to see if they have a license template.
 - `unused_files.py`: Reparses Special:UnusedFiles, and re-sorts the data, along with removing some known exceptions.
+- `wrong_date.py`: Parses {{Patch name}} to try and spot patches which are out of chronological order, or are swapping month and day.
+
+## Running a report locally
+While the reports are designed to be run through CI, you can also run them locally (to test).
+1. You can run all reports through the master script via `python master.py`
+2. You can run an individual report via `python -m reports.report_name`

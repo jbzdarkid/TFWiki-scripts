@@ -30,15 +30,17 @@ class FileDict:
     hex = hash.hexdigest()
     return (self.root / hex[:2] / hex).with_suffix('.txt')
 
-  def get(self, key, default=None):
+  def get(self, key, default, *, subkey=None):
     try:
-      return self.__getitem__(key)
+      return self.__getitem__(key, subkey)
     except KeyError:
       return default
 
-  def __getitem__(self, key):
-    if not self.cache_valid(key):
+  def __getitem__(self, key, subkey=None):
+    if not self.cache_valid(key, subkey):
       return None # Cache has expired for the given key
+    if subkey:
+      key += '-' + subkey
 
     try:
       with self._path(key).open('r', encoding='utf-8') as f:
@@ -46,7 +48,12 @@ class FileDict:
     except FileNotFoundError as ex:
       raise KeyError(f'Key {key} was not found on disk') from ex
 
-  def __setitem__(self, key, value):
+  def set(self, key, value, *, subkey=None):
+    self.__setitem__(key, value, subkey)
+
+  def __setitem__(self, key, value, subkey=None):
+    if subkey:
+      key += '-' + subkey
     if key not in self.metadata: # N.B. we are actually writing an entry in the metadata for itself. Unused atm.
       self.metadata[key] = {}
     self.metadata[key]['last_fetched'] = datetime.now(timezone.utc).timestamp()
@@ -55,22 +62,23 @@ class FileDict:
     with self._path(key).open('w', encoding='utf-8') as f:
       f.write(value)
 
-  def cache_valid(self, key):
+  def cache_valid(self, key, subkey=None):
     if key == 'metadata':
       return True
 
     # Look up the last modification time and last time we wrote to the cache.
     # If the data has been modified since we cached it, it is not valid.
-    # If any piece of data is missing, assume the cache is valid.
-    data = self.metadata.get(key, {})
-    last_modified = data.get('last_modified', 0)
-    last_fetched = data.get('last_fetched', datetime.now(timezone.utc).timestamp())
+    # If any piece of data is missing, assume the cache is invalid.
+
+    # The root key is updated when the data is modified, so it resets with or without a subkey.
+    last_modified = self.metadata.get(key, {}).get('last_modified', 0)
+
+    # The subkey is updated when the data is fetched, so it only tracks for this subkey fetch.
+    if subkey:
+      key += '-' + subkey
+    last_fetched = self.metadata.get(key, {}).get('last_fetched', 0)
 
     return last_fetched > last_modified
-    """
-    one_month_ago = (datetime.now(timezone.utc) - timedelta(days=30)).timestamp()
-    return last_modified < one_month_ago or last_cached > last_modified
-    """
 
   # Evict a cache entry if it's not more recent than |dt|
   # This is a soft eviction (i.e. the file continues to exist).

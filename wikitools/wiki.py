@@ -10,9 +10,8 @@ from .page import Page
 from .file_dict import FileDict
 from .empty_cache import EmptyCache
 
-class EmptyResponse():
-    def json(self):
-        return dict()
+class TimeoutReached(Exception):
+  pass
 
 class Wiki:
   def __init__(self, api_url, user_agent=None, use_cache=True):
@@ -30,9 +29,11 @@ class Wiki:
     if use_cache:
       self.page_text_cache = FileDict('cache/text')
       self.page_html_cache = FileDict('cache/html')
+      self.page_link_cache = FileDict('cache/link')
     else:
       self.page_text_cache = EmptyCache()
       self.page_html_cache = EmptyCache()
+      self.page_link_cache = EmptyCache()
 
     # As of MediaWiki 1.27, logging in and remaining logged in requires correct HTTP cookie handling by your client on all requests.
     self.session = requests.Session()
@@ -48,17 +49,17 @@ class Wiki:
   def retry(self, action):
     i = 0
     while True:
-      try:
-        self.lock.acquire()
-
+      with self.lock:
         if self.last_network_request_time and self.last_network_request_time < datetime.now(timezone.utc):
-          return EmptyResponse() # Timeout reached; network requests can no longer be made.
+          raise TimeoutReached # Deadline passed; network requests can no longer be made.
 
         sleep_duration = (self.next_request - datetime.now(timezone.utc)).total_seconds()
         if sleep_duration > 0:
           sleep(sleep_duration)
         self.next_request = datetime.now(timezone.utc) + timedelta(milliseconds=10)
 
+      # Release the lock before starting a network request so we don't include request duration as part of our sleep
+      try:
         r = action()
         self.logger.error(
           '%d %s %s %s %d',
@@ -81,8 +82,6 @@ class Wiki:
         sleep(1)
         if i > self.MAX_RETRIES:
           raise
-      finally:
-        self.lock.release()
 
   def get(self, action, **params):
     params.update({
@@ -98,29 +97,25 @@ class Wiki:
   def get_with_continue(self, action, entry_key, **kwargs):
     while True:
       data = self.get(action, **kwargs)
-      if data == {'batchcomplete': ''}:
-        return # No entries for this query
-      elif 'error' in data and data['error']['code'] == 'internal_api_error_DBConnectionError':
+      if 'error' in data and data['error']['code'] == 'internal_api_error_DBConnectionError':
         continue # Some sort of transient wiki error. Just retry.
       if 'error' in data:
         print('Error: ' + str(data['error']))
         break
 
-      try:
+      if action in data and entry_key in data[action]:
         entries = data[action][entry_key]
-      except KeyError:
-        if action not in data:
-          print(f'Query "{action}" was not found in data. Did you mean one of these keys: {", ".join(data.keys())}')
-        else:
-          print(f'Entry key "{entry_key}" was not found in data[{action}]. Did you mean one of these keys: {", ".join(data[action].keys())}')
-        break
 
-      if isinstance(entries, list):
-        for entry in entries:
-          yield entry
-      elif isinstance(entries, dict):
-        for entry in entries.values():
-          yield entry
+        if isinstance(entries, list):
+          for entry in entries:
+            yield entry
+        elif isinstance(entries, dict):
+          for entry in entries.values():
+            yield entry
+      elif 'batchcomplete' not in data:
+        print(f'Query "{action}" was not found in data. Did you mean one of these keys: {", ".join(data.keys())}')
+        print(f'Entry key "{entry_key}" was not found in data[{action}]. Did you mean one of these keys: {", ".join(data[action].keys())}')
+        raise ValueError('Could not parse API response.')
 
       if 'continue' in data:
         kwargs.update(data['continue'])
@@ -163,11 +158,14 @@ class Wiki:
 
   def get_namespaces(self):
     namespaces = {}
+    self.content_namespaces = []
     for namespace in self.get_with_continue('query', 'namespaces',
       meta='siteinfo',
       siprop='namespaces'
     ):
       namespaces[namespace['*']] = namespace['id']
+      if namespace['id'] >= 0:
+        self.content_namespaces.append(namespace['*'])
     namespaces['*'] = '*' # 'All', in many queries
     namespaces['Main'] = namespaces['']
     if 'Team Fortress Wiki' in namespaces:
@@ -200,15 +198,16 @@ class Wiki:
     redirect_filter = {
       False: 'nonredirects',
       True: 'redirects',
-      None: 'all',
+      'both': 'all',
     }[redirects]
 
     for namespace in namespaces:
-      for entry in self.get_with_continue('query', 'allpages',
-        list='allpages',
-        aplimit=500,
-        apnamespace=self.namespaces[namespace],
-        apfilterredir=redirect_filter,
+      for entry in self.get_with_continue('query', 'pages',
+        generator='allpages',
+        gaplimit=500,
+        gapnamespace=self.namespaces[namespace],
+        gapfilterredir=redirect_filter,
+        prop='info', # Includes last touched timestamp
       ):
         title = entry['title']
         if title.endswith('.js') or title.endswith('.css'):
@@ -273,12 +272,13 @@ class Wiki:
     ):
       yield Page(self, entry['title'], entry)
 
-  def update_caches_from_recent_changes(self, days_ago=30):
-    start_time = datetime.now(timezone.utc) - timedelta(days=days_ago)
-    for page in self.get_recent_changes(start_time):
-      modified_time = datetime.fromisoformat(page.raw['timestamp'])
-      self.page_text_cache.set_modified(page.url_title, modified_time)
-      self.page_html_cache.set_modified(page.url_title, modified_time)
+  def populate_touched_cache(self):
+    # The AllPages API does not support multiple namespaces, so we need the full list here.
+    for page in self.get_all_pages(namespaces=self.content_namespaces, redirects='both'):
+      modified = datetime.fromisoformat(page.raw['touched'])
+      self.page_html_cache.set_modified(page.url_title, modified)
+      self.page_text_cache.set_modified(page.url_title, modified)
+      self.page_link_cache.set_modified(page.url_title, modified)
 
   def get_all_unused_files(self):
     for html in self.get_html_with_continue('Special:UnusedFiles'):

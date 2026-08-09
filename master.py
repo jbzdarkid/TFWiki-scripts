@@ -59,7 +59,7 @@ daily_reports = {
 # English-only but otherwise frequently changing reports
 weekly_reports = {
   'displaytitles_weekly': 'Duplicate displaytitles',
-  'incorrect_redirects': 'Mistranslated redirects',
+  # 'incorrect_redirects': 'Mistranslated redirects', # Disabled 2026-04-27 due to timeouts
   'incorrectly_categorized': 'Pages with incorrect categorization',
   'incorrectly_linked': 'Pages with incorrect links',
   'lang_duplicates': 'Lang duplicates',
@@ -74,6 +74,7 @@ weekly_reports = {
 
 # Everything else (especially reports which require all HTML contents)
 monthly_reports = {
+  'bad_tags': 'Misused template tags',
   'displaytitles': 'Duplicate displaytitles',
   'duplicate_files': 'Duplicate files',
   'edit_stats': 'Users by edit count',
@@ -82,6 +83,7 @@ monthly_reports = {
   'undocumented_templates': 'Undocumented templates',
   'unlicensed_images': 'Unlicensed images',
   'unused_files': 'Unused files',
+  'wrong_date': 'Incorrect patch dates',
 }
 
 all_reports = daily_reports | weekly_reports | monthly_reports
@@ -98,8 +100,10 @@ if __name__ == '__main__':
     modules_to_run += daily_reports.keys()
     if datetime.now(timezone.utc).weekday() == 0:
       modules_to_run += weekly_reports.keys()
-    if datetime.now(timezone.utc).day == 1:
-      modules_to_run += monthly_reports.keys()
+
+    for i, key in enumerate(monthly_reports.keys()):
+      if datetime.now(timezone.utc).day == i + 1:
+        modules_to_run.append(key)
 
   elif event == 'pull_request':
     root = 'User:Darkid/Reports'
@@ -143,7 +147,7 @@ if __name__ == '__main__':
     summary = 'Manually triggered update from https://github.com/jbzdarkid/TFWiki-scripts'
 
     # On manual triggers, run everything, unless a specific report was specified.
-    modules_to_run = argv[1:] if len(argv) > 1 else all_reports.keys()
+    modules_to_run = argv[1].split(' ') if len(argv) > 1 else all_reports.keys()
 
   elif event == 'local_run':
     print('Local run; executing all reports')
@@ -161,8 +165,8 @@ if __name__ == '__main__':
   if not w.login(environ['WIKI_USERNAME'], environ['WIKI_PASSWORD']):
     exit(1)
 
-  print('Successfully logged in, fetching RC log to invalidate the cache')
-  w.update_caches_from_recent_changes()
+  print('Successfully logged in, scanning page timestamps to invalidate the caches')
+  w.populate_touched_cache()
 
   # I am working on a caching story, but it's not 100% ready yet.
   # Until then, shuffle the order of reports to guarantee a more even coverage,
