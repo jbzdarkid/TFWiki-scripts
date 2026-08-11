@@ -33,12 +33,14 @@ def run_report(w, module, name):
   try:
     output = {}
     raw_output = importlib.import_module('reports.' + module).main(w)
-    # Fixup for report format (TBD; will push into reports once stable)
+    # Fixup for varied report output formats (TBD; will push into reports once stable)
     if isinstance(raw_output, list):
       for lang, contents in raw_output:
-        output[lang] = contents
+        page = Page(w, f'{root}/{name}/{lang}')
+        output[page] = contents
     else:
-      output['en'] = raw_output
+      page = Page(w, f'{root}/{name}')
+      output[page] = raw_output
     return output
   except Exception:
     print_exc(file=stdout)
@@ -183,10 +185,22 @@ if __name__ == '__main__':
   report_start = datetime.now(timezone.utc)
   w.last_network_request_time = report_start + timedelta(hours=5, minutes=40) - sleep_before_upload
 
+  comment_with_placeholders = 'Please verify the following diffs:\n'
+  action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/actions/runs/' + environ['GITHUB_RUN_ID']
+
   report_outputs = {}
   for module in modules_to_run:
     report_name = all_reports[module]
-    report_outputs[report_name] = run_report(w, module, report_name)
+    output = run_report(w, module, report_name)
+    if not output:
+      comment_with_placeholders += f'- [ ] Report {report_name} threw an exception. Please check the [action logs]({action_url}).\n'
+      continue
+
+    comment_with_placeholders += f'- [ ] Report {report_name} succeeded, diffs:'
+    for page in output:
+      comment_with_placeholders += f' %{page.url_title}%'
+
+    comment_with_placeholders += '\n'
 
   print('All reports completed, sleeping then uploading outputs')
   sleep(sleep_before_upload.total_seconds())
@@ -194,52 +208,33 @@ if __name__ == '__main__':
   w.last_network_request_time = None # Unblock network requests so we can POST again.
   w.MAX_RETRIES = 1 # We will be retrying via outer loop.
 
-  action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/actions/runs/' + environ['GITHUB_RUN_ID']
-
-  reports_to_upload = []
-  comment_with_placeholders = 'Please verify the following diffs:\n'
-  for report_name, output in report_outputs.items():
-    if not output:
-      comment_with_placeholders += f'- [ ] Report {report_name} threw an exception. Please check the [action logs]({action_url}).\n'
-      continue
-
-    comment_with_placeholders += f'- [ ] Report {report_name} succeeded, diffs:'
-    for lang in output.keys():
-      comment_with_placeholders += f' %{report_name}_{lang}%'
-      reports_to_upload.append((report_name, lang))
-    comment_with_placeholders += '\n'
 
   for i in range(5):
-    print(f'Still have {len(reports_to_upload)} reports to upload on attempt {i+1}/5')
-    for report_name, lang in list(reports_to_upload):
-      if lang != 'en':
-        page_name = f'{root}/{report_name}/{lang}'
-      else:
-        page_name = f'{root}/{report_name}'
-
-      contents = report_outputs[report_name][lang]
-      wiki_diff_url = Page(w, page_name).edit(contents, bot=True, summary=summary)
+    print(f'Still have {len(reports_outputs)} pages to edit on attempt {i+1}/5')
+    for page in list(report_outputs.keys()):
+      contents = report_outputs[page]
+      wiki_diff_url = page.edit(contents, bot=True, summary=summary)
       if wiki_diff_url:
-        comment_with_placeholders.replace(f'%{report_name}_{lang}%', f'[{lang}]({wiki_diff_url})')
-        reports_to_upload.remove((report_name, lang))
+        comment_with_placeholders.replace(f'%{page.url_title}%', f'[{lang}]({wiki_diff_url})')
+        report_outputs.pop(page)
 
     for page in w.get_user_contribs(w.get_current_user(), report_start):
       try:
-        reports_to_upload.remove((page.basename, page.lang))
+        report_outputs.pop(page.url_title)
       except ValueError:
-        print(f'Not removing {page.basename}/{page.lang}')
+        print(f'Found unrelated edit to page {page.url_title} which was not an expected report. Not removing from the pending list.')
 
-    if len(reports_to_upload) == 0:
+    if len(report_outputs) == 0:
       break
 
   # Tried 5 times, give up on anything not uploaded
-  for report_name, lang in reports_to_upload:
-    comment_with_placeholders.replace(f'%{report_name}_{lang}%', f'~~[{lang}]({action_url})~~')
+  for page, contents in report_outputs:
+    comment_with_placeholders.replace(f'%{page.url_title}%', f'~~[{page.lang}]({action_url})~~')
 
     # Save the contents to a file (will be attached as a build artifact)
-    file_name = f'reports/wiki_{report_name.lower().replace(" ", "_")}_{lang}.txt'
+    file_name = f'reports/wiki_{page.url_title}.txt'
     with open(file_name, 'w', encoding='utf-8') as f:
-      f.write(report_outputs[report_name][lang])
+      f.write(contents)
 
   comment = comment_with_placeholders
 
