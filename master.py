@@ -227,11 +227,11 @@ if __name__ == '__main__':
 
     for page in w.get_user_contribs(w.get_current_user(), report_start):
       if page not in report_outputs:
-        print(f'Found unrelated edit to page {page.url_title} which was not an expected report. Not removing from the pending list.')
         continue
 
       wiki_diff_url = f'{page.wiki.wiki_url}?diff={page.raw["revid"]}'
       comment_with_placeholders = comment_with_placeholders.replace(f'%{page.url_title}%', f'[{page.lang}]({wiki_diff_url})')
+      report_outputs.pop(page)
 
     if len(report_outputs) == 0:
       break
