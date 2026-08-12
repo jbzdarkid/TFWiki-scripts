@@ -201,6 +201,7 @@ if __name__ == '__main__':
       comment_with_placeholders += f'- [ ] Report {report_name} threw an exception. Please check the [action logs]({action_url}).\n'
       all_reports_succeeded = False
       continue
+    report_outputs.update(output) # Dictionary merge; includes all pages + contents
 
     comment_with_placeholders += f'- [ ] Report {report_name} succeeded, diffs:'
     for page in output:
@@ -225,10 +226,12 @@ if __name__ == '__main__':
         report_outputs.pop(page)
 
     for page in w.get_user_contribs(w.get_current_user(), report_start):
-      try:
-        report_outputs.pop(page)
-      except ValueError:
+      if page not in report_outputs:
         print(f'Found unrelated edit to page {page.url_title} which was not an expected report. Not removing from the pending list.')
+        continue
+
+      wiki_diff_url = f'{page.wiki.wiki_url}?diff={page.raw["revid"]}'
+      comment_with_placeholders = comment_with_placeholders.replace(f'%{page.url_title}%', f'[{page.lang}]({wiki_diff_url})')
 
     if len(report_outputs) == 0:
       break

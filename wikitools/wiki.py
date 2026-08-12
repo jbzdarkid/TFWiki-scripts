@@ -252,7 +252,7 @@ class Wiki:
       ucend='now',
       ucdir='newer',
       ucuser=username,
-      ucprop='title', # Only return page titles, not page IDs
+      ucprop='ids|title', # Return the revision id (for diff links) and the page title
       ucshow='top', # Only show changes which are the most recent edit to avoid listing pages twice
     ):
       yield Page(self, entry['title'], entry)
