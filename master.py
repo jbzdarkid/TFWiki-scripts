@@ -221,7 +221,7 @@ if __name__ == '__main__':
       contents = report_outputs[page]
       wiki_diff_url = page.edit(contents, bot=True, summary=summary)
       if wiki_diff_url:
-        comment_with_placeholders.replace(f'%{page.url_title}%', f'[{page.lang}]({wiki_diff_url})')
+        comment_with_placeholders = comment_with_placeholders.replace(f'%{page.url_title}%', f'[{page.lang}]({wiki_diff_url})')
         report_outputs.pop(page)
 
     for page in w.get_user_contribs(w.get_current_user(), report_start):
@@ -235,7 +235,7 @@ if __name__ == '__main__':
 
   # Tried 5 times, give up on anything not uploaded
   for page, contents in report_outputs.items():
-    comment_with_placeholders.replace(f'%{page.url_title}%', f'~~[{page.lang}]({action_url})~~')
+    comment_with_placeholders = comment_with_placeholders.replace(f'%{page.url_title}%', f'~~[{page.lang}]({action_url})~~')
     all_reports_succeeded = False
 
     # Save the contents to a file (will be attached as a build artifact)
