@@ -180,7 +180,7 @@ if __name__ == '__main__':
   report_start = datetime.now(timezone.utc)
   total_pipeline_duration = timedelta(hours=5, minutes=55)
   report_end = report_start + total_pipeline_duration
-  
+
   sleep_before_upload = timedelta(minutes=15) # Helps avoid throttling / wiki database issues, I think
   upload_duration_guess = timedelta(minutes=15)
   report_stop = report_end - upload_duration_guess - sleep_before_upload
@@ -221,7 +221,7 @@ if __name__ == '__main__':
       contents = report_outputs[page]
       wiki_diff_url = page.edit(contents, bot=True, summary=summary)
       if wiki_diff_url:
-        comment_with_placeholders.replace(f'%{page.url_title}%', f'[{lang}]({wiki_diff_url})')
+        comment_with_placeholders.replace(f'%{page.url_title}%', f'[{page.lang}]({wiki_diff_url})')
         report_outputs.pop(page)
 
     for page in w.get_user_contribs(w.get_current_user(), report_start):
