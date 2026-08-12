@@ -177,23 +177,29 @@ if __name__ == '__main__':
   shuffle(modules_to_run)
   print(f'Running reports: {modules_to_run}')
 
-  # All scripts must finish with enough time to sleep and *then* upload the report files.
+  report_start = datetime.now(timezone.utc)
+  total_pipeline_duration = timedelta(hours=5, minutes=55)
+  report_end = report_start + total_pipeline_duration
+  
+  sleep_before_upload = timedelta(minutes=15) # Helps avoid throttling / wiki database issues, I think
+  upload_duration_guess = timedelta(minutes=15)
+  report_stop = report_end - upload_duration_guess - sleep_before_upload
+
   # This value (on the global wiki class) acts as a soft stop for our reports,
   # so they are unable to make network requests after this time.
-  # I'm just using a flat 30 minutes here, while accounting for 10 minutes before the actual github timelimit.
-  sleep_before_upload = timedelta(minutes=30)
-  report_start = datetime.now(timezone.utc)
-  w.last_network_request_time = report_start + timedelta(hours=5, minutes=40) - sleep_before_upload
+  w.last_network_request_time = report_stop
 
   comment_with_placeholders = 'Please verify the following diffs:\n'
   action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/actions/runs/' + environ['GITHUB_RUN_ID']
 
+  all_reports_succeeded = True
   report_outputs = {}
   for module in modules_to_run:
     report_name = all_reports[module]
     output = run_report(w, module, report_name)
     if not output:
       comment_with_placeholders += f'- [ ] Report {report_name} threw an exception. Please check the [action logs]({action_url}).\n'
+      all_reports_succeeded = False
       continue
 
     comment_with_placeholders += f'- [ ] Report {report_name} succeeded, diffs:'
@@ -210,7 +216,7 @@ if __name__ == '__main__':
 
 
   for i in range(5):
-    print(f'Still have {len(reports_outputs)} pages to edit on attempt {i+1}/5')
+    print(f'Still have {len(report_outputs)} pages to edit on attempt {i+1}/5')
     for page in list(report_outputs.keys()):
       contents = report_outputs[page]
       wiki_diff_url = page.edit(contents, bot=True, summary=summary)
@@ -230,6 +236,7 @@ if __name__ == '__main__':
   # Tried 5 times, give up on anything not uploaded
   for page, contents in report_outputs:
     comment_with_placeholders.replace(f'%{page.url_title}%', f'~~[{page.lang}]({action_url})~~')
+    all_reports_succeeded = False
 
     # Save the contents to a file (will be attached as a build artifact)
     file_name = f'reports/wiki_{page.url_title}.txt'
@@ -245,5 +252,4 @@ if __name__ == '__main__':
   elif environ['GITHUB_EVENT_NAME'] == 'schedule':
     print(comment)
 
-  num_failures = list(report_outputs.values()).count(None)
-  exit(num_failures)
+  exit(0 if all_reports_succeeded else 1)
