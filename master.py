@@ -226,7 +226,7 @@ if __name__ == '__main__':
 
     for page in w.get_user_contribs(w.get_current_user(), report_start):
       try:
-        report_outputs.pop(page.url_title)
+        report_outputs.pop(page)
       except ValueError:
         print(f'Found unrelated edit to page {page.url_title} which was not an expected report. Not removing from the pending list.')
 
@@ -234,7 +234,7 @@ if __name__ == '__main__':
       break
 
   # Tried 5 times, give up on anything not uploaded
-  for page, contents in report_outputs:
+  for page, contents in report_outputs.items():
     comment_with_placeholders.replace(f'%{page.url_title}%', f'~~[{page.lang}]({action_url})~~')
     all_reports_succeeded = False
 
