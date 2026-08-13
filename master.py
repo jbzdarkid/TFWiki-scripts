@@ -27,25 +27,21 @@ import open_pr_comment
 # Threading for navboxes.py?
 # Might be more smarts to do in lang_quality.py, e.g. non-ascii characters in 'en', or check for only quote characters (or other lang incomplete hints)
 
-def edit_or_save(page_name, file_name, lang, contents, summary):
-  wiki_diff_url = Page(w, page_name).edit(contents, bot=True, summary=summary)
-  if wiki_diff_url:
-    return f' [{lang}]({wiki_diff_url})'
-
-  # Edit failed, fall back to saving to file (will be attached as a build artifact)
-  with open(f'reports/{file_name}', 'w', encoding='utf-8') as f:
-    f.write(contents)
-
-  action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/actions/runs/' + environ['GITHUB_RUN_ID']
-  return f' ~~[{lang}]({action_url})~~'
-
-  return None
-
 def run_report(w, module, name):
   start = datetime.now(timezone.utc)
   print(f'Starting {name} at {start}')
   try:
-    return importlib.import_module('reports.' + module).main(w)
+    output = {}
+    raw_output = importlib.import_module('reports.' + module).main(w)
+    # Fixup for varied report output formats (TBD; will push into reports once stable)
+    if isinstance(raw_output, list):
+      for lang, contents in raw_output:
+        page = Page(w, f'{root}/{name}/{lang}')
+        output[page] = contents
+    else:
+      page = Page(w, f'{root}/{name}')
+      output[page] = raw_output
+    return output
   except Exception:
     print_exc(file=stdout)
     return None
@@ -153,7 +149,7 @@ if __name__ == '__main__':
     summary = 'Manually triggered update from https://github.com/jbzdarkid/TFWiki-scripts'
 
     # On manual triggers, run everything, unless a specific report was specified.
-    modules_to_run = argv[1].split(' ') if len(argv) > 1 else all_reports.keys()
+    modules_to_run = argv[1:] if len(argv) > 1 else all_reports.keys()
 
   elif event == 'local_run':
     print('Local run; executing all reports')
@@ -181,37 +177,76 @@ if __name__ == '__main__':
   shuffle(modules_to_run)
   print(f'Running reports: {modules_to_run}')
 
-  # All scripts must finish with enough time to sleep and *then* upload the report files.
+  report_start = datetime.now(timezone.utc)
+  total_pipeline_duration = timedelta(hours=5, minutes=55)
+  report_end = report_start + total_pipeline_duration
+
+  sleep_before_upload = timedelta(minutes=15) # Helps avoid throttling / wiki database issues, I think
+  upload_duration_guess = timedelta(minutes=15)
+  report_stop = report_end - upload_duration_guess - sleep_before_upload
+
   # This value (on the global wiki class) acts as a soft stop for our reports,
   # so they are unable to make network requests after this time.
-  # I'm just using a flat 30 minutes here, while accounting for 10 minutes before the actual github timelimit.
-  sleep_before_upload = timedelta(minutes=30)
-  w.last_network_request_time = datetime.now(timezone.utc) + timedelta(hours=5, minutes=40) - sleep_before_upload
+  w.last_network_request_time = report_stop
 
+  comment_with_placeholders = 'Please verify the following diffs:\n'
+  action_url = 'https://github.com/' + environ['GITHUB_REPOSITORY'] + '/actions/runs/' + environ['GITHUB_RUN_ID']
+
+  all_reports_succeeded = True
   report_outputs = {}
   for module in modules_to_run:
     report_name = all_reports[module]
-    report_outputs[report_name] = run_report(w, module, report_name)
+    output = run_report(w, module, report_name)
+    if not output:
+      comment_with_placeholders += f'- [ ] Report {report_name} threw an exception. Please check the [action logs]({action_url}).\n'
+      all_reports_succeeded = False
+      continue
+    report_outputs.update(output) # Dictionary merge; includes all pages + contents
+
+    comment_with_placeholders += f'- [ ] Report {report_name} succeeded, diffs:'
+    for page in output:
+      comment_with_placeholders += f' %{page.url_title}%'
+
+    comment_with_placeholders += '\n'
 
   print('All reports completed, sleeping then uploading outputs')
   sleep(sleep_before_upload.total_seconds())
 
   w.last_network_request_time = None # Unblock network requests so we can POST again.
-  w.MAX_RETRIES = 2 # Only 2 attempts at POST-ing. I think it's just working and returning 502, not actually faililng.
+  w.MAX_RETRIES = 1 # We will be retrying via outer loop.
 
-  comment = 'Please verify the following diffs:\n'
-  for report_name, output in report_outputs.items():
-    if not output:
-      comment += f'- [ ] Report {report_name} threw an exception. Please check the action logs.\n'
-      continue
-    comment += f'- [ ] Report {report_name} succeeded, diffs:'
-    file_name = 'wiki_' + report_name.lower().replace(' ', '_')
-    if isinstance(output, list):
-      for lang, contents in output:
-        comment += edit_or_save(f'{root}/{report_name}/{lang}', f'{file_name}_{lang}.txt', lang, contents, summary)
-    else:
-      comment += edit_or_save(f'{root}/{report_name}', f'{file_name}.txt', 'en', output, summary)
-    comment += '\n'
+
+  for i in range(5):
+    print(f'Still have {len(report_outputs)} pages to edit on attempt {i+1}/5')
+    for page in list(report_outputs.keys()):
+      contents = report_outputs[page]
+      wiki_diff_url = page.edit(contents, bot=True, summary=summary)
+      if wiki_diff_url:
+        comment_with_placeholders = comment_with_placeholders.replace(f'%{page.url_title}%', f'[{page.lang}]({wiki_diff_url})')
+        report_outputs.pop(page)
+
+    for page in w.get_user_contribs(w.get_current_user(), report_start):
+      if page not in report_outputs:
+        continue
+
+      wiki_diff_url = f'{page.wiki.wiki_url}?diff={page.raw["revid"]}'
+      comment_with_placeholders = comment_with_placeholders.replace(f'%{page.url_title}%', f'[{page.lang}]({wiki_diff_url})')
+      report_outputs.pop(page)
+
+    if len(report_outputs) == 0:
+      break
+
+  # Tried 5 times, give up on anything not uploaded
+  for page, contents in report_outputs.items():
+    comment_with_placeholders = comment_with_placeholders.replace(f'%{page.url_title}%', f'~~[{page.lang}]({action_url})~~')
+    all_reports_succeeded = False
+
+    # Save the contents to a file (will be attached as a build artifact)
+    file_name = f'reports/wiki_{page.url_title}.txt'
+    with open(file_name, 'w', encoding='utf-8') as f:
+      f.write(contents)
+
+  comment = comment_with_placeholders
 
   if event == 'pull_request':
     open_pr_comment.create_pr_comment(comment)
@@ -220,5 +255,4 @@ if __name__ == '__main__':
   elif environ['GITHUB_EVENT_NAME'] == 'schedule':
     print(comment)
 
-  num_failures = list(report_outputs.values()).count(None)
-  exit(num_failures)
+  exit(0 if all_reports_succeeded else 1)
