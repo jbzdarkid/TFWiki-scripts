@@ -64,7 +64,7 @@ def main(w):
         for i, patch in enumerate(patches[:-1]):
           next_patch = patches[i+1]
           if patch > next_patch:
-            bad_order[lang][page].append((f'{patch[0]}-{patch[1]}-{patch[2]}', f'{next_patch[0]}-{next_patch[2]}-{next_patch[1]}'))
+            bad_order[lang][page].append((f'{patch[0]}-{patch[1]:02}-{patch[2]:02}', f'{next_patch[0]:02}-{next_patch[1]:02}-{next_patch[2]:02}'))
         if verbose:
           print(f'Page {page.title} has patches out of order')
         continue
@@ -73,7 +73,7 @@ def main(w):
         for patch in patches:
           flipped_patch = (patch[0], patch[2], patch[1])
           if patch not in expected and patch[1] != patch[2] and flipped_patch in expected and flipped_patch not in patches:
-            flipped[lang][page].append((f'{patch[0]}-{patch[1]}-{patch[2]}', f'{patch[0]}-{patch[2]}-{patch[1]}'))
+            flipped[lang][page].append((f'{patch[0]}-{patch[1]:02}-{patch[2]:02}', f'{patch[0]}-{patch[2]:02}-{patch[1]:02}'))
             if verbose:
               print(f'Page {page.title} has a (probable) day/month swapped patch')
             break
@@ -95,7 +95,7 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages where the patch links do no
 
     output += '== {{lang name|name|%s}} ==\n' % lang
     for page in sorted(pages):
-      output += f'=== [[{page.title}]] ===\n'
+      output += '=== [[%s#{{heading|Update history|lang=%s}}|%s]] ===\n' % (page.title, page.lang, page.title)
 
       if page in bad_order[lang]:
         for error in bad_order[lang][page]:
