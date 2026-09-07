@@ -95,7 +95,7 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages where the patch links do no
 
     output += '== {{lang name|name|%s}} ==\n' % lang
     for page in sorted(pages):
-      output += '=== [[%s#{{heading|Update history}}|%s]] ===\n' % (page.title, page.title)
+      output += '=== [[%s#{{heading|Update history|lang=%s}}|%s]] ===\n' % (page.title, page.lang, page.title)
 
       if page in bad_order[lang]:
         for error in bad_order[lang][page]:
