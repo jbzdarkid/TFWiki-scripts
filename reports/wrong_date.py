@@ -64,7 +64,7 @@ def main(w):
         for i, patch in enumerate(patches[:-1]):
           next_patch = patches[i+1]
           if patch > next_patch:
-            bad_order[lang][page].append((f'{patch[0]}-{patch[1]:02}-{patch[2]:02}', f'{next_patch[0]:02}-{next_patch[2]:02}-{next_patch[1]:02}'))
+            bad_order[lang][page].append((f'{patch[0]}-{patch[1]:02}-{patch[2]:02}', f'{next_patch[0]:02}-{next_patch[1]:02}-{next_patch[2]:02}'))
         if verbose:
           print(f'Page {page.title} has patches out of order')
         continue
@@ -95,7 +95,7 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages where the patch links do no
 
     output += '== {{lang name|name|%s}} ==\n' % lang
     for page in sorted(pages):
-      output += f'=== [[{page.title}]] ===\n'
+      output += f'=== [[{page.title}#{{common string|Update history}}]] ===\n'
 
       if page in bad_order[lang]:
         for error in bad_order[lang][page]:
