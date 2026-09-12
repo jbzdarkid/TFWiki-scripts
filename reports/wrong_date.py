@@ -16,16 +16,24 @@ def pagescraper(page, patches_per_page):
   history_start = False
   for line in text.split('\n'):
     # There are some weird pages out there
-    if search(r'{{[Uu]pdate[ _]history +\|', line):
+    if search(r'{{[Uu]pdate[ _]history *\|', line):
       history_start = True
     if not history_start:
       continue
 
-    # TODO: I'm not doing anything special for extra Patch Name args here... but I could?
     m = search(r'{{[Pp]atch name\|(\d+)\|(\d+)\|(\d+)(.*?)}}', line)
     if m:
+      print(m.group(0))
+      patch_num = 0
+      if m.group(4):
+        for arg in m.group(4)[1:].split('|'):
+          key, value = arg.split('=', 1)
+          if key == 'num':
+            patch_num = int(value)
+            break
+
       # Normalize to (year, month, day) order for sorting
-      patches.append((int(m.group(3)), int(m.group(1)), int(m.group(2))))
+      patches.append((int(m.group(3)), int(m.group(1)), int(m.group(2)), patch_num))
 
     # Assuming mismatched is doing its job, there should be an even count of {} within the page.
     # That means we can exit the loop once depth reaches 0 (and we exit the Update history section).
@@ -45,7 +53,9 @@ def main(w):
     for page in Page(w, 'Template:Update history').get_transclusions(namespaces=['Main']):
       pages.put(page)
 
-  # First, get the correct ordering
+  print(patches_per_page)
+
+  # Determine the correct patch list, from the english page
   expected_patches = {}
   for page, patches in patches_per_page['en'].items():
     expected_patches[page.title] = set(patches)
@@ -53,11 +63,13 @@ def main(w):
   # Next, check for errors.
   bad_order = {lang: defaultdict(list) for lang in LANGS}
   flipped = {lang: defaultdict(list) for lang in LANGS}
+  duplicates = {lang: defaultdict(list) for lang in LANGS}
   for lang in LANGS:
     for page, patches in patches_per_page[lang].items():
-      # I only want to report two cases:
+      # I only want to report these cases:
       # 1. The patch order is wrong (language independent)
       # 2. There's a patch which is backwards (month/date mixup)
+      # 3. The same patch is listed twice (retranslation error)
       # I don't actually care about stale translations, nor even really about excessive translation, since both are just 'update your translation'.
 
       if patches != sorted(patches):
@@ -77,6 +89,13 @@ def main(w):
             if verbose:
               print(f'Page {page.title} has a (probable) day/month swapped patch')
             break
+
+      unique_patches = set(patches)
+      for patch in unique_patches:
+        if patches.count(patch) > 1:
+          duplicates[lang][page].append(f'{patch[0]}-{patch[1]:02}-{patch[2]:02}')
+          if verbose:
+            print(f'Page {page.title} lists {patch} twice')
 
   output = """\
 {{{{DISPLAYTITLE: {count} pages with incorrect patches}}}}
@@ -103,6 +122,9 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages where the patch links do no
       if page in flipped[lang]:
         for error in flipped[lang][page]:
           output += f'* Page contains {error[0]}, but the english page only contains {error[1]}'
+      if page in duplicates[lang]:
+        for error in flipped[lang][page]:
+          output += f'* Page lists {error} twice\n'
 
   return output
 
