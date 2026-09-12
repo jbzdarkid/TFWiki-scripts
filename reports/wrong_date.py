@@ -21,7 +21,8 @@ def pagescraper(page, patches_per_page):
     if not history_start:
       continue
 
-    m = search(r'{{[Pp]atch name\|(\d+)\|(\d+)\|(\d+)(.*?)}}', line)
+    # TODO: Sometimes patches are referenced in other patches, so for now, only include patches that have the bold (''') prefix.
+    m = search(r"^'''{{[Pp]atch name\|(\d+)\|(\d+)\|(\d+)(.*?)}}", line)
     if m:
       patch_num = 0
       if m.group(4):
