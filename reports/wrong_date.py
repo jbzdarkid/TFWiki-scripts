@@ -81,7 +81,7 @@ def main(w):
         for i, patch in enumerate(patches[:-1]):
           next_patch = patches[i+1]
           if patch > next_patch:
-            bad_order[lang][page].append(to_string(patch), to_string(next_patch))
+            bad_order[lang][page].append((to_string(patch), to_string(next_patch)))
         if verbose:
           print(f'Page {page.title} has patches out of order')
         continue
@@ -90,7 +90,7 @@ def main(w):
         for patch in patches:
           flipped_patch = (patch[0], patch[2], patch[1])
           if patch not in expected and patch[1] != patch[2] and flipped_patch in expected and flipped_patch not in patches:
-            flipped[lang][page].append(to_string(patch), to_string(flipped_patch))
+            flipped[lang][page].append((to_string(patch), to_string(flipped_patch)))
             if verbose:
               print(f'Page {page.title} has a (probable) day/month swapped patch')
             break
