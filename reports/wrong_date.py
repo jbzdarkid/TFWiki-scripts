@@ -23,7 +23,6 @@ def pagescraper(page, patches_per_page):
 
     m = search(r'{{[Pp]atch name\|(\d+)\|(\d+)\|(\d+)(.*?)}}', line)
     if m:
-      print(m.group(0))
       patch_num = 0
       if m.group(4):
         for arg in m.group(4)[1:].split('|'):
@@ -52,8 +51,6 @@ def main(w):
     # In the future, we could handle all pages which use {{Patch name}}.
     for page in Page(w, 'Template:Update history').get_transclusions(namespaces=['Main']):
       pages.put(page)
-
-  print(patches_per_page)
 
   # Determine the correct patch list, from the english page
   expected_patches = {}
