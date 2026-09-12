@@ -27,7 +27,10 @@ def pagescraper(page, patches_per_page):
       if m.group(4):
         for arg in m.group(4)[1:].split('|'):
           if arg.startswith('num='):
-            patch_num = int(arg[4:])
+            try:
+              patch_num = int(arg[4:])
+            except:
+              print(f'Could not parse patch num from "{arg}" on {page}')
             break
 
       # Normalize to (year, month, day) order for sorting
