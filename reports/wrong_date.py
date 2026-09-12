@@ -45,6 +45,11 @@ def pagescraper(page, patches_per_page):
   if len(patches) > 0:
     patches_per_page[page.lang][page] = patches
 
+def to_string(patch):
+  str = f'{patch[0]}-{patch[1]:02}-{patch[2]:02}'
+  if len(patch) > 3 and patch[3] > 0:
+    str += f' (#{patch[3]})'
+  return str
 
 def main(w):
   patches_per_page = {lang: {} for lang in LANGS}
@@ -75,7 +80,7 @@ def main(w):
         for i, patch in enumerate(patches[:-1]):
           next_patch = patches[i+1]
           if patch > next_patch:
-            bad_order[lang][page].append((f'{patch[0]}-{patch[1]:02}-{patch[2]:02}', f'{next_patch[0]:02}-{next_patch[1]:02}-{next_patch[2]:02}'))
+            bad_order[lang][page].append(to_string(patch), to_string(next_patch))
         if verbose:
           print(f'Page {page.title} has patches out of order')
         continue
@@ -84,7 +89,7 @@ def main(w):
         for patch in patches:
           flipped_patch = (patch[0], patch[2], patch[1])
           if patch not in expected and patch[1] != patch[2] and flipped_patch in expected and flipped_patch not in patches:
-            flipped[lang][page].append((f'{patch[0]}-{patch[1]:02}-{patch[2]:02}', f'{patch[0]}-{patch[2]:02}-{patch[1]:02}'))
+            flipped[lang][page].append(to_string(patch), to_string(flipped_patch))
             if verbose:
               print(f'Page {page.title} has a (probable) day/month swapped patch')
             break
@@ -92,7 +97,7 @@ def main(w):
       unique_patches = set(patches)
       for patch in unique_patches:
         if patches.count(patch) > 1:
-          duplicates[lang][page].append(f'{patch[0]}-{patch[1]:02}-{patch[2]:02}')
+          duplicates[lang][page].append(to_string(patch))
           if verbose:
             print(f'Page {page.title} lists {patch} twice')
 
