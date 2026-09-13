@@ -67,7 +67,6 @@ def main(w):
             bad_order[lang][page].append((f'{patch[0]}-{patch[1]:02}-{patch[2]:02}', f'{next_patch[0]:02}-{next_patch[1]:02}-{next_patch[2]:02}'))
         if verbose:
           print(f'Page {page.title} has patches out of order')
-        continue
 
       if expected := expected_patches.get(page.basename, None):
         for patch in patches:
