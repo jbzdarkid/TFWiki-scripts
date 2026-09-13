@@ -101,6 +101,13 @@ def main(w):
           if verbose:
             print(f'Page {page.title} lists {patch} twice')
 
+
+  all_report_pages = defaultdict(set)
+  for lang in LANGS:
+    all_report_pages[lang] |= bad_order[lang].keys()
+    all_report_pages[lang] |= flipped[lang].keys()
+    all_report_pages[lang] |= duplicates[lang].keys()
+
   output = """\
 {{{{DISPLAYTITLE: {count} pages with incorrect patches}}}}
 Found '''<onlyinclude>{count}</onlyinclude>''' pages where the patch links do not match english, or are not in chronological order. Data as of {date}.
@@ -108,16 +115,15 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages where the patch links do no
 {{{{TOC limit|2}}}}
 
 """.format(
-    count=sum((len(pages) for pages in bad_order.values())),
+    count=sum((len(pages) for pages in all_report_pages.values())),
     date=time_and_date())
 
-  for lang in LANGS:
-    pages = list(bad_order[lang].keys()) + list(flipped[lang].keys())
-    if len(pages) == 0:
+  for lang in all_report_pages:
+    if len(all_report_pages[lang]) == 0:
       continue
 
     output += '== {{lang name|name|%s}} ==\n' % lang
-    for page in sorted(pages):
+    for page in sorted(all_report_pages[lang]):
       output += '=== [[%s#{{heading|Update history|lang=%s}}|%s]] ===\n' % (page.title, page.lang, page.title)
 
       if page in bad_order[lang]:
@@ -127,8 +133,8 @@ Found '''<onlyinclude>{count}</onlyinclude>''' pages where the patch links do no
         for error in flipped[lang][page]:
           output += f'* Page contains {error[0]}, but the english page only contains {error[1]}'
       if page in duplicates[lang]:
-        for error in flipped[lang][page]:
-          output += f'* Page lists {error} twice\n'
+        for error in duplicates[lang][page]:
+          output += f'* Patch {error} is listed twice\n'
 
   return output
 
