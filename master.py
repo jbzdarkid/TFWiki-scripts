@@ -181,8 +181,8 @@ if __name__ == '__main__':
   total_pipeline_duration = timedelta(hours=5, minutes=55)
   report_end = report_start + total_pipeline_duration
 
-  sleep_before_upload = timedelta(minutes=15) # Helps avoid throttling / wiki database issues, I think
-  upload_duration_guess = timedelta(minutes=15)
+  sleep_before_upload = timedelta(minutes=5) # Helps avoid throttling / wiki database issues, I think
+  upload_duration_guess = timedelta(minutes=20)
   report_stop = report_end - upload_duration_guess - sleep_before_upload
 
   # This value (on the global wiki class) acts as a soft stop for our reports,
@@ -217,6 +217,9 @@ if __name__ == '__main__':
 
 
   for i in range(5):
+    if len(report_outputs) == 0:
+      break
+
     print(f'Still have {len(report_outputs)} pages to edit on attempt {i+1}/5')
     for page in list(report_outputs.keys()):
       contents = report_outputs[page]
