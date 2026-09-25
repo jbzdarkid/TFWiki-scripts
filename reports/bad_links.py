@@ -7,17 +7,9 @@ verbose = False
 
 def pagescraper(page, links, anchors):
   html = page.get_raw_html()
-  if len(html) == 142:
-    return
-  if 'a href' in html:
-    lines = html.split('\n')
-    for line in lines:
-      if 'a href' in line:
-        print(line)
   for m in finditer('<a href="/wiki/(.*?)#(.*?)"', html):
     target = m.group(1)
     section = m.group(2)
-    print(target, section)
     links[target][section].append(page)
 
   for m in finditer('<span .*?id="(.*?)"', html):
@@ -28,16 +20,9 @@ def main(w):
   anchors = defaultdict(list)
 
   with pagescraper_queue_single(pagescraper, links, anchors) as pages:
-    i = 0
     for page in w.get_all_pages(namespaces=['Main', 'TFW', 'File', 'Template', 'Help', 'Category']):
       pages.put(page)
-      i += 1
-      if i > 100:
-        break
-      input()
 
-  print(links)
-  print(anchors)
   broken_links = defaultdict(lambda: defaultdict(list))
   for target in links:
     for section in links[target]:
