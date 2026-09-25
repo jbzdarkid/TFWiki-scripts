@@ -27,7 +27,6 @@ image_templates = [
   'ScreenshotTF2',
   'Steam mod content',
   'TFC image',
-  'Trademark',
   'Valve content',
   'Valve content/game',
 ]
