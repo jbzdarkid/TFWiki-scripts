@@ -15,7 +15,7 @@ def main(w):
       if page.basename.endswith(' (custom mission)'):
         continue # These pages are generally poorly translated
 
-      wanted_templates[template].append(page)
+      wanted_templates[page].append(template)
 
   output = """\
 {{{{DISPLAYTITLE: {count} wanted templates}}}}
@@ -25,10 +25,10 @@ List of all <onlyinclude>{count}</onlyinclude> broken template transclusions (us
     count=sum(len(v) for v in wanted_templates.values()),
     date=time_and_date())
 
-  for template in sorted(wanted_templates.keys()):
-    output += f'== [[{template}]] ==\n'
-    for page in sorted(wanted_templates[template]):
-      output += f'* [[{page.title}]]\n'
+  for page in sorted(wanted_templates.keys()):
+    output += f'== [[{page}]] ==\n'
+    for template in sorted(wanted_templates[page]):
+      output += f'* {template}]\n'
 
   return output
 
