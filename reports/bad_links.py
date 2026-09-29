@@ -1,6 +1,6 @@
 from collections import defaultdict
 from re import finditer
-from .utils import pagescraper_queue_single, time_and_date
+from .utils import pagescraper_queue, time_and_date
 from wikitools import wiki
 
 verbose = False
@@ -19,7 +19,7 @@ def main(w):
   links = defaultdict(lambda: defaultdict(list))
   anchors = defaultdict(list)
 
-  with pagescraper_queue_single(pagescraper, links, anchors) as pages:
+  with pagescraper_queue(pagescraper, links, anchors) as pages:
     for page in w.get_all_pages(namespaces=['Main', 'TFW', 'File', 'Template', 'Help', 'Category']):
       pages.put(page)
 

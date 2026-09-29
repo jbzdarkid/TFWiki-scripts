@@ -59,11 +59,15 @@ class Page:
 
   def get_raw_html(self):
     cached_html = self.wiki.page_html_cache.get(self.url_title, None)
-    if cached_html is not None:
+    if 'This website is running Anubis' in cached_html:
+      pass
+    elif '429 Too Many Requests' in cached_html:
+      pass
+    elif cached_html is not None:
       return cached_html
 
     try:
-      r = requests.get(self.wiki.wiki_url, allow_redirects=True, params={'title': self.url_title})
+      r = self.wiki.session.get(self.wiki.wiki_url, allow_redirects=True, params={'title': self.url_title})
       self.wiki.page_html_cache[self.url_title] = r.text
       return r.text
     except requests.exceptions.RequestException:
