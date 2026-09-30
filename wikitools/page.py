@@ -59,11 +59,7 @@ class Page:
 
   def get_raw_html(self):
     cached_html = self.wiki.page_html_cache.get(self.url_title, None)
-    if 'This website is running Anubis' in cached_html:
-      pass
-    elif '429 Too Many Requests' in cached_html:
-      pass
-    elif cached_html is not None:
+    if cached_html is not None and 'This website is running Anubis' not in cached_html and '429 Too Many Requests' not in cached_html:
       return cached_html
 
     try:
