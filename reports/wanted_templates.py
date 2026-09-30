@@ -21,7 +21,7 @@ def main(w):
 {{{{DISPLAYTITLE: {count} wanted templates}}}}
 List of all <onlyinclude>{count}</onlyinclude> broken template transclusions (usually due to typos or missing dictionary entries). Data as of {date}.
 
-== List ==\n""".format(
+""".format(
     count=sum(len(v) for v in wanted_templates.values()),
     date=time_and_date())
 
