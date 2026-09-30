@@ -61,14 +61,7 @@ class Wiki:
       # Release the lock before starting a network request so we don't include request duration as part of our sleep
       try:
         r = action()
-        self.logger.error(
-          '%d %s %s %s %d',
-          r.status_code,
-          r.request.method,
-          r.request.url,
-          r.request.headers,
-          len(r.request.body) if r.request.body else 0,
-        )
+        self.logger.error(f'{r.status_code} {r.request.method} {r.request.url} {len(r.request.body) if r.request.body else 0}')
         r.raise_for_status()
         return r
       except requests.RequestException as e:

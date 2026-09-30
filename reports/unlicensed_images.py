@@ -27,7 +27,7 @@ image_templates = [
   'ScreenshotTF2',
   'Steam mod content',
   'TFC image',
-  'Trademark',
+  # 'Trademark', # Should always be accompanied by another license
   'Valve content',
   'Valve content/game',
 ]

@@ -12,7 +12,6 @@ from wikitools.page import Page
 import open_pr_comment
 
 # Reports I want:
-# Now that I have wikitext caching, many things are faster. Write a report for Redirects which link to non-existant subsections
 # Quotations which use quote characters
 # Using {{lang}} and {{if lang}} on non-template pages -> this is apparently somewhat common now to make copy/paste editing easier
 # Pages which link to disambig pages not in hatnote/see also
@@ -20,11 +19,9 @@ import open_pr_comment
 # Templates sorted by usage and protect status
 # A 'missing translations' report but for dictionary entries (maybe sorted by usage, too?)
 # Templates which have redirects in them
-# Main (or just non-Template) pages which use <includeonly> <onlyinclude> etc.
 
 # Reports I want to improve:
 # Sort missing categories by # pages
-# Threading for navboxes.py?
 # Might be more smarts to do in lang_quality.py, e.g. non-ascii characters in 'en', or check for only quote characters (or other lang incomplete hints)
 
 def run_report(w, module, name):
@@ -76,7 +73,8 @@ weekly_reports = {
 # Everything else (especially reports which require all HTML contents)
 monthly_reports = {
   'bad_tags': 'Misused template tags',
-  'displaytitles': 'Duplicate displaytitles',
+  'bad_links': 'Links to non-existant subsections',
+  # 'displaytitles': 'Duplicate displaytitles', # Disabled 2026-09-13 because of anti-scraping stuff
   'duplicate_files': 'Duplicate files',
   'edit_stats': 'Users by edit count',
   'external_links2': 'External links',
