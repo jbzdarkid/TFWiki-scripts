@@ -27,7 +27,7 @@ List of all <onlyinclude>{count}</onlyinclude> broken template transclusions (us
 
   # Ordering this by page title -> lang, instead of lang -> title, because many of these are copied translations.
   for page in sorted(wanted_templates.keys(), key = lambda page: page.url_title):
-    output += f'== [[{page}]] ==\n'
+    output += f'=== [{page.get_edit_url()} {page.title}] ===\n'
     for template in sorted(wanted_templates[page]):
       output += f'* {template}\n'
 
