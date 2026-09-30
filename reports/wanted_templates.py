@@ -25,10 +25,11 @@ List of all <onlyinclude>{count}</onlyinclude> broken template transclusions (us
     count=sum(len(v) for v in wanted_templates.values()),
     date=time_and_date())
 
-  for page in sorted(wanted_templates.keys()):
+  # Ordering this by page title -> lang, instead of lang -> title, because many of these are copied translations.
+  for page in sorted(wanted_templates.keys(), lambda page: page.url_title):
     output += f'== [[{page}]] ==\n'
     for template in sorted(wanted_templates[page]):
-      output += f'* {template}]\n'
+      output += f'* {template}\n'
 
   return output
 
