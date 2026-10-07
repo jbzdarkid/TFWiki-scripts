@@ -73,7 +73,7 @@ weekly_reports = {
 # Everything else (especially reports which require all HTML contents)
 monthly_reports = {
   'bad_tags': 'Misused template tags',
-  'bad_links': 'Links to non-existant subsections',
+  # 'bad_links': 'Links to non-existant subsections', # Disabled 2026-09-13 because of anti-scraping stuff
   # 'displaytitles': 'Duplicate displaytitles', # Disabled 2026-09-13 because of anti-scraping stuff
   'duplicate_files': 'Duplicate files',
   'edit_stats': 'Users by edit count',
