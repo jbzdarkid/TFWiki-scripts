@@ -1,5 +1,5 @@
 from collections import defaultdict
-from re import search
+from re import search, match
 
 from .utils import pagescraper_queue, time_and_date
 from wikitools import wiki
@@ -22,7 +22,7 @@ def pagescraper(page, patches_per_page):
       continue
 
     # TODO: Sometimes patches are referenced in other patches, so for now, only include patches that have the bold (''') prefix.
-    m = search(r"^'''{{[Pp]atch name\|(\d+)\|(\d+)\|(\d+)(.*?)}}", line)
+    m = match(r"^'''{{[Pp]atch name\|(\d+)\|(\d+)\|(\d+)(.*?)}}(.*?)$", line)
     if m:
       patch_num = 0
       if m.group(4):
@@ -35,7 +35,13 @@ def pagescraper(page, patches_per_page):
             break
 
       # Normalize to (year, month, day) order for sorting
-      patches.append((int(m.group(3)), int(m.group(1)), int(m.group(2)), patch_num))
+      # Note that some pages manually add "#2" after the patch names, so keep any trailing text as a fallback.
+      patches.append((int(m.group(3)), int(m.group(1)), int(m.group(2)), patch_num, m.group(5)))
+
+    m = match(r"^'''{{[Ii]tem schema\|(\d+)\|(\d+)\|(\d+)(.*?)$", line)
+    if m:
+      # Normalize to (year, month, day) order for sorting
+      patches.append((int(m.group(3)), int(m.group(1)), int(m.group(2)), 0, m.group(4)))
 
     # Assuming mismatched is doing its job, there should be an even count of {} within the page.
     # That means we can exit the loop once depth reaches 0 (and we exit the Update history section).
